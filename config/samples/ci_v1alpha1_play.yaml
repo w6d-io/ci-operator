@@ -1,0 +1,35 @@
+apiVersion: ci.w6d.io/v1alpha1
+kind: Play
+metadata:
+  name: play-sample
+  namespace: default
+spec:
+  name: test-w6d
+  environment: develop
+  stack:
+    language: js
+    package: npm
+  project_id: 1
+  pipeline_id: 1
+  repo_url: https://github.com/w6dio/ci.git
+  token: 0123456789abcdef0123456789abcdef01234567
+  commit:
+    sha: 0123456789abcdef0123456789abcdef01234567
+    ref: master
+  domain: example.wildcard.sh
+  tasks:
+    - unit-tests:
+        script:
+          - echo "unit-test1"
+          - echo "unit-test2"
+          - echo "unit-test3"
+    - build:
+        variables:
+          BUILDENV: build
+    - deploy:
+        env:
+          BUILDENV: build
+  dependencies:
+    mongodb:
+      env:
+        HOST: "$HOST"

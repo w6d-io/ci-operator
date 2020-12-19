@@ -1,0 +1,13 @@
+domain: w6d.io
+repo: github.com/w6d-io/ci-operator
+resources:
+- group: ci
+  kind: Play
+  version: v1alpha1
+- group: ci
+  kind: LimitCi
+  version: v1alpha1
+- group: ci
+  kind: Step
+  version: v1alpha1
+version: "2"

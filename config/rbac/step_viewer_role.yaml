@@ -1,0 +1,20 @@
+# permissions for end users to view steps.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: step-viewer-role
+rules:
+- apiGroups:
+  - ci.w6d.io
+  resources:
+  - steps
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ci.w6d.io
+  resources:
+  - steps/status
+  verbs:
+  - get

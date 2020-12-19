@@ -1,0 +1,24 @@
+# permissions for end users to edit plays.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: play-editor-role
+rules:
+- apiGroups:
+  - ci.w6d.io
+  resources:
+  - plays
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ci.w6d.io
+  resources:
+  - plays/status
+  verbs:
+  - get

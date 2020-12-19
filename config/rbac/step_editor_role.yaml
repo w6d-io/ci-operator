@@ -1,0 +1,24 @@
+# permissions for end users to edit steps.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: step-editor-role
+rules:
+- apiGroups:
+  - ci.w6d.io
+  resources:
+  - steps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ci.w6d.io
+  resources:
+  - steps/status
+  verbs:
+  - get
