@@ -1,0 +1,71 @@
+/*
+Copyright 2020 WILDCARD SA.
+
+Licensed under the WILDCARD SA License, Version 1.0 (the "License");
+WILDCARD SA is register in french corporation.
+You may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.w6d.io/licenses/LICENSE-1.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is prohibited.
+Created on 28/12/2020
+*/
+
+package secrets
+
+import (
+	"context"
+	"github.com/w6d-io/ci-operator/internal/config"
+	"github.com/w6d-io/ci-operator/internal/k8s/serviceaccount"
+	"github.com/w6d-io/ci-operator/internal/util"
+	"time"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/go-logr/logr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+)
+
+const (
+	DockerSecretKey    = ".dockerconfigjson"
+	DockerPrefixSecret = "reg-cred"
+	DockerConfigType   = "kubernetes.io/dockerconfigjson"
+)
+
+// DockerCredCreate creates the docker config json secret and add it into the service account
+func (s *Secret) DockerCredCreate(ctx context.Context, r client.Client, log logr.Logger) error {
+	log = log.WithName("Create").WithValues("action", DockerPrefixSecret)
+	log.V(1).Info("creating")
+
+	namespacedName := util.GetCINamespacedName(DockerPrefixSecret, s.Play)
+	resource := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        namespacedName.Name,
+			Namespace:   namespacedName.Namespace,
+			Annotations: make(map[string]string),
+			Labels:      util.GetCILabels(s.Play),
+		},
+		StringData: map[string]string{
+			DockerSecretKey: s.Play.Spec.Secret[DockerSecretKey],
+		},
+		Type: DockerConfigType,
+	}
+
+	resource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
+	if err := controllerutil.SetControllerReference(s.Play, resource, s.Scheme); err != nil {
+		return err
+	}
+	if err := r.Create(ctx, resource); err != nil {
+		return err
+	}
+	if err := serviceaccount.Update(ctx, resource.Name,
+		util.GetCINamespacedName(serviceaccount.Prefix, s.Play), r); err != nil {
+		return err
+	}
+
+	return nil
+}

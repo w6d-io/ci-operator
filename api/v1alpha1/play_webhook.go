@@ -35,7 +35,7 @@ func (in *Play) SetupWebhookWithManager(mgr ctrl.Manager) error {
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
-// +kubebuilder:webhook:path=/mutate-ci-w6d-io-v1alpha1-play,mutating=true,failurePolicy=fail,admissionReviewVersions=v1alpha1,sideEffects=None,groups=ci.w6d.io,resources=plays,verbs=create;update,versions=v1alpha1,name=mplay.kb.io
+// +kubebuilder:webhook:path=/mutate-ci-w6d-io-v1alpha1-play,mutating=true,failurePolicy=fail,admissionReviewVersions=v1;v1beta1,sideEffects=None,groups=ci.w6d.io,resources=plays,verbs=create;update,versions=v1alpha1,name=mplay.kb.io
 
 var _ webhook.Defaulter = &Play{}
 
@@ -48,7 +48,7 @@ func (in *Play) Default() {
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-// +kubebuilder:webhook:verbs=create;update,path=/validate-ci-w6d-io-v1alpha1-play,mutating=false,failurePolicy=fail,admissionReviewVersions=v1alpha1,sideEffects=None,groups=ci.w6d.io,resources=plays,versions=v1alpha1,name=vplay.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-ci-w6d-io-v1alpha1-play,mutating=false,failurePolicy=fail,admissionReviewVersions=v1;v1beta1,sideEffects=None,groups=ci.w6d.io,resources=plays,versions=v1alpha1,name=vplay.kb.io
 
 var _ webhook.Validator = &Play{}
 
@@ -70,9 +70,21 @@ func (in *Play) ValidateCreate() error {
 func (in *Play) ValidateUpdate(old runtime.Object) error {
 	playlog.Info("validate update", "name", in.Name)
 
-	// TODO(user): fill in your validation logic upon object update.
 	var allErrs field.ErrorList
 	allErrs = in.validateTaskType()
+
+	if old.(*Play).Spec.PipelineID != in.Spec.PipelineID {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("pipelineID"),
+				in.Spec.PipelineID,
+				"pipelineID cannot be changed"))
+	}
+	if old.(*Play).Spec.ProjectID != in.Spec.ProjectID {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("projectID"),
+				in.Spec.ProjectID,
+				"pipelineID cannot be changed"))
+	}
 	if len(allErrs) > 0 {
 		return apierrors.NewInvalid(
 			PlayGroupKind, in.Name, allErrs)
@@ -93,17 +105,16 @@ func (in Play) validateTaskType() field.ErrorList {
 	for _, task := range in.Spec.Tasks {
 		for t := range task {
 			switch t {
-			case Build,Sonar,UnitTests,IntegrationTests,Deploy,Clean:
+			case Build, Sonar, UnitTests, IntegrationTests, Deploy, Clean:
 				continue
 			default:
 				taskErrs = append(taskErrs,
 					field.Invalid(field.NewPath("spec").Child("tasks"),
-					t,
-					"not a TaskType"))
+						t,
+						"not a TaskType"))
 
 			}
 		}
 	}
 	return taskErrs
 }
-

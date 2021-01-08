@@ -20,7 +20,7 @@ spec:
     - jsonPath: .status.state
       name: State
       type: string
-    - jsonPath: .status.pipeline_run
+    - jsonPath: .status.pipeline_run_name
       name: PipelineRun
       priority: 1
       type: string
@@ -63,20 +63,12 @@ spec:
                   sha:
                     description: SHA contains git commit SHA
                     type: string
-                required:
-                - ref
-                - sha
                 type: object
               dependencies:
                 additionalProperties:
                   description: Dependency struct contains env and service for the
                     dependencies
                   properties:
-                    env:
-                      additionalProperties:
-                        type: string
-                      description: Env is environmental variable for this dependency
-                      type: object
                     services:
                       description: Services contain a list of host and port to expose
                       items:
@@ -85,12 +77,19 @@ spec:
                         description: Service struct for dependencies
                         type: object
                       type: array
-                  required:
-                  - env
+                    variables:
+                      additionalProperties:
+                        type: string
+                      description: Env is environmental variable for this dependency
+                      type: object
                   type: object
                 description: 'Dependencies contains a list of Dependency ie: MongoDb
                   or PostgreSQL'
                 type: object
+              docker_url:
+                description: DockerURL contains the registry name and tag where to
+                  push docker image
+                type: string
               domain:
                 description: Domain contains the url for exposition
                 pattern: ^([A-Za-z0–9-]+\.)+[A-Za-z][A-Za-z]+$
@@ -123,13 +122,13 @@ spec:
                     description: Projects is the list of project id in this scope
                     format: int64
                     type: integer
-                required:
-                - name
-                - projects
                 type: object
-              sonar:
-                description: Sonar contains the sonarqube token
-                type: string
+              secret:
+                additionalProperties:
+                  type: string
+                description: Secret contains the secret data. Each key must be either
+                  - git_token - .dockerconfigjson - sonar_token
+                type: object
               stack:
                 description: Stack of the project
                 properties:
@@ -139,8 +138,6 @@ spec:
                   package:
                     description: Package contains the package use in application
                     type: string
-                required:
-                - language
                 type: object
               tasks:
                 description: Tasks contains the list of task to be created by Play
@@ -174,22 +171,6 @@ spec:
                     type: object
                   type: object
                 type: array
-              token:
-                description: Token contains the token for git clone
-                type: string
-              vmx:
-                description: Vmx toggle for use vmx node
-                type: boolean
-            required:
-            - commit
-            - environment
-            - name
-            - pipeline_id
-            - project_id
-            - repo_url
-            - scope
-            - stack
-            - tasks
             type: object
           status:
             description: PlayStatus defines the observed state of Play

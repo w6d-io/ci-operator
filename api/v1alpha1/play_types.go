@@ -28,56 +28,54 @@ var (
 	PlayGroupKind = schema.GroupKind{Group: "ci.w6d.io", Kind: "Play"}
 )
 
-
 // PlaySpec defines the desired state of Play
 type PlaySpec struct {
 	// Name of project
-	Name string `json:"name"`
+	Name string `json:"name,omitempty"`
 
 	// Stack of the project
-	Stack Stack `json:"stack"`
+	Stack Stack `json:"stack,omitempty"`
 
 	// Scope contains the name of scope and list of projects id
-	Scope Scope `json:"scope"`
+	Scope Scope `json:"scope,omitempty"`
 
 	// Environment contains application environment
-	Environment string `json:"environment"`
+	Environment string `json:"environment,omitempty"`
 
 	// ProjectID contains the project ID
-	ProjectID int64 `json:"project_id"`
+	ProjectID int64 `json:"project_id,omitempty"`
 
 	// PipelineID contains the ID of pipeline for the project
-	PipelineID int64 `json:"pipeline_id"`
+	PipelineID int64 `json:"pipeline_id,omitempty"`
 
 	// RepoURL contains the git repository url
-	RepoURL string `json:"repo_url"`
-
-	// Token contains the token for git clone
-	// +optional
-	Token string `json:"token,omitempty"`
+	RepoURL string `json:"repo_url,omitempty"`
 
 	// Commit contains all git information
-	Commit Commit `json:"commit"`
-
-	// Sonar contains the sonarqube token
-	// +optional
-	Sonar string `json:"sonar,omitempty"`
+	Commit Commit `json:"commit,omitempty"`
 
 	// Domain contains the url for exposition
-	// +optional
 	// +kubebuilder:validation:Pattern=^([A-Za-z0–9-]+\.)+[A-Za-z][A-Za-z]+$
+	// +optional
 	Domain string `json:"domain,omitempty"`
 
 	// Tasks contains the list of task to be created by Play
-	Tasks []map[TaskType]Task `json:"tasks"`
+	Tasks []map[TaskType]Task `json:"tasks,omitempty"`
 
 	// Dependencies contains a list of Dependency ie: MongoDb or PostgreSQL
 	// +optional
 	Dependencies map[DependencyType]Dependency `json:"dependencies,omitempty"`
 
-	// Vmx toggle for use vmx node
+	// DockerURL contains the registry name and tag where to push docker image
 	// +optional
-	Vmx bool `json:"vmx,omitempty"`
+	DockerURL string `json:"docker_url,omitempty"`
+
+	// Secret contains the secret data. Each key must be either
+	// - git_token
+	// - .dockerconfigjson
+	// - sonar_token
+	// +optional
+	Secret map[string]string `json:"secret,omitempty"`
 }
 
 // PlayStatus defines the observed state of Play
@@ -94,7 +92,7 @@ type PlayStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.state"
-// +kubebuilder:printcolumn:name="PipelineRun",type="string",priority=1,JSONPath=".status.pipeline_run"
+// +kubebuilder:printcolumn:name="PipelineRun",type="string",priority=1,JSONPath=".status.pipeline_run_name"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",description="CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC."
 // +kubebuilder:subresource:status
 // Play is the Schema for the plays API
@@ -118,9 +116,9 @@ type PlayList struct {
 // Commit contains all git information
 type Commit struct {
 	// SHA contains git commit SHA
-	SHA string `json:"sha"`
+	SHA string `json:"sha,omitempty"`
 	// Ref contains git commit reference
-	Ref string `json:"ref"`
+	Ref string `json:"ref,omitempty"`
 	// Message contains commit message
 	// +optional
 	Message string `json:"message,omitempty"`
@@ -144,7 +142,7 @@ type Task struct {
 // Dependency struct contains env and service for the dependencies
 type Dependency struct {
 	// Env is environmental variable for this dependency
-	Env fields.Set `json:"env"`
+	Variables fields.Set `json:"variables,omitempty,omitempty"`
 
 	// Services contain a list of host and port to expose
 	// +optional
@@ -153,12 +151,13 @@ type Dependency struct {
 
 // NameValue struct for env type format kubernetes format
 type NameValue struct {
-	Name   string `json:"name"`
-	Values string `json:"values"`
+	Name   string `json:"name,omitempty"`
+	Values string `json:"values,omitempty"`
 }
 
 // Docker structure contains information for docker build
 type Docker struct {
+
 	// Filepath contains the dockerfile full path
 	// +optional
 	Filepath string `json:"filepath,omitempty"`
@@ -194,20 +193,21 @@ const (
 // Scope is use for gathering project
 type Scope struct {
 	// Name of the scope
-	Name string `json:"name"`
+	Name string `json:"name,omitempty"`
 
 	// Projects is the list of project id in this scope
-	Projects int64 `json:"projects"`
+	// +optional
+	Projects int64 `json:"projects,omitempty"`
 }
 
 // Stack contains the language and package of the source
 type Stack struct {
 	// Language contains the repository language
-	Language string `json:"language"`
+	Language string `json:"language,omitempty"`
 
 	// Package contains the package use in application
 	// +optional
-	Package string `json:"package"`
+	Package string `json:"package,omitempty"`
 }
 
 func (in Stack) String() string {
@@ -224,6 +224,21 @@ type Service map[ServiceElement]string
 // DependencyType contain list of dependencies managed
 // +kubebuilder::validation:Enum=mongodb;postgresql
 type DependencyType string
+
+func (d DependencyType) String() string {
+	return string(d)
+}
+
+const (
+	// MongoDB ...
+	MongoDB DependencyType = "mongodb"
+
+	// Postgresql ...
+	Postgresql DependencyType = "postgresql"
+
+	// MariaDB
+	MariaDB DependencyType = "mariadb"
+)
 
 // Script type
 type Script []string

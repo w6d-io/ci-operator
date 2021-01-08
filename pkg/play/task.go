@@ -1,0 +1,50 @@
+/*
+Copyright 2020 WILDCARD SA.
+
+Licensed under the WILDCARD SA License, Version 1.0 (the "License");
+WILDCARD SA is register in french corporation.
+You may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.w6d.io/licenses/LICENSE-1.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is prohibited.
+Created on 23/11/2020
+*/
+
+package play
+
+import (
+	"context"
+	"github.com/go-logr/logr"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	"github.com/w6d-io/ci-operator/internal/tekton/task"
+	"github.com/w6d-io/ci-operator/internal/util"
+)
+
+// SetTask executes the Task according the TaskType
+//   - Build     => create a build Tekton Task
+//   - Clean     => create a cleaning Tekton Task
+//   - Deploy    => create a deployment Tekton Task
+//   - IntTest   => create a integration test Tekton Task
+//   - Sonar     => create a sonar Tekton Task
+//   - UnitTests => create a unit test Tekton Task
+func (wf *WFType) SetTask(ctx context.Context, p *ci.Play, logger logr.Logger) error {
+	log := logger.WithName("SetTask").WithValues("cx-namespace", util.InNamespace(p))
+	log.Info("Build tasks")
+	var t = task.Task{
+		Client: wf.Client,
+		Play:   p,
+		Scheme: wf.Scheme,
+	}
+	if err := t.Parse(ctx, logger); err != nil {
+		return err
+	}
+	for _, create := range t.Creates {
+		if err := wf.Add(create); err != nil {
+			return err
+		}
+	}
+	return nil
+}

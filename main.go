@@ -18,23 +18,21 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/w6d-io/ci-operator/internal/config"
 	"os"
 
-	resourcev1alpha1 "github.com/tektoncd/pipeline/pkg/apis/resource/v1alpha1"
-
-	"go.uber.org/zap/zapcore"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	"github.com/w6d-io/ci-operator/controllers"
-	"github.com/w6d-io/ci-operator/util"
-
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	resourcev1alpha1 "github.com/tektoncd/pipeline/pkg/apis/resource/v1alpha1"
+	civ1alpha1 "github.com/w6d-io/ci-operator/api/v1alpha1"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	civ1alpha1 "github.com/w6d-io/ci-operator/api/v1alpha1"
-
+	"github.com/w6d-io/ci-operator/controllers"
+	"github.com/w6d-io/ci-operator/internal/util"
+	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	// +kubebuilder:scaffold:imports
 )
@@ -90,7 +88,7 @@ func main() {
 		setupLog.Error(errors.New("flag error"), "config file is missing")
 		os.Exit(1)
 	}
-	if err := controllers.Cfg.Validate(); err != nil {
+	if err := config.Validate(); err != nil {
 		fmt.Printf("error : %s\n", err)
 		setupLog.Error(err, "config loading error")
 		os.Exit(1)
@@ -105,7 +103,7 @@ func main() {
 		MetricsBindAddress: metricsAddr,
 		Port:               9443,
 		LeaderElection:     enableLeaderElection,
-		LeaderElectionID:   "2f8df8b9.w6d.io",
+		LeaderElectionID:   "2f8df8b9.ci.w6d.io",
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
@@ -120,13 +118,16 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "Play")
 		os.Exit(1)
 	}
-	if err = (&civ1alpha1.Play{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "Play")
-		os.Exit(1)
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err = (&civ1alpha1.Play{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "Play")
+			os.Exit(1)
+		}
 	}
 	// +kubebuilder:scaffold:builder
 
-	setupLog.Info("starting manager", "Version", Version, "Built", Built, "Revision", Revision)
+	setupLog.Info("starting manager", "Version", Version, "Built",
+		Built, "Revision", Revision, "Arch", OsArch, "GoVersion", GoVersion)
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)

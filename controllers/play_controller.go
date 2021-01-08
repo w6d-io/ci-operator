@@ -17,6 +17,10 @@ package controllers
 import (
 	"context"
 	"github.com/go-logr/logr"
+	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
+	"github.com/w6d-io/ci-operator/internal/util"
+	"github.com/w6d-io/ci-operator/pkg/play"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -45,36 +49,46 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.Log.WithName("Reconcile").WithValues("play", req.NamespacedName)
 	// get the play resource
-	var p ci.Play
-	if err := r.Get(ctx, req.NamespacedName, &p); err != nil {
+	p := new(ci.Play)
+	if err := r.Get(ctx, req.NamespacedName, p); err != nil {
 		log.Error(err, "unable to fetch Play")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	log = log.WithValues("cx-namespace", InNamespace(p))
+	log = log.WithValues("cx-namespace", util.InNamespace(p))
 	log.V(1).Info("req name " + req.Name)
-	var childPrs tkn.PipelineRunList
-	if err := r.List(ctx, &childPrs, InNamespace(p),
-		client.MatchingFields{"metadata.ownerReferences.name": req.Name}); IgnoreNotExists(err) != nil {
+	log.V(1).Info("get pipelinerun " + util.GetCINamespacedName(pipelinerun.Prefix, p).String())
+	var childPr tkn.PipelineRun
+	err := r.Get(ctx, util.GetCINamespacedName(pipelinerun.Prefix, p), &childPr)
+	if client.IgnoreNotFound(err) != nil {
 		log.Error(err, "Unable to list child PipelineRuns")
-		return ctrl.Result{}, client.IgnoreNotFound(err)
-	}
-
-	if len(childPrs.Items) > 0 {
-		p.Status.PipelineRunName = childPrs.Items[0].Name
-	}
-
-	log.V(1).Info("updating play status")
-	if err := r.Status().Update(ctx, &p); err != nil {
-		log.Error(err, "unable to update Play status")
 		return ctrl.Result{}, err
 	}
 
-	log.V(1).Info("getting pipeline run")
+	if !apierrors.IsNotFound(err) {
+		if childPr.Name != "" && p.Status.PipelineRunName != childPr.Name {
+			p.Status.PipelineRunName = childPr.Name
+			log.V(1).Info("updating play status")
+			if err := r.Status().Update(ctx, p); err != nil {
+				log.Error(err, "unable to update Play status")
+				return ctrl.Result{}, err
+			}
+		}
+		if util.Condition(childPr.Status.Conditions) != p.Status.State {
+			p.Status.State = util.Condition(childPr.Status.Conditions)
+			if err := r.Status().Update(ctx, p); err != nil {
+				log.Error(err, "unable to update Play status")
+				return ctrl.Result{}, err
+			}
+		}
+		return ctrl.Result{}, nil
+	}
+	log.V(1).Info("pipelinerun not found")
+	log.V(1).Info("getting all pipeline run")
 	var prs tkn.PipelineRunList
-	if err := r.List(ctx, &prs, InNamespace(p)); IgnoreNotExists(err) != nil {
-		log.Error(err, "Unable to list PipelineRuns in ", InNamespace(p))
+	if err := r.List(ctx, &prs, util.InNamespace(p)); util.IgnoreNotExists(err) != nil {
+		log.Error(err, "Unable to list PipelineRuns in ", util.InNamespace(p))
 		p.Status.State = ci.Errored
-		if err := r.Status().Update(ctx, &p); err != nil {
+		if err := r.Status().Update(ctx, p); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, nil
@@ -83,19 +97,19 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	log.V(1).Info("check pipeline run running")
 	var runningPipeline []tkn.PipelineRun
 	for _, pr := range prs.Items {
-		if IsPipelineRunning(pr) {
+		if util.IsPipelineRunning(pr) {
 			runningPipeline = append(runningPipeline, pr)
 		}
 	}
 	log.V(1).Info("pipelinerun", "running", len(runningPipeline),
-		"cx-namespace", InNamespace(p))
+		"cx-namespace", util.InNamespace(p))
 
 	log.V(1).Info("get limitCi")
 	var limits ci.LimitCiList
-	if err := r.List(ctx, &limits, InNamespace(p)); client.IgnoreNotFound(err) != nil {
+	if err := r.List(ctx, &limits, util.InNamespace(p)); client.IgnoreNotFound(err) != nil {
 		log.Error(err, "unable to list LimitCi")
 		p.Status.State = ci.Errored
-		if err := r.Status().Update(ctx, &p); err != nil {
+		if err := r.Status().Update(ctx, p); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, err
@@ -103,16 +117,16 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if len(limits.Items) > 0 && (limits.Items[0].Spec.Concurrent <= int64(len(runningPipeline))) {
 		p.Status.State = ci.Queued
-		if err := r.Status().Update(ctx, &p); err != nil {
+		if err := r.Status().Update(ctx, p); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, nil
 	}
-	if err := CreateCI(ctx, p, r); err != nil {
+	if err := play.CreateCI(ctx, p, r.Log, r, r.Scheme); err != nil {
 		log.Error(err, "Failed to create CI")
-		CleanCI(ctx, p, r)
+		//CleanCI(ctx, p, r)
 		p.Status.State = ci.Errored
-		if err := r.Status().Update(ctx, &p); err != nil {
+		if err := r.Status().Update(ctx, p); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, err
