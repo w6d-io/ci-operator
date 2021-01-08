@@ -41,8 +41,13 @@ func (t *Task) Deploy(ctx context.Context, logger logr.Logger) error {
 	log := logger.WithName("Deploy").WithValues("task", ci.Deploy)
 	// get the task
 	log.V(1).Info("get task")
-	// TODO get task from index in WFType
-	steps, err := GetSteps(ctx, ci.Deploy, t.Play, logger, t.Client)
+	s := &Step{
+		Index:    t.Index,
+		PlaySpec: t.Play.Spec,
+		Client:   t.Client,
+		TaskType: ci.Deploy,
+	}
+	steps, err := s.GetSteps(ctx, logger)
 	if err != nil {
 		log.Error(err, "get steps failed")
 		return err

@@ -27,6 +27,8 @@ import (
 )
 
 type Task struct {
+	// Index is the position of the task in the list
+	Index   int
 	Creates []func(context.Context, client.Client, logr.Logger) error
 	Client  client.Client
 	Play    *ci.Play

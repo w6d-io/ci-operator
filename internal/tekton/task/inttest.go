@@ -42,7 +42,13 @@ func (t *Task) IntTest(ctx context.Context, logger logr.Logger) error {
 	// get the task
 	log.V(1).Info("get task")
 	// TODO get task from index in WFType
-	steps, err := GetSteps(ctx, ci.IntegrationTests, t.Play, logger, t.Client)
+	s := &Step{
+		Index:    t.Index,
+		PlaySpec: t.Play.Spec,
+		Client:   t.Client,
+		TaskType: ci.IntegrationTests,
+	}
+	steps, err := s.GetSteps(ctx, logger)
 	if err != nil {
 		log.Error(err, "get steps failed")
 		return err

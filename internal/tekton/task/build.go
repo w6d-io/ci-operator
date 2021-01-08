@@ -41,7 +41,13 @@ type BuildTask struct {
 func (t *Task) Build(ctx context.Context, logger logr.Logger) error {
 	log := logger.WithName("Build").WithValues("task", ci.Build)
 	log.V(1).Info("get steps")
-	steps, err := GetSteps(ctx, ci.Build, t.Play, logger, t.Client)
+	s := &Step{
+		Index:    t.Index,
+		PlaySpec: t.Play.Spec,
+		Client:   t.Client,
+		TaskType: ci.Build,
+	}
+	steps, err := s.GetSteps(ctx, logger)
 	if err != nil {
 		log.Error(err, "get steps failed")
 		return err

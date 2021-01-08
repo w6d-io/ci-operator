@@ -17,10 +17,16 @@ package values
 
 import "bytes"
 
+const (
+	FileNameValues           string = "values.yaml"
+	PostgresqlFileNameValues string = "values-postgresql.yaml"
+	MongoDBFileNameValues    string = "values-mongodb.yaml"
+)
+
 // GetValues builds the values from the template from Play resource
 func (in *Templates) GetValues(out *bytes.Buffer) error {
 
-	if err := in.PrintTemplate(out, "values.yaml", HelmValuesTemplate); err != nil {
+	if err := in.PrintTemplate(out, FileNameValues, HelmValuesTemplate); err != nil {
 		return err
 	}
 	return nil
@@ -30,7 +36,7 @@ func (in *Templates) GetValues(out *bytes.Buffer) error {
 // Play resource
 func (in *Templates) GetMongoDBValues(out *bytes.Buffer) error {
 
-	if err := in.PrintTemplate(out, "values-mongodb.yaml", MongoDBValuesTemplate); err != nil {
+	if err := in.PrintTemplate(out, MongoDBFileNameValues, MongoDBValuesTemplate); err != nil {
 		return err
 	}
 	return nil
@@ -40,7 +46,7 @@ func (in *Templates) GetMongoDBValues(out *bytes.Buffer) error {
 // Play resource
 func (in *Templates) GetPostgresValues(out *bytes.Buffer) error {
 
-	if err := in.PrintTemplate(out, "values-postgresql.yaml", PostgresqlValuesTemplate); err != nil {
+	if err := in.PrintTemplate(out, PostgresqlFileNameValues, PostgresqlValuesTemplate); err != nil {
 		return err
 	}
 	return nil

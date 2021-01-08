@@ -17,9 +17,11 @@ package play
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/go-logr/logr"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal/config"
+	"github.com/w6d-io/ci-operator/internal/minio"
 	"github.com/w6d-io/ci-operator/internal/values"
 )
 
@@ -35,9 +37,19 @@ func (wf *WFType) CreateValues(p *ci.Play, logger logr.Logger) error {
 	valueBuf := new(bytes.Buffer)
 	templ.GetValues(valueBuf)
 	// TODO send Value to Minio or create Secret
+	// put values.yaml in MinIO
+	m := minio.New(logger)
+	m.PutString(logger, valueBuf.String(), BuildTarget(p, values.FileNameValues))
 	// TODO Create same process for MongoDB and PostgreSQL values
 	// TODO for secret implementations update VolumeMount
 	// TODO implements a method to factorized the process
 
 	return nil
+}
+
+// BuildTarget return the path with project ID, pipeline ID and filename
+func BuildTarget(play *ci.Play, filename string) (path string) {
+
+	path = fmt.Sprintf("%v/%v/%s", play.Spec.ProjectID, play.Spec.PipelineID, filename)
+	return
 }
