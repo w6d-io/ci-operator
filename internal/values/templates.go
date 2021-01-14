@@ -18,6 +18,7 @@ package values
 import (
 	"bytes"
 	"fmt"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"strings"
 	"text/template"
 
@@ -26,100 +27,24 @@ import (
 	"github.com/speps/go-hashids"
 )
 
-// HelmValuesTemplate is the yaml template for helm command.
-// render values.yaml according to the play resource contain
-var HelmValuesTemplate = `---
-{{- range $task := .Values.tasks }}
-{{- range $key, $var := $task }}
-{{- if and (eq $key "deploy") $var.variables }}
-env:
-{{- range $name, $value := $var.variables }}
-  - name: {{ $name }}
-    value: {{ $value | quote }}
-{{- end }}
-{{- end -}}
-{{- end -}}
-{{- end }}
-
-service:
-  name: {{ .Values.name }}-app
-
-podLabels:
-  application: {{ .Values.name }}
-
-{{- if .Values.domain }}
-ingress:
-  enabled: true
-  class: {{ .Internal.class }}
-  host: {{ .Values.domain }}
-{{- end }}
-
-{{- if .Values.Dependencies }}
-secrets:
-{{- range $db := .Values.Dependencies }}
-{{- range $name, $value := $db.Variables }}
-  - name: {{ $name }}
-    value: {{ $value | quote }}
-    key: {{ $name | lower }}
-	kind: env
-{{- end }}
-{{- end }}
-{{- end }}
-
-`
-
-// MongoDBValuesTemplate MongoDB values chart template
-var MongoDBValuesTemplate = `---
-architecture: "standalone"
-replicaCount: {{ default 1 .MongoDB.Replicas }}
-auth:
-  enabled: true
-  rootPassword: {{ .MongoDB.RootPassword }}
-  password:     {{ .MongoDB.Password}}
-  username:     {{ .MongoDB.Username }}
-  database:     {{ .MongoDB.Database }}
-persistence:
-  enabled: true
-  size: {{ default 5Gi .MongoDB.Size }}
-arbiter:
-  enabled: false
-metrics:
-  enabled: true
-  serviceMonitor:
-    enabled: true
-    namespace: monitoring
-`
-
-// PostgresqlValuesTemplate PostgreSQL values chart template
-var PostgresqlValuesTemplate = `---
-{{- $pass := randAlphaNum 20 }}
-global:
-  postgresql:
-    postgresqlDatabase: {{ .Postgres.Database }}
-    postgresqlUsername: {{ .Postgres.Username }}
-    postgresqlPassword: {{ default $pass .Postgres.Password }}
-postgresqlPostgresPassword: {{ .Postgres.PostgresPassword }}
-persistence:
-  enabled: true
-  size: {{ default 5Gi .Postgres.Size }}
-metrics:
-  enabled: true
-  serviceMonitor:
-    enabled: true
-`
-
 var (
 	Salt      string
 	MinLength int
 )
 
-func (in *Templates) PrintTemplate(out *bytes.Buffer, name string, templ string) error {
+var (
+	ValueLog = ctrl.Log.WithValues("package", "values")
+)
 
+func (in *Templates) PrintTemplate(out *bytes.Buffer, name string, templ string) error {
+	log := ValueLog.WithName("PrintTemplate")
+	log.V(1).Info("templating")
 	funcMap := sprig.TxtFuncMap()
 	valuesMap := TxtFuncMap()
 
 	t := template.Must(template.New(name).Funcs(funcMap).Funcs(valuesMap).Parse(templ))
 	if err := t.Execute(out, in); err != nil {
+		log.Error(err, "Execute")
 		return err
 	}
 	return nil

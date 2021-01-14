@@ -31,6 +31,9 @@ func (p *Pipeline) SetPipelineIntTest(play *ci.Play, logger logr.Logger) error {
 	p.Params = append(p.Params, tkn.ParamSpec{
 		Name: "init-tests_script",
 		Type: tkn.ParamTypeString,
+	}, tkn.ParamSpec{
+		Name: "init-tests_image",
+		Type: tkn.ParamTypeString,
 	})
 	params := []tkn.Param{
 		{
@@ -38,6 +41,13 @@ func (p *Pipeline) SetPipelineIntTest(play *ci.Play, logger logr.Logger) error {
 			Value: tkn.ArrayOrString{
 				Type:      tkn.ParamTypeString,
 				StringVal: "$(params.init-tests_script)",
+			},
+		},
+		{
+			Name: "IMAGE",
+			Value: tkn.ArrayOrString{
+				Type:      tkn.ParamTypeString,
+				StringVal: "$(params.init-tests_image)",
 			},
 		},
 	}

@@ -126,6 +126,9 @@ type Commit struct {
 
 // Task is what actions and/or configuration the task can be contains
 type Task struct {
+	// Image to use for this task
+	// +optional
+	Image string `json:"image,omitempty"`
 	// Script is a list of command to execute in the task
 	// +optional
 	Script Script `json:"script,omitempty"`

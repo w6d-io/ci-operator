@@ -96,8 +96,10 @@ type CIInterface interface {
 
 var _ CIInterface = &pipelineresource.ImagePR{}
 var _ CIInterface = &pipelineresource.GitPR{}
-var _ CIInterface = &serviceaccount.ServiceAccount{}
-var _ CIInterface = &rbac.Rbac{}
+var _ CIInterface = &serviceaccount.CI{}
+var _ CIInterface = &serviceaccount.Deploy{}
+var _ CIInterface = &rbac.CI{}
+var _ CIInterface = &rbac.Deploy{}
 var _ CIInterface = &task.BuildTask{}
 var _ CIInterface = &task.CleanTask{}
 var _ CIInterface = &task.DeployTask{}

@@ -39,6 +39,9 @@ func (wf *WFType) CreateValues(p *ci.Play, logger logr.Logger) error {
 	// TODO send Value to Minio or create Secret
 	// put values.yaml in MinIO
 	m := minio.New(logger)
+	if m == nil {
+		return fmt.Errorf("create minio install return nil")
+	}
 	m.PutString(logger, valueBuf.String(), BuildTarget(p, values.FileNameValues))
 	// TODO Create same process for MongoDB and PostgreSQL values
 	// TODO for secret implementations update VolumeMount

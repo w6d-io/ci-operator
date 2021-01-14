@@ -47,6 +47,7 @@ func New(logger logr.Logger) *Minio {
 			return nil
 		}
 	}
+	m.Client = minioClient
 	log.V(1).Info("return minio client")
 	return m
 }

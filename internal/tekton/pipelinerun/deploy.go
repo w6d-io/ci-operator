@@ -50,16 +50,16 @@ func (p *PipelineRun) SetDeploy(pos int, log logr.Logger) error {
 		Name: "deploy_s3valuepath",
 		Value: tkn.ArrayOrString{
 			Type: tkn.ParamTypeString,
-			StringVal: fmt.Sprintf("%v/%v/values.yaml",
+			StringVal: fmt.Sprintf("%v/%v/%v/values.yaml",
+				config.GetMinio().Bucket,
 				p.Play.Spec.ProjectID,
 				p.Play.Spec.PipelineID),
 		},
 	}, tkn.Param{
 		Name: "deploy_values",
 		Value: tkn.ArrayOrString{
-			Type: tkn.ParamTypeString,
-			StringVal: fmt.Sprintf("%s/%s/values.yaml", config.GetMinio().GetBucket(),
-				config.GetWorkspacePath("values")),
+			Type:      tkn.ParamTypeString,
+			StringVal: fmt.Sprintf("%s/values.yaml", config.GetWorkspacePath("values")),
 		},
 	}, tkn.Param{
 		Name: "deploy_namespace",

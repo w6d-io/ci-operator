@@ -27,14 +27,22 @@ func (wf *WFType) ServiceAccount(p *ci.Play, logger logr.Logger) error {
 	log := logger.WithName("GitSecret").WithValues("cx-namespace", util.InNamespace(p))
 	log.V(1).Info("Build git sa")
 
-	sa := &serviceaccount.ServiceAccount{
+	ci := &serviceaccount.CI{
 		WorkFlowStruct: internal.WorkFlowStruct{
 			Play:   p,
 			Scheme: wf.Scheme,
 		},
 	}
-
-	if err := wf.Add(sa.Create); err != nil {
+	if err := wf.Add(ci.Create); err != nil {
+		return err
+	}
+	deploy := &serviceaccount.Deploy{
+		WorkFlowStruct: internal.WorkFlowStruct{
+			Play:   p,
+			Scheme: wf.Scheme,
+		},
+	}
+	if err := wf.Add(deploy.Create); err != nil {
 		return err
 	}
 	return nil

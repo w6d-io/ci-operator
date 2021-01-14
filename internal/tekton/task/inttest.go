@@ -97,6 +97,10 @@ func (u *IntTestTask) Create(ctx context.Context, r client.Client, log logr.Logg
 			},
 			Params: []tkn.ParamSpec{
 				{
+					Name: "IMAGE",
+					Type: tkn.ParamTypeString,
+				},
+				{
 					Name: "script",
 					Type: tkn.ParamTypeString,
 				},

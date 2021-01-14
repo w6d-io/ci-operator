@@ -45,6 +45,7 @@ type Minio struct {
 type Ingress struct {
 	Class  string `json:"class"`
 	Prefix string `json:"prefix"`
+	Issuer string `json:"issuer"`
 }
 
 type Hash struct {

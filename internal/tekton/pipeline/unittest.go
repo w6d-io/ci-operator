@@ -31,6 +31,9 @@ func (p *Pipeline) SetPipelineUnitTest(play *ci.Play, logger logr.Logger) error 
 	p.Params = append(p.Params, tkn.ParamSpec{
 		Name: "unit-tests_script",
 		Type: tkn.ParamTypeString,
+	}, tkn.ParamSpec{
+		Name: "unit-tests_image",
+		Type: tkn.ParamTypeString,
 	})
 	params := []tkn.Param{
 		{
@@ -38,6 +41,13 @@ func (p *Pipeline) SetPipelineUnitTest(play *ci.Play, logger logr.Logger) error 
 			Value: tkn.ArrayOrString{
 				Type:      tkn.ParamTypeString,
 				StringVal: "$(params.unit-tests_script)",
+			},
+		},
+		{
+			Name: "IMAGE",
+			Value: tkn.ArrayOrString{
+				Type:      tkn.ParamTypeString,
+				StringVal: "$(params.unit-tests_image)",
 			},
 		},
 	}

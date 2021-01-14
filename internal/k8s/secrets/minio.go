@@ -31,16 +31,16 @@ import (
 
 const (
 	// filename use with s3cmd
-	MinIOSecretKey = ".s3cfg"
+	MinIOSecretKey string = ".s3cfg"
 	// Prefix use for name of resource
-	MinIOPrefixSecret = "minio"
+	MinIOPrefixSecret string = "minio"
 	// s3cfg config template
-	MinIOSecretTemplate = `
+	MinIOSecretTemplate string = `
 [default]
 access_key = {{ .Values.access_key }}
 secret_key = {{ .Values.secret_key }}
 bucket_location = us-east-1
-host_base = %s
+host_base = {{ .Values.host }}
 host_bucket = {{ .Values.host }}/%(bucket)
 default_mime_type = binary/octet-stream
 enable_multipart = True
@@ -61,7 +61,7 @@ website_endpoint = {{ default "http" .Values.scheme }}://{{ .Values.host }}
 
 // MinIOCreate creates the minio secret that contains the .s3cfg configuration
 func (s *Secret) MinIOCreate(ctx context.Context, r client.Client, log logr.Logger) error {
-	log = log.WithValues("Create").WithValues("action", MinIOPrefixSecret)
+	log = log.WithName("Create").WithValues("action", MinIOPrefixSecret)
 	log.V(1).Info("creating")
 
 	buf := new(bytes.Buffer)

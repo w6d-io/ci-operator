@@ -16,8 +16,9 @@ Created on 07/01/2021
 package play
 
 import (
-	"github.com/go-logr/logr"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+
+	"github.com/go-logr/logr"
 	"github.com/w6d-io/ci-operator/internal"
 	"github.com/w6d-io/ci-operator/internal/k8s/rbac"
 	"github.com/w6d-io/ci-operator/internal/util"
@@ -27,14 +28,24 @@ func (wf *WFType) Rbac(p *ci.Play, logger logr.Logger) error {
 	log := logger.WithName("GitSecret").WithValues("cx-namespace", util.InNamespace(p))
 	log.V(1).Info("Build git sa")
 
-	resource := &rbac.Rbac{
+	resourceCI := &rbac.CI{
 		WorkFlowStruct: internal.WorkFlowStruct{
 			Play:   p,
 			Scheme: wf.Scheme,
 		},
 	}
 
-	if err := wf.Add(resource.Create); err != nil {
+	if err := wf.Add(resourceCI.Create); err != nil {
+		return err
+	}
+	resourceDeploy := &rbac.Deploy{
+		WorkFlowStruct: internal.WorkFlowStruct{
+			Play:   p,
+			Scheme: wf.Scheme,
+		},
+	}
+
+	if err := wf.Add(resourceDeploy.Create); err != nil {
 		return err
 	}
 	return nil

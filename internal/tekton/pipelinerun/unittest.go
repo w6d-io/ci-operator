@@ -26,12 +26,18 @@ func (p *PipelineRun) SetUnitTest(pos int, log logr.Logger) error {
 	log = log.WithName("SetUnitTest").WithValues("action", "pipeline-run")
 	log.V(1).Info("set unit test pipeline run params")
 
-	task := p.Play.Spec.Tasks[pos][ci.IntegrationTests]
+	task := p.Play.Spec.Tasks[pos][ci.UnitTests]
 	p.Params = append(p.Params, tkn.Param{
 		Name: "unit-tests_script",
 		Value: tkn.ArrayOrString{
 			Type:      tkn.ParamTypeString,
 			StringVal: strings.Join(task.Script, "\n"),
+		},
+	}, tkn.Param{
+		Name: "unit-tests_image",
+		Value: tkn.ArrayOrString{
+			Type:      tkn.ParamTypeString,
+			StringVal: task.Image,
 		},
 	})
 	return nil

@@ -33,6 +33,12 @@ func (p *PipelineRun) SetIntTest(pos int, log logr.Logger) error {
 			Type:      tkn.ParamTypeString,
 			StringVal: strings.Join(task.Script, "\n"),
 		},
+	}, tkn.Param{
+		Name: "init-tests_image",
+		Value: tkn.ArrayOrString{
+			Type:      tkn.ParamTypeString,
+			StringVal: task.Image,
+		},
 	})
 	return nil
 }
