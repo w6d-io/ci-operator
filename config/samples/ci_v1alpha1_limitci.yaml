@@ -1,0 +1,6 @@
+apiVersion: ci.w6d.io/v1alpha1
+kind: LimitCi
+metadata:
+  name: limitci-sample
+spec:
+  concurrent: 2

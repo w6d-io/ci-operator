@@ -22,4 +22,4 @@
 *.swp
 *.swo
 *~
-/config/samples
+/config/tests/

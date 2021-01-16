@@ -22,6 +22,7 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/kardianos/govendor v1.0.9 // indirect
+	github.com/minio/minio-go/v6 v6.0.57
 	github.com/onsi/ginkgo v1.12.1
 	github.com/onsi/gomega v1.10.1
 	github.com/speps/go-hashids v2.0.0+incompatible

@@ -156,6 +156,9 @@ spec:
                             description: Filepath contains the dockerfile full path
                             type: string
                         type: object
+                      image:
+                        description: Image to use for this task
+                        type: string
                       script:
                         description: Script is a list of command to execute in the
                           task

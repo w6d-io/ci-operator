@@ -1,15 +1,17 @@
 /*
-Copyright 2020 WILDCARD SA.
+Copyright 2020 WILDCARD
 
-Licensed under the WILDCARD SA License, Version 1.0 (the "License");
-WILDCARD SA is register in french corporation.
-You may not use this file except in compliance with the License.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.w6d.io/licenses/LICENSE-1.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
-distributed under the License is prohibited.
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 Created on 06/01/2021
 */
 
@@ -31,16 +33,16 @@ import (
 
 const (
 	// filename use with s3cmd
-	MinIOSecretKey = ".s3cfg"
+	MinIOSecretKey string = ".s3cfg"
 	// Prefix use for name of resource
-	MinIOPrefixSecret = "minio"
+	MinIOPrefixSecret string = "minio"
 	// s3cfg config template
-	MinIOSecretTemplate = `
+	MinIOSecretTemplate string = `
 [default]
 access_key = {{ .Values.access_key }}
 secret_key = {{ .Values.secret_key }}
 bucket_location = us-east-1
-host_base = %s
+host_base = {{ .Values.host }}
 host_bucket = {{ .Values.host }}/%(bucket)
 default_mime_type = binary/octet-stream
 enable_multipart = True
@@ -61,7 +63,7 @@ website_endpoint = {{ default "http" .Values.scheme }}://{{ .Values.host }}
 
 // MinIOCreate creates the minio secret that contains the .s3cfg configuration
 func (s *Secret) MinIOCreate(ctx context.Context, r client.Client, log logr.Logger) error {
-	log = log.WithValues("Create").WithValues("action", MinIOPrefixSecret)
+	log = log.WithName("Create").WithValues("action", MinIOPrefixSecret)
 	log.V(1).Info("creating")
 
 	buf := new(bytes.Buffer)
