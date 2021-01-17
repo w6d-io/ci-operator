@@ -61,23 +61,6 @@ step:
 apiVersion: ci.w6d.io/v1alpha1
 kind: Step
 metadata:
-  name: digest-step-sample
-  annotations:
-    ci.w6d.io/language: js
-    ci.w6d.io/task: build
-    ci.w6d.io/order: "1"
-step:
-  name: digest
-  image: "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/imagedigestexporter:v0.11.1"
-  command:
-    - /ko-app/imagedigestexporter
-  args:
-    - -images=[{"name":"$(params.IMAGE)","type":"image","url":"$(params.IMAGE)","digest":"","OutputImageDir":"$(workspaces.source.path)/$(params.CONTEXT)/image-digest"}]
-    - -terminationMessagePath=$(params.CONTEXT)/image-digested
----
-apiVersion: ci.w6d.io/v1alpha1
-kind: Step
-metadata:
   name: deploy-init-helm-step-sample
   annotations:
     ci.w6d.io/language: js
@@ -124,7 +107,7 @@ step:
   args:
   - upgrade
   - --version
-  - "v1.0.0"
+  - "v1.0.1"
   - --install
   - -f
   - $(params.values)
