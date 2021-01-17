@@ -180,7 +180,6 @@ func IsBuildStage(play *ci.Play) bool {
 	return false
 }
 
-
 // ParseHostURL parses a url string, validates the string is a host url, and
 // returns the parsed URL
 func ParseHostURL(host string) (*url.URL, error) {
