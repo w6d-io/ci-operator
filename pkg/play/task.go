@@ -36,9 +36,10 @@ func (wf *WFType) SetTask(ctx context.Context, p *ci.Play, logger logr.Logger) e
 	log := logger.WithName("SetTask").WithValues("cx-namespace", util.InNamespace(p))
 	log.Info("Build tasks")
 	var t = task.Task{
-		Client: wf.Client,
-		Play:   p,
-		Scheme: wf.Scheme,
+		OpsNamespacedName: OpsNamespacedName,
+		Client:            wf.Client,
+		Play:              p,
+		Scheme:            wf.Scheme,
 	}
 	if err := t.Parse(ctx, logger); err != nil {
 		return err

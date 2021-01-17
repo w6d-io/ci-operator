@@ -29,7 +29,8 @@ import (
 )
 
 // CreateCI takes a Play struct to create tekton Pipeline
-func CreateCI(ctx context.Context, p *ci.Play, logger logr.Logger, r client.Client, scheme *runtime.Scheme) error {
+func CreateCI(ctx context.Context, p *ci.Play, logger logr.Logger,
+	r client.Client, scheme *runtime.Scheme) error {
 
 	log := logger.WithName("CreateCI").WithValues("cx-namespace", util.InNamespace(p))
 	p.Status.State = ci.Creating
