@@ -19,7 +19,6 @@ package play
 
 import (
 	"context"
-
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 
 	"github.com/go-logr/logr"

@@ -55,12 +55,6 @@ func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) ([]tkn.Step, er
 	var steplist ci.StepList
 	//var opts []client.ListOption
 
-	//opts = append(opts, client.MatchingFields{"metadata.annotations." + ci.AnnotationTask: string(taskType)})
-	//opts = append(opts, client.MatchingFields{"metadata.annotations." + ci.AnnotationLanguage: scope.Language})
-	//
-	//if taskType == ci.UnitTests || taskType == ci.IntegrationTests {
-	//	opts = append(opts, client.MatchingFields{"metadata.annotations." + ci.AnnotationPackage: scope.Package})
-	//}
 	err := s.Client.List(ctx, &steplist)
 	if err != nil {
 		return nil, err
@@ -97,13 +91,18 @@ func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) ([]tkn.Step, er
 // FilteredSteps return a ci.Steps filtered by annotation
 func (s *Step) FilteredSteps(log logr.Logger, steps ci.Steps, isTest bool) ci.Steps {
 	filteredSteps := ci.Steps{}
-	log = log.WithName("FilteredSteps").WithValues("task", s.TaskType, "stack", s.PlaySpec.Stack)
+	log = log.WithName("FilteredSteps").WithValues("task", s.TaskType, "stack", s.PlaySpec.Stack,
+		"ops-namespace", config.GetNamespace())
+	log.V(2).Info("filtering")
 	_, mongoOK := s.PlaySpec.Dependencies[ci.MongoDB]
 	_, postgresOK := s.PlaySpec.Dependencies[ci.Postgresql]
 	_, mariaDBOK := s.PlaySpec.Dependencies[ci.MariaDB]
 	task := s.PlaySpec.Tasks[s.Index][s.TaskType]
 
 	for _, step := range steps {
+		if config.GetNamespace() != ""  && step.Namespace != config.GetNamespace() {
+			continue
+		}
 		if (mongoOK || postgresOK || mariaDBOK) && step.Annotations[ci.AnnotationTask] == s.TaskType.String() &&
 			(step.Annotations[ci.AnnotationLanguage] == ci.MongoDB.String() ||
 				step.Annotations[ci.AnnotationLanguage] == ci.Postgresql.String()) {

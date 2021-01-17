@@ -90,6 +90,7 @@ func main() {
 		setupLog.Error(errors.New("flag error"), "config file is missing")
 		os.Exit(1)
 	}
+
 	if err := config.Validate(); err != nil {
 		fmt.Printf("error : %s\n", err)
 		setupLog.Error(err, "config loading error")
@@ -111,7 +112,6 @@ func main() {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
-
 	if err = (&controllers.PlayReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("Play"),

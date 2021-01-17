@@ -57,7 +57,7 @@ type PlaySpec struct {
 	Commit Commit `json:"commit,omitempty"`
 
 	// Domain contains the url for exposition
-	// +kubebuilder:validation:Pattern=^([A-Za-z0–9-]+\.)+[A-Za-z][A-Za-z]+$
+	// +kubebuilder:validation:Pattern=^([A-Za-z0–9\-\.]+)+([A-Za-z0-9\.]+)*\.[A-Za-z][A-Za-z]+$
 	// +optional
 	Domain string `json:"domain,omitempty"`
 
