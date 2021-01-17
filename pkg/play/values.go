@@ -37,14 +37,18 @@ func (wf *WFType) CreateValues(p *ci.Play, logger logr.Logger) error {
 		Internal: config.GetConfigRaw(),
 	}
 	valueBuf := new(bytes.Buffer)
-	templ.GetValues(valueBuf)
+	if err := templ.GetValues(valueBuf); err != nil {
+		return err
+	}
 	// TODO send Value to Minio or create Secret
 	// put values.yaml in MinIO
 	m := minio.New(logger)
 	if m == nil {
 		return fmt.Errorf("create minio install return nil")
 	}
-	m.PutString(logger, valueBuf.String(), BuildTarget(p, values.FileNameValues))
+	if err := m.PutString(logger, valueBuf.String(), BuildTarget(p, values.FileNameValues)); err != nil {
+		return err
+	}
 	// TODO Create same process for MongoDB and PostgreSQL values
 	// TODO for secret implementations update VolumeMount
 	// TODO implements a method to factorized the process

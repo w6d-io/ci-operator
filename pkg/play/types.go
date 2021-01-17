@@ -23,7 +23,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/w6d-io/ci-operator/internal/k8s/rbac"
-	"github.com/w6d-io/ci-operator/internal/k8s/serviceaccount"
+	"github.com/w6d-io/ci-operator/internal/k8s/sa"
 	"github.com/w6d-io/ci-operator/internal/tekton/pipeline"
 	"github.com/w6d-io/ci-operator/internal/tekton/pipelineresource"
 	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
@@ -97,8 +97,8 @@ type CIInterface interface {
 
 var _ CIInterface = &pipelineresource.ImagePR{}
 var _ CIInterface = &pipelineresource.GitPR{}
-var _ CIInterface = &serviceaccount.CI{}
-var _ CIInterface = &serviceaccount.Deploy{}
+var _ CIInterface = &sa.CI{}
+var _ CIInterface = &sa.Deploy{}
 var _ CIInterface = &rbac.CI{}
 var _ CIInterface = &rbac.Deploy{}
 var _ CIInterface = &task.BuildTask{}

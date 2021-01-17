@@ -15,7 +15,7 @@ limitations under the License.
 Created on 28/12/2020
 */
 
-package serviceaccount
+package sa
 
 import (
 	"context"

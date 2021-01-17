@@ -20,7 +20,7 @@ package rbac
 import (
 	"context"
 	"fmt"
-	"github.com/w6d-io/ci-operator/internal/k8s/serviceaccount"
+	"github.com/w6d-io/ci-operator/internal/k8s/sa"
 	"time"
 
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -65,7 +65,7 @@ func (in *CI) Create(ctx context.Context, r client.Client, logger logr.Logger) e
 		Subjects: []rbacv1.Subject{
 			{
 				Kind:      rbacv1.ServiceAccountKind,
-				Name:      util.GetCINamespacedName(serviceaccount.Prefix, in.Play).Name,
+				Name:      util.GetCINamespacedName(sa.Prefix, in.Play).Name,
 				Namespace: namespacedName.Namespace,
 			},
 		},
