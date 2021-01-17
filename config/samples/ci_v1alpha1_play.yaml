@@ -14,7 +14,7 @@ spec:
   project_id: 1
   pipeline_id: 1
   repo_url: https://github.com/w6d-io/nodejs-sample.git
-  docker_url: w6dio/nodejs-sample:3010508c-master
+  docker_url: w6dio/nodejs-sample:3010508c-main
   commit:
     sha: 3010508ce47519b9b7444dcd2d2961796c874cff
     ref: main
