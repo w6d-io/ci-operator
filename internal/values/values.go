@@ -52,6 +52,9 @@ env:
 {{- end -}}
 {{- end }}
 
+lifecycle:
+  enabled: true
+
 image:
   repository: {{ $repository }}
   tag: {{ $tag }}
