@@ -28,7 +28,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/w6d-io/ci-operator/internal"
 	"github.com/w6d-io/ci-operator/internal/config"
-	"github.com/w6d-io/ci-operator/internal/k8s/serviceaccount"
+	"github.com/w6d-io/ci-operator/internal/k8s/sa"
 	"github.com/w6d-io/ci-operator/internal/util"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -60,20 +60,18 @@ func (in *Deploy) Create(ctx context.Context, r client.Client, logger logr.Logge
 		Subjects: []rbacv1.Subject{
 			{
 				Kind:      rbacv1.ServiceAccountKind,
-				Name:      util.GetCINamespacedName(serviceaccount.Prefix, in.Play).Name,
+				Name:      util.GetCINamespacedName(sa.Prefix, in.Play).Name,
 				Namespace: namespacedName.Namespace,
 			},
 			{
 				Kind:      rbacv1.ServiceAccountKind,
-				Name:      util.GetCINamespacedName(serviceaccount.Prefix, in.Play).Name,
+				Name:      util.GetCINamespacedName(sa.Prefix, in.Play).Name,
 				Namespace: deployNamespacedNamed.Namespace,
 			},
 		},
 	}
 	resource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
-	//if err := controllerutil.SetControllerReference(in.Play, resource, in.Scheme); err != nil {
-	//	return err
-	//}
+	// TODO find a way to link this resource with oper
 	log.V(1).Info(fmt.Sprintf("rolbinding contains\n%v",
 		util.GetObjectContain(resource)))
 	if err := r.Create(ctx, resource); err != nil {

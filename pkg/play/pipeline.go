@@ -19,19 +19,23 @@ package play
 
 import (
 	"github.com/go-logr/logr"
+
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
-	"github.com/w6d-io/ci-operator/internal/tekton/pipeline"
+
+	intpipeline "github.com/w6d-io/ci-operator/internal/tekton/pipeline"
 	"github.com/w6d-io/ci-operator/internal/util"
 )
 
 func (wf *WFType) SetPipeline(p *ci.Play, logger logr.Logger) error {
 	log := logger.WithName("SetPipeline").WithValues("cx-namespace", util.InNamespace(p))
 	log.Info("Build pipeline")
-	pipeline := &pipeline.Pipeline{
+	pipeline := &intpipeline.Pipeline{
 		Play:   p,
 		Scheme: wf.Scheme,
 	}
-	pipeline.Parse(log)
+	if err := pipeline.Parse(log); err != nil {
+		return err
+	}
 
 	if err := wf.Add(pipeline.Create); err != nil {
 		return err

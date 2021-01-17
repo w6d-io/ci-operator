@@ -100,7 +100,7 @@ func (s *Step) FilteredSteps(log logr.Logger, steps ci.Steps, isTest bool) ci.St
 	task := s.PlaySpec.Tasks[s.Index][s.TaskType]
 
 	for _, step := range steps {
-		if config.GetNamespace() != ""  && step.Namespace != config.GetNamespace() {
+		if config.GetNamespace() != "" && step.Namespace != config.GetNamespace() {
 			continue
 		}
 		if (mongoOK || postgresOK || mariaDBOK) && step.Annotations[ci.AnnotationTask] == s.TaskType.String() &&

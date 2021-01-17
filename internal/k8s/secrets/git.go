@@ -21,7 +21,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/w6d-io/ci-operator/internal/config"
-	"github.com/w6d-io/ci-operator/internal/k8s/serviceaccount"
+	"github.com/w6d-io/ci-operator/internal/k8s/sa"
 	"github.com/w6d-io/ci-operator/internal/util"
 	"net/url"
 	"time"
@@ -77,8 +77,8 @@ func (s *Secret) GitCreate(ctx context.Context, r client.Client, log logr.Logger
 		return err
 	}
 
-	if err := serviceaccount.Update(ctx, resource.Name,
-		util.GetCINamespacedName(serviceaccount.Prefix, s.Play), r); err != nil {
+	if err := sa.Update(ctx, resource.Name,
+		util.GetCINamespacedName(sa.Prefix, s.Play), r); err != nil {
 		return err
 	}
 	// All went well

@@ -20,7 +20,7 @@ package secrets
 import (
 	"context"
 	"github.com/w6d-io/ci-operator/internal/config"
-	"github.com/w6d-io/ci-operator/internal/k8s/serviceaccount"
+	"github.com/w6d-io/ci-operator/internal/k8s/sa"
 	"github.com/w6d-io/ci-operator/internal/util"
 	"time"
 
@@ -64,8 +64,8 @@ func (s *Secret) DockerCredCreate(ctx context.Context, r client.Client, log logr
 	if err := r.Create(ctx, resource); err != nil {
 		return err
 	}
-	if err := serviceaccount.Update(ctx, resource.Name,
-		util.GetCINamespacedName(serviceaccount.Prefix, s.Play), r); err != nil {
+	if err := sa.Update(ctx, resource.Name,
+		util.GetCINamespacedName(sa.Prefix, s.Play), r); err != nil {
 		return err
 	}
 
