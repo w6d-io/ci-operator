@@ -19,8 +19,8 @@ package task
 
 import (
 	"context"
-	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 
+	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 
 	"github.com/go-logr/logr"

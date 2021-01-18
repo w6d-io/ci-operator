@@ -115,6 +115,34 @@ func GetDockerImageTag(play *ci.Play) (*url.URL, error) {
 	return URL, nil
 }
 
+// GetDockerImageTagRaw return the Docker repository
+func GetDockerImageTagRaw(play *ci.Play) (address string, tag string, err error) {
+
+	rep := fmt.Sprintf("https://reg-ext.w6d.io/cxcm/%v/%v:%v-%v",
+		play.Spec.ProjectID, play.Spec.Name, play.Spec.Commit.SHA[:8], play.Spec.Commit.Ref)
+	URL, err := ParseHostURL(rep)
+	if err != nil {
+		return "", "", err
+	}
+	if play.Spec.DockerURL != "" {
+		if !strings.HasPrefix(play.Spec.DockerURL, "http") {
+			play.Spec.DockerURL = "https://" + play.Spec.DockerURL
+		}
+		URL, err = ParseHostURL(play.Spec.DockerURL)
+		if err != nil {
+			return
+		}
+	}
+
+	partAddress := strings.SplitN(URL.Path, ":", 2)
+	address = partAddress[0]
+	tag = partAddress[1]
+	if partAddress[1] == "" {
+		tag = "latest"
+	}
+	return
+}
+
 // IgnoreNotFound returns nil on NotFound errors.
 // All other values that are not NotFound errors or nil are returned unmodified.
 func IgnoreNotExists(err error) error {
@@ -150,4 +178,29 @@ func IsBuildStage(play *ci.Play) bool {
 		}
 	}
 	return false
+}
+
+// ParseHostURL parses a url string, validates the string is a host url, and
+// returns the parsed URL
+func ParseHostURL(host string) (*url.URL, error) {
+	protoAddrParts := strings.SplitN(host, "://", 2)
+	if len(protoAddrParts) == 1 {
+		return nil, fmt.Errorf("unable to parse docker host `%s`", host)
+	}
+
+	var basePath string
+	proto, addr := protoAddrParts[0], protoAddrParts[1]
+	if proto == "tcp" {
+		parsed, err := url.Parse("tcp://" + addr)
+		if err != nil {
+			return nil, err
+		}
+		addr = parsed.Host
+		basePath = parsed.Path
+	}
+	return &url.URL{
+		Scheme: proto,
+		Host:   addr,
+		Path:   basePath,
+	}, nil
 }

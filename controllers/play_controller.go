@@ -127,7 +127,6 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 	if err := play.CreateCI(ctx, p, r.Log, r, r.Scheme); err != nil {
 		log.Error(err, "Failed to create CI")
-		//CleanCI(ctx, p, r)
 		p.Status.State = ci.Errored
 		if err := r.Status().Update(ctx, p); err != nil {
 			return ctrl.Result{}, err

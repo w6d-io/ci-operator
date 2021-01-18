@@ -21,7 +21,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/w6d-io/ci-operator/internal/config"
-	"github.com/w6d-io/ci-operator/internal/k8s/serviceaccount"
+	"github.com/w6d-io/ci-operator/internal/k8s/sa"
 	"github.com/w6d-io/ci-operator/internal/util"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"time"
@@ -82,7 +82,7 @@ func (p *PipelineRun) Create(ctx context.Context, r client.Client, log logr.Logg
 		},
 		Spec: tkn.PipelineRunSpec{
 			PipelineRef:        &tkn.PipelineRef{Name: util.GetCINamespacedName("pipeline", p.Play).Name},
-			ServiceAccountName: util.GetCINamespacedName(serviceaccount.Prefix, p.Play).Name,
+			ServiceAccountName: util.GetCINamespacedName(sa.Prefix, p.Play).Name,
 			Resources:          p.getPipelineResourceBinding(p.Play),
 			Workspaces:         p.getWorkspaceBinding(),
 			Params:             p.Params,

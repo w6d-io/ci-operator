@@ -21,7 +21,7 @@ import (
 	"github.com/go-logr/logr"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal"
-	"github.com/w6d-io/ci-operator/internal/k8s/serviceaccount"
+	"github.com/w6d-io/ci-operator/internal/k8s/sa"
 	"github.com/w6d-io/ci-operator/internal/util"
 )
 
@@ -29,7 +29,7 @@ func (wf *WFType) ServiceAccount(p *ci.Play, logger logr.Logger) error {
 	log := logger.WithName("GitSecret").WithValues("cx-namespace", util.InNamespace(p))
 	log.V(1).Info("Build git sa")
 
-	ci := &serviceaccount.CI{
+	ci := &sa.CI{
 		WorkFlowStruct: internal.WorkFlowStruct{
 			Play:   p,
 			Scheme: wf.Scheme,
@@ -38,7 +38,7 @@ func (wf *WFType) ServiceAccount(p *ci.Play, logger logr.Logger) error {
 	if err := wf.Add(ci.Create); err != nil {
 		return err
 	}
-	deploy := &serviceaccount.Deploy{
+	deploy := &sa.Deploy{
 		WorkFlowStruct: internal.WorkFlowStruct{
 			Play:   p,
 			Scheme: wf.Scheme,

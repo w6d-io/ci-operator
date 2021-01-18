@@ -70,7 +70,9 @@ func (s *Secret) MinIOCreate(ctx context.Context, r client.Client, log logr.Logg
 	tpl := values.Templates{
 		Values: config.GetMinioRaw(),
 	}
-	tpl.PrintTemplate(buf, MinIOSecretKey, MinIOSecretTemplate)
+	if err := tpl.PrintTemplate(buf, MinIOSecretKey, MinIOSecretTemplate); err != nil {
+		return err
+	}
 	namespacedName := util.GetCINamespacedName(MinIOPrefixSecret, s.Play)
 	resource := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{

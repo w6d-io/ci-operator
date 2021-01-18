@@ -37,8 +37,8 @@ var HelmValuesTemplate = `---
 {{- $tag := (printf "%v-%v" (substr 0 7 .Values.commit.sha) .Values.commit.ref) }}
 {{- if .Values.docker_url }}
 {{- $part := split ":" .Values.docker_url }}
-{{- $repository := $part._0 }}
-{{- $tag := $part._1 }}
+{{- $repository = $part._0 }}
+{{- $tag = $part._1 }}
 {{- end }}
 {{- range $task := .Values.tasks }}
 {{- range $key, $var := $task }}
@@ -51,6 +51,9 @@ env:
 {{- end -}}
 {{- end -}}
 {{- end }}
+
+lifecycle:
+  enabled: true
 
 image:
   repository: {{ $repository }}

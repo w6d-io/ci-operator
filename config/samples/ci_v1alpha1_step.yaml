@@ -61,23 +61,6 @@ step:
 apiVersion: ci.w6d.io/v1alpha1
 kind: Step
 metadata:
-  name: digest-step-sample
-  annotations:
-    ci.w6d.io/language: js
-    ci.w6d.io/task: build
-    ci.w6d.io/order: "1"
-step:
-  name: digest
-  image: "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/imagedigestexporter:v0.11.1"
-  command:
-    - /ko-app/imagedigestexporter
-  args:
-    - -images=[{"name":"$(params.IMAGE)","type":"image","url":"$(params.IMAGE)","digest":"","OutputImageDir":"$(workspaces.source.path)/$(params.CONTEXT)/image-digest"}]
-    - -terminationMessagePath=$(params.CONTEXT)/image-digested
----
-apiVersion: ci.w6d.io/v1alpha1
-kind: Step
-metadata:
   name: deploy-init-helm-step-sample
   annotations:
     ci.w6d.io/language: js
@@ -88,7 +71,7 @@ step:
   image: "w6dio/kubectl:v1.1.0"
   script: |
     # sleep infinity
-    helm3 repo add cxcm https://reg.w6d.io/chartrepo/cxcm
+    helm3 repo add w6dio https://charts.w6d.io
 ---
 apiVersion: ci.w6d.io/v1alpha1
 kind: Step
@@ -124,7 +107,7 @@ step:
   args:
   - upgrade
   - --version
-  - "v0.4.2"
+  - "v1.0.1"
   - --install
   - -f
   - $(params.values)
@@ -132,7 +115,7 @@ step:
   - --namespace
   - $(params.namespace)
   - $(params.release_name)
-  - cxcm/app
+  - w6dio/app
 ---
 apiVersion: ci.w6d.io/v1alpha1
 kind: Step
@@ -166,7 +149,7 @@ step:
   args:
     - upgrade
     - --install
-    - -v
+    - --version
     - "10.3.1"
     - -f
     - $(params.values)
@@ -209,7 +192,7 @@ step:
     - helm3
     - upgrade
     - --install
-    - -v
+    - --version
     - "10.3.1"
     - -f
     - $(params.values)
@@ -251,8 +234,8 @@ step:
   args:
     - upgrade
     - --install
-    - -v "
-    - 10.2.0"
+    - --version
+    - "10.2.0"
     - -f
     - $(params.values)
     - $(params.flags[*])
@@ -293,8 +276,8 @@ step:
   args:
     - upgrade
     - --install
-    - -v "
-    - 10.2.0"
+    - --version
+    - "10.2.0"
     - -f
     - $(params.values)
     - $(params.flags[*])

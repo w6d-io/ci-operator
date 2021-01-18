@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"sort"
 
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
@@ -48,6 +49,7 @@ func New(filename string) error {
 	if err := yaml.Unmarshal(data, config); err != nil {
 		log.Error(err, "Error unmarshal the configuration")
 	}
+	config.Namespace = os.Getenv("NAMESPACE")
 	if config.Volume.Name == "" {
 		config.Volume = tkn.WorkspaceBinding{
 			Name:     "ws",
@@ -178,4 +180,8 @@ func (m *Minio) GetBucket() string {
 		return config.Minio.Bucket
 	}
 	return ""
+}
+
+func GetNamespace() string {
+	return config.Namespace
 }
