@@ -17,7 +17,10 @@ Created on 30/12/2020
 
 package config
 
-import tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+import (
+	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	"net/url"
+)
 
 // Config controller common parameter
 type Config struct {
@@ -29,12 +32,19 @@ type Config struct {
 	Volume        tkn.WorkspaceBinding       `json:"volume" yaml:"volume"`
 	Namespace     string                     `json:"namespace" yaml:"namespace"`
 	// Hash is use for provide unpredictable string from an integer
-	Hash Hash `json:"hash" yaml:"hash"`
+	Hash Hash                                `json:"hash" yaml:"hash"`
 	// Minio contains all minio information for the connection the could be omitted
-	Minio *Minio `json:"minio,omitempty" yaml:"minio,omitempty"`
+	Minio *Minio                             `json:"minio,omitempty" yaml:"minio,omitempty"`
 	// DeployPrefix is used to build namespace name where application will be deployed
 	// default values is cx
-	DeployPrefix string `json:"deploy_prefix" yaml:"deploy_prefix"`
+	DeployPrefix string                      `json:"deploy_prefix" yaml:"deploy_prefix"`
+	// WebHooks contains a list of WebHook where payload will be send
+	WebHooks     []WebHook                   `json:"web_hooks" yaml:"web_hooks"`
+}
+
+type WebHook struct {
+	Name string   `json:"name" yaml:"name"`
+	URL  *url.URL `json:"url" yaml:"url"`
 }
 
 type Minio struct {
