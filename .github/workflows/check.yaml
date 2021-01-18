@@ -11,9 +11,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - name: Git Checkout
+      uses: actions/checkout@v2
+
     - name: Get kubebuilder
-      uses: RyanSiu1995/kubebuilder-action@v1
+      uses: RyanSiu1995/kubebuilder-action@v1.1
       with:
         version: 2.3.1
     - name: Set up Go
