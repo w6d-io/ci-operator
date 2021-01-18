@@ -19,9 +19,10 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Environment (please complete the following information):**
- - OS: [e.g. iOS]
- - Go Version [e.g. 22]
- - Tekton Version [e.g. 22]
+ - Kubernetes version:
+ - Go Version [e.g. 1.15]
+ - Tekton Version [e.g. 0.20.0]
+ - Cloud-provider/provisioner: [e.g. AWS, GCP, Azure, Scaleway]
 
 
 **Additional context**
