@@ -86,7 +86,7 @@ func TestTemplates_PrintTemplate(t *testing.T) {
 				"test.yaml",
 				HelmValuesTemplate,
 			},
-			false,
+			true,
 		},
 	}
 	for _, tt := range tests {
