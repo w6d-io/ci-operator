@@ -42,6 +42,7 @@ func New(filename string) error {
 	// TODO add dynamic configuration feature
 	log := ctrl.Log.WithName("controllers").WithName("Config")
 	log.V(1).Info("read config file")
+	config = new(Config)
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		log.Error(err, "error reading the configuration")
