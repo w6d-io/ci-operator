@@ -1,0 +1,6 @@
+---
+domain: "example.ci"
+ingress:
+  class: nginx
+  issuer: letsencrypt-prod
+deploy_prefix: "test"
