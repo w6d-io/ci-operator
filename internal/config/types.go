@@ -39,12 +39,13 @@ type Config struct {
 	// default values is cx
 	DeployPrefix string                      `json:"deploy_prefix" yaml:"deploy_prefix"`
 	// WebHooks contains a list of WebHook where payload will be send
-	WebHooks     []WebHook                   `json:"web_hooks" yaml:"web_hooks"`
+	Webhooks     []Webhook                   `json:"webhooks" yaml:"webhooks"`
 }
 
-type WebHook struct {
-	Name string   `json:"name" yaml:"name"`
-	URL  *url.URL `json:"url" yaml:"url"`
+type Webhook struct {
+	Name   string `json:"name" yaml:"name"`
+	URLRaw string `json:"url" yaml:"url"`
+	URL    *url.URL
 }
 
 type Minio struct {
