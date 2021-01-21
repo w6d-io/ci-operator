@@ -39,11 +39,11 @@ func CreateCI(ctx context.Context, p *ci.Play, logger logr.Logger,
 	}
 	var wf WFInterface
 	wf = &WFType{
-		Client: r,
-		Scheme: scheme,
+		Client:  r,
+		Scheme:  scheme,
 		Creates: []CIFunc{},
 	}
-//	wf = New(r, scheme)
+	//	wf = New(r, scheme)
 
 	if err := wf.CreateValues(p, logger); err != nil {
 		return err

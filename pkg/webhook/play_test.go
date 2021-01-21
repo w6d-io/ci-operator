@@ -40,7 +40,7 @@ var _ = Describe("Webhook", func() {
 					&ci.Play{},
 					ci.Failed,
 					logger,
-					)).To(BeNil())
+				)).To(BeNil())
 			})
 		})
 	})

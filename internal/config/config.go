@@ -64,9 +64,9 @@ func New(filename string) error {
 	}
 	values.Salt = config.Hash.Salt
 	values.MinLength = config.Hash.MinLength
-	for i, wh := range config.Webhooks{
+	for i, wh := range config.Webhooks {
 		if wh.URLRaw != "" {
-			config.Webhooks[i].URL , err = url.Parse(wh.URLRaw)
+			config.Webhooks[i].URL, err = url.Parse(wh.URLRaw)
 			if err != nil {
 				return fmt.Errorf("webhook (%s) config error %s", wh.Name, err)
 			}

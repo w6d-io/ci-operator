@@ -41,18 +41,18 @@ func BuildPlayPayload(play *ci.Play, status ci.State, logger logr.Logger) error 
 
 	payload = &PlayPayload{
 		ObjectKind: play.APIVersion,
-		ProjectID: play.Spec.ProjectID,
+		ProjectID:  play.Spec.ProjectID,
 		PipelineID: play.Spec.PipelineID,
-		RepoURL: play.Spec.RepoURL,
-		Commit: play.Spec.Commit,
-		Stack: play.Spec.Stack,
-		Status: status,
+		RepoURL:    play.Spec.RepoURL,
+		Commit:     play.Spec.Commit,
+		Stack:      play.Spec.Stack,
+		Status:     status,
 	}
 	return nil
 }
 
 // GetPayLoad returns the
-func GetPayLoad() Payload{
+func GetPayLoad() Payload {
 	return payload
 }
 
@@ -110,10 +110,10 @@ func (p *PlayPayload) DoSend() error {
 		go func(URL string) {
 			logg := log.WithValues("url", URL)
 			select {
-				case errc <- p.Send(URL):
-					logg.Info("sent")
-				case <-quit:
-					logg.Info("quit")
+			case errc <- p.Send(URL):
+				logg.Info("sent")
+			case <-quit:
+				logg.Info("quit")
 			}
 		}(wh.URLRaw)
 	}

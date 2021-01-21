@@ -21,12 +21,12 @@ var _ = Describe("Config", func() {
 				Expect(config.New("../../test/config/file4.yaml")).ToNot(BeNil())
 			})
 		})
- 		Context("Validate config", func() {
+		Context("Validate config", func() {
 			It("File exists", func() {
 				Expect(config.New("../../test/config/file1.yaml")).To(BeNil())
 			})
- 			It("Check mandatory value", func() {
- 				Expect(config.Validate()).To(BeNil())
+			It("Check mandatory value", func() {
+				Expect(config.Validate()).To(BeNil())
 			})
 			It("load file without mandatory part", func() {
 				Expect(config.New("../../test/config/file2.yaml")).To(BeNil())
@@ -41,11 +41,11 @@ var _ = Describe("Config", func() {
 				Expect(config.GetConfig()).To(Equal(&config.Config{
 					DefaultDomain: "example.ci",
 					Ingress: config.Ingress{
-						Class: "nginx",
+						Class:  "nginx",
 						Issuer: "letsencrypt-prod",
 					},
 					Volume: tkn.WorkspaceBinding{
-						Name: "ws",
+						Name:     "ws",
 						EmptyDir: &corev1.EmptyDirVolumeSource{},
 					},
 					DeployPrefix: "test",
@@ -76,7 +76,7 @@ var _ = Describe("Config", func() {
 				Expect(config.GetRaw("{test")).To(BeNil())
 			})
 
- 		})
+		})
 		Context("Check Minio Method", func() {
 			It("load tiny config ", func() {
 				Expect(config.New("../../test/config/file5.yaml")).To(BeNil())
