@@ -30,15 +30,18 @@ var _ = Describe("Webhook", func() {
 			It("Build payload", func() {
 				Expect(webhook.BuildPlayPayload(play, status, logger)).To(BeNil())
 			})
-			It("Get list of subscribers", func() {})
 			It("Send to subscribers", func() {
 				Expect(webhook.GetPayLoad().Send("")).To(BeNil())
 			})
 		})
 		Context("When some resource creation failed", func() {
-			It("Build payload", func() {})
-			It("Get list of subscribers", func() {})
-			It("Send to subscribers", func() {})
+			It("Build payload", func() {
+				Expect(webhook.BuildPlayPayload(
+					&ci.Play{},
+					ci.Failed,
+					logger,
+					)).To(BeNil())
+			})
 		})
 	})
 })

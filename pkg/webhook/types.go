@@ -24,6 +24,9 @@ type Payload interface {
 
 	// DoSend loop on webhook address and call Send
 	DoSend() error
+
+	// SetStatus record the status in the Payload
+	SetStatus(ci.State)
 }
 type PlayPayload struct {
 	ObjectKind string    `json:"object_kind,omitempty"`

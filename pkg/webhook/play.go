@@ -56,6 +56,10 @@ func GetPayLoad() Payload{
 	return payload
 }
 
+func (p *PlayPayload) SetStatus(state ci.State) {
+	p.Status = state
+}
+
 func (p *PlayPayload) Send(URL string) error {
 	log := logger.WithName("Send")
 	if URL == "" {
@@ -69,7 +73,8 @@ func (p *PlayPayload) Send(URL string) error {
 		log.Error(err, "json conversion failed")
 		return err
 	}
-	retry.Do(
+	retry.DefaultAttempts = 5
+	if err := retry.Do(
 		func() error {
 			response, err := client.Post(URL, "application/json", bytes.NewBuffer(data))
 			if err == nil {
@@ -85,10 +90,12 @@ func (p *PlayPayload) Send(URL string) error {
 				}
 				log.Info(string(data))
 			}
-			log.Error(err,"Post data returns failed")
+			log.Error(err, "Post data returns failed")
 			return err
 		},
-		)
+	); err != nil {
+		return err
+	}
 	return nil
 }
 

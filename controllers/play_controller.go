@@ -22,6 +22,7 @@ import (
 	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
 	"github.com/w6d-io/ci-operator/internal/util"
 	"github.com/w6d-io/ci-operator/pkg/play"
+	"github.com/w6d-io/ci-operator/pkg/webhook"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -56,6 +57,9 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if err := r.Get(ctx, req.NamespacedName, p); err != nil {
 		log.Error(err, "unable to fetch Play")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+	if err := webhook.BuildPlayPayload(p, ci.Unknown, log); err != nil {
+		log.Error(err, "build payload of play")
 	}
 	log = log.WithValues("cx-namespace", util.InNamespace(p))
 	log.V(1).Info("req name " + req.Name)
@@ -132,6 +136,12 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, err
+	}
+	payload := webhook.GetPayLoad()
+	payload.SetStatus(p.Status.State)
+	if err := payload.DoSend(); err != nil {
+		log.Error(err, "webhook")
+		return ctrl.Result{}, nil
 	}
 	return ctrl.Result{}, nil
 }
