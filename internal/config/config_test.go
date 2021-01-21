@@ -10,10 +10,6 @@ import (
 
 var _ = Describe("Config", func() {
 	Describe("Parse yaml configuration", func() {
-// 		err := config.New("../../test/config/")
-// 		if err != nil {
-// 			Fail(err.Error())
-// 		}
 		Context("Manage config issues", func() {
 			It("File does not exist", func() {
 				Expect(config.New("../../test/config/no-file.yaml")).ToNot(BeNil())
@@ -115,7 +111,9 @@ var _ = Describe("Config", func() {
 			It("GetWorkspacePath function with unset value", func() {
 				Expect(config.GetWorkspacePath("test")).To(Equal(""))
 			})
-
+			It("GetWebhooks function", func() {
+				Expect(len(config.GetWebhooks())).To(Equal(1))
+			})
 		})
 	})
 })

@@ -196,3 +196,8 @@ func (m *Minio) GetBucket() string {
 func GetNamespace() string {
 	return config.Namespace
 }
+
+// GetWebhooks returns the list of url where to send the event
+func GetWebhooks() []Webhook {
+	return config.Webhooks
+}
