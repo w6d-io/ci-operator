@@ -58,9 +58,6 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		log.Error(err, "unable to fetch Play")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	if err := webhook.BuildPlayPayload(p, ci.Unknown, log); err != nil {
-		log.Error(err, "build payload of play")
-	}
 	log = log.WithValues("cx-namespace", util.InNamespace(p))
 	log.V(1).Info("req name " + req.Name)
 	log.V(1).Info("get pipelinerun " + util.GetCINamespacedName(pipelinerun.Prefix, p).String())
@@ -136,6 +133,9 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, err
+	}
+	if err := webhook.BuildPlayPayload(p, ci.Unknown, log); err != nil {
+		log.Error(err, "build payload of play")
 	}
 	payload := webhook.GetPayLoad()
 	payload.SetStatus(p.Status.State)

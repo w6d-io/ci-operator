@@ -61,21 +61,23 @@ func (p *PlayPayload) SetStatus(state ci.State) {
 }
 
 func (p *PlayPayload) Send(URL string) error {
-	log := logger.WithName("Send")
 	if URL == "" {
 		return nil
 	}
+	log := logger.WithName("Send").WithValues("URL", URL)
+	log.V(1).Info("create http client")
 	client := http.Client{
 		Timeout: 1 * time.Second,
 	}
+	log.V(1).Info("marshal payload")
 	data, err := json.Marshal(p)
 	if err != nil {
 		log.Error(err, "json conversion failed")
 		return err
 	}
-	retry.DefaultAttempts = 5
 	if err := retry.Do(
 		func() error {
+			log.V(1).WithValues("send", retry.DefaultAttempts).Info("post payload")
 			response, err := client.Post(URL, "application/json", bytes.NewBuffer(data))
 			if err == nil {
 				defer func() {
@@ -93,6 +95,7 @@ func (p *PlayPayload) Send(URL string) error {
 			log.Error(err, "Post data returns failed")
 			return err
 		},
+		retry.Attempts(5),
 	); err != nil {
 		return err
 	}
