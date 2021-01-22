@@ -20,7 +20,9 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/w6d-io/ci-operator/pkg/webhook"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"sort"
 
@@ -41,6 +43,7 @@ func New(filename string) error {
 	// TODO add dynamic configuration feature
 	log := ctrl.Log.WithName("controllers").WithName("Config")
 	log.V(1).Info("read config file")
+	config = new(Config)
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		log.Error(err, "error reading the configuration")
@@ -48,6 +51,7 @@ func New(filename string) error {
 	}
 	if err := yaml.Unmarshal(data, config); err != nil {
 		log.Error(err, "Error unmarshal the configuration")
+		return err
 	}
 	config.Namespace = os.Getenv("NAMESPACE")
 	if config.Volume.Name == "" {
@@ -61,6 +65,14 @@ func New(filename string) error {
 	}
 	values.Salt = config.Hash.Salt
 	values.MinLength = config.Hash.MinLength
+	for i, wh := range config.Webhooks {
+		if wh.URLRaw != "" {
+			config.Webhooks[i].URL, err = url.Parse(wh.URLRaw)
+			if err != nil {
+				return fmt.Errorf("webhook (%s) config error %s", wh.Name, err)
+			}
+		}
+	}
 	return nil
 }
 
@@ -184,4 +196,9 @@ func (m *Minio) GetBucket() string {
 
 func GetNamespace() string {
 	return config.Namespace
+}
+
+// GetWebhooks returns the list of url where to send the event
+func GetWebhooks() []webhook.Webhook {
+	return config.Webhooks
 }

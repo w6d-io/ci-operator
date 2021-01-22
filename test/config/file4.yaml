@@ -1,0 +1,9 @@
+---
+domain: "example.ci"
+ingress:
+  class: nginx
+  issuer: letsencrypt-prod
+deploy_prefix: "test"
+webhooks:
+  - name: pipeline-status
+    url: :{}/pipeline-status_8080/webhook

@@ -258,20 +258,23 @@ const (
 	// Queued means that the PipelineRun not applied yet due to limitation
 	Queued State = "Queued"
 
-	// Running signifies at least on Step of the Task is running
+	// Running means at least on Step of the Task is running
 	Running State = "Running"
 
-	// Failed signifies at least on Step of the Task is failed
+	// Failed means at least on Step of the Task is failed
 	Failed State = "Failed"
 
-	// Succeeded signifies that all Task is success
+	// Succeeded means that all Task is success
 	Succeeded State = "Succeeded"
 
-	// Cancelled signifies that a TaskRun or PipelineRun has been cancelled
+	// Cancelled means that a TaskRun or PipelineRun has been cancelled
 	Cancelled State = "Cancelled"
 
-	// Errored signifies that at least one tekton resource couldn't be created
+	// Errored means that at least one tekton resource couldn't be created
 	Errored State = "Errored"
+
+	// Unknown means that the controller just begun to run
+	Unknown State = "Unknown"
 )
 
 func init() {

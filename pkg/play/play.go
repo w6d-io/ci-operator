@@ -38,7 +38,12 @@ func CreateCI(ctx context.Context, p *ci.Play, logger logr.Logger,
 		return err
 	}
 	var wf WFInterface
-	wf = New(r, scheme)
+	wf = &WFType{
+		Client:  r,
+		Scheme:  scheme,
+		Creates: []CIFunc{},
+	}
+	//	wf = New(r, scheme)
 
 	if err := wf.CreateValues(p, logger); err != nil {
 		return err
@@ -84,14 +89,14 @@ func CreateCI(ctx context.Context, p *ci.Play, logger logr.Logger,
 
 // TODO Add is ci exists function / method
 
-// New creates a WFInterface instance
-func New(client client.Client, scheme *runtime.Scheme) *WFType {
-	wf := new(WFType)
-	wf.Creates = []CIFunc{}
-	wf.Client = client
-	wf.Scheme = scheme
-	return wf
-}
+//// New creates a WFInterface instance
+//func New(client client.Client, scheme *runtime.Scheme) *WFType {
+//	wf := new(WFType)
+//	wf.Creates = []CIFunc{}
+//	wf.Client = client
+//	wf.Scheme = scheme
+//	return wf
+//}
 
 // Run executes Create methods in WFType
 func (wf *WFType) Run(ctx context.Context, r client.Client, log logr.Logger) error {

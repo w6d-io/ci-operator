@@ -18,17 +18,21 @@ package controllers
 
 import (
 	"context"
+
 	"github.com/go-logr/logr"
+	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
 	"github.com/w6d-io/ci-operator/internal/util"
 	"github.com/w6d-io/ci-operator/pkg/play"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"github.com/w6d-io/ci-operator/pkg/webhook"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
+	controller "sigs.k8s.io/controller-runtime/pkg/controller"
 )
 
 // PlayReconciler reconciles a Play object
@@ -133,11 +137,24 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 		return ctrl.Result{}, err
 	}
+	if err := webhook.BuildPlayPayload(p, ci.Unknown, log); err != nil {
+		log.Error(err, "build payload of play")
+	}
+
+	payload := webhook.GetPayLoad()
+	payload.SetStatus(p.Status.State)
+	if err := payload.DoSend(config.GetWebhooks()); err != nil {
+		log.Error(err, "webhook")
+		return ctrl.Result{}, nil
+	}
 	return ctrl.Result{}, nil
 }
 
 func (r *PlayReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&ci.Play{}).
+		WithOptions(controller.Options{
+			MaxConcurrentReconciles: 10,
+		}).
 		Complete(r)
 }
