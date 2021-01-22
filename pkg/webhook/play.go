@@ -21,14 +21,13 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/avast/retry-go"
 	"github.com/go-logr/logr"
-	"github.com/w6d-io/ci-operator/internal/config"
-	"time"
 )
 
 var (
@@ -102,9 +101,8 @@ func (p *PlayPayload) Send(URL string) error {
 	return nil
 }
 
-func (p *PlayPayload) DoSend() error {
+func (p *PlayPayload) DoSend(whs []Webhook) error {
 	log := logger.WithName("DoSend")
-	whs := config.GetWebhooks()
 	errc := make(chan error, len(whs))
 	quit := make(chan struct{})
 	defer close(quit)
@@ -120,7 +118,7 @@ func (p *PlayPayload) DoSend() error {
 			}
 		}(wh.URLRaw)
 	}
-	for range config.GetWebhooks() {
+	for range whs {
 		if err := <-errc; err != nil {
 			log.Error(err, "Send failed")
 			return err

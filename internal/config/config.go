@@ -20,6 +20,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/w6d-io/ci-operator/pkg/webhook"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -198,6 +199,6 @@ func GetNamespace() string {
 }
 
 // GetWebhooks returns the list of url where to send the event
-func GetWebhooks() []Webhook {
+func GetWebhooks() []webhook.Webhook {
 	return config.Webhooks
 }

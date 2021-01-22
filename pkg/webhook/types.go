@@ -16,14 +16,18 @@ Created on 20/01/2021
 */
 package webhook
 
-import ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+import (
+	"net/url"
+
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+)
 
 type Payload interface {
 	// Send sends the event to a webhook address
 	Send(string) error
 
 	// DoSend loop on webhook address and call Send
-	DoSend() error
+	DoSend([]Webhook) error
 
 	// SetStatus record the status in the Payload
 	SetStatus(ci.State)
@@ -39,3 +43,9 @@ type PlayPayload struct {
 }
 
 var payload Payload
+
+type Webhook struct {
+	Name   string `json:"name" yaml:"name"`
+	URLRaw string `json:"url" yaml:"url"`
+	URL    *url.URL
+}

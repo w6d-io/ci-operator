@@ -19,7 +19,7 @@ package config
 
 import (
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
-	"net/url"
+	"github.com/w6d-io/ci-operator/pkg/webhook"
 )
 
 // Config controller common parameter
@@ -31,21 +31,19 @@ type Config struct {
 	Ingress       Ingress                    `json:"ingress" yaml:"ingress"`
 	Volume        tkn.WorkspaceBinding       `json:"volume" yaml:"volume"`
 	Namespace     string                     `json:"namespace" yaml:"namespace"`
+
 	// Hash is use for provide unpredictable string from an integer
 	Hash Hash `json:"hash" yaml:"hash"`
+
 	// Minio contains all minio information for the connection the could be omitted
 	Minio *Minio `json:"minio,omitempty" yaml:"minio,omitempty"`
+
 	// DeployPrefix is used to build namespace name where application will be deployed
 	// default values is cx
 	DeployPrefix string `json:"deploy_prefix" yaml:"deploy_prefix"`
-	// WebHooks contains a list of WebHook where payload will be send
-	Webhooks []Webhook `json:"webhooks" yaml:"webhooks"`
-}
 
-type Webhook struct {
-	Name   string `json:"name" yaml:"name"`
-	URLRaw string `json:"url" yaml:"url"`
-	URL    *url.URL
+	// WebHooks contains a list of WebHook where payload will be send
+	Webhooks []webhook.Webhook `json:"webhooks" yaml:"webhooks"`
 }
 
 type Minio struct {
