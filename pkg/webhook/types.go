@@ -29,10 +29,16 @@ type Payload interface {
 	// DoSend loop on webhook address and call Send
 	DoSend([]Webhook) error
 
+	// GetStatus return the name of the object in Payload
+	GetStatus() ci.State
+
 	// SetStatus record the status in the Payload
 	SetStatus(ci.State)
 
-	// SetStatus record the status in the Payload
+	// GetObjectName return the name of the object in Payload
+	GetObjectName() string
+
+	// SetObjectName record the status in the Payload
 	SetObjectName(string)
 }
 

@@ -72,10 +72,22 @@ func GetPayLoad() Payload {
 	return payload
 }
 
+// GetStatus returns the play status from payload
+func (p *PlayPayload) GetStatus() ci.State {
+	return p.Status
+}
+
+// SetStatus sets the play status to payload
 func (p *PlayPayload) SetStatus(state ci.State) {
 	p.Status = state
 }
 
+// GetObjectName returns the object name from payload
+func (p *PlayPayload) GetObjectName() string {
+	return p.Object.Name
+}
+
+// SetObjectName sets the object name in payload
 func (p *PlayPayload) SetObjectName(name string) {
 	p.Object.Name = name
 }
