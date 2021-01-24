@@ -34,12 +34,29 @@ var (
 	logger = ctrl.Log.WithName("WebHook")
 )
 
+type PlayPayload struct {
+	Object     Object    `json:"object,omitempty"`
+	ProjectID  int64     `json:"project_id,omitempty"`
+	PipelineID int64     `json:"pipeline_id,omitempty"`
+	RepoURL    string    `json:"repo_url,omitempty"`
+	Commit     ci.Commit `json:"ref,omitempty"`
+	Stack      ci.Stack  `json:"stack,omitempty"`
+	Status     ci.State  `json:"status,omitempty"`
+}
+
+type Object struct {
+	Name string `json:"name,omitempty"`
+	Kind string `json:"kind,omitempty"`
+}
+
 func BuildPlayPayload(play *ci.Play, status ci.State, logger logr.Logger) error {
 	log := logger.WithName("BuildPayload")
 	log.V(1).Info("build payload")
 
 	payload = &PlayPayload{
-		ObjectKind: play.APIVersion,
+		Object: Object{
+			Kind: "pipelinerun",
+		},
 		ProjectID:  play.Spec.ProjectID,
 		PipelineID: play.Spec.PipelineID,
 		RepoURL:    play.Spec.RepoURL,
@@ -57,6 +74,10 @@ func GetPayLoad() Payload {
 
 func (p *PlayPayload) SetStatus(state ci.State) {
 	p.Status = state
+}
+
+func (p *PlayPayload) SetObjectName(name string) {
+	p.Object.Name = name
 }
 
 func (p *PlayPayload) Send(URL string) error {
