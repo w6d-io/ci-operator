@@ -73,8 +73,8 @@ func GetPayLoad() Payload {
 }
 
 // GetStatus returns the play status from payload
-func (p *PlayPayload) GetStatus() string {
-	return p.Object.Name
+func (p *PlayPayload) GetStatus() ci.State {
+	return p.Status
 }
 
 // SetStatus sets the play status to payload

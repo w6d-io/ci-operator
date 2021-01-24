@@ -30,7 +30,7 @@ type Payload interface {
 	DoSend([]Webhook) error
 
 	// GetStatus return the name of the object in Payload
-	GetStatus() string
+	GetStatus() ci.State
 
 	// SetStatus record the status in the Payload
 	SetStatus(ci.State)
