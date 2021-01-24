@@ -31,15 +31,9 @@ type Payload interface {
 
 	// SetStatus record the status in the Payload
 	SetStatus(ci.State)
-}
-type PlayPayload struct {
-	ObjectKind string    `json:"object_kind,omitempty"`
-	ProjectID  int64     `json:"project_id,omitempty"`
-	PipelineID int64     `json:"pipeline_id,omitempty"`
-	RepoURL    string    `json:"repo_url,omitempty"`
-	Commit     ci.Commit `json:"ref,omitempty"`
-	Stack      ci.Stack  `json:"stack,omitempty"`
-	Status     ci.State  `json:"status,omitempty"`
+
+	// SetStatus record the status in the Payload
+	SetObjectName(string)
 }
 
 var payload Payload

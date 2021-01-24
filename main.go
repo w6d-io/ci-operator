@@ -97,7 +97,7 @@ func main() {
 		os.Exit(1)
 	}
 	setupLog.Info("set opts")
-	opts.Development = true
+	opts.Development = os.Getenv("RELEASE") != "prod"
 	opts.StacktraceLevel = zapcore.PanicLevel
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 

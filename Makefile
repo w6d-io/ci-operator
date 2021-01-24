@@ -1,6 +1,6 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= w6dio/ci-controller:latest
+IMG ?= w6dio/ci-opertor:latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
