@@ -33,6 +33,14 @@ var _ = Describe("Webhook", func() {
 			It("Send to subscribers", func() {
 				Expect(webhook.GetPayLoad().Send("")).To(BeNil())
 			})
+			It("Get the play status", func() {
+				webhook.GetPayLoad().SetStatus(ci.Running)
+				Expect(webhook.GetPayLoad().GetStatus()).Should(Equal(ci.Running))
+			})
+			It("Get the object name", func() {
+				webhook.GetPayLoad().SetObjectName("test")
+				Expect(webhook.GetPayLoad().GetObjectName()).Should(Equal("test"))
+			})
 		})
 		Context("When some resource creation failed", func() {
 			It("Build payload", func() {
