@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"time"
 
@@ -45,8 +46,8 @@ type PlayPayload struct {
 }
 
 type Object struct {
-	Name string `json:"name,omitempty"`
-	Kind string `json:"kind,omitempty"`
+	NamespacedName types.NamespacedName `json:"namespaced_name,omitempty"`
+	Kind           string               `json:"kind,omitempty"`
 }
 
 func BuildPlayPayload(play *ci.Play, status ci.State, logger logr.Logger) error {
@@ -83,13 +84,13 @@ func (p *PlayPayload) SetStatus(state ci.State) {
 }
 
 // GetObjectName returns the object name from payload
-func (p *PlayPayload) GetObjectName() string {
-	return p.Object.Name
+func (p *PlayPayload) GetObjectNamespacedName() types.NamespacedName {
+	return p.Object.NamespacedName
 }
 
 // SetObjectName sets the object name in payload
-func (p *PlayPayload) SetObjectName(name string) {
-	p.Object.Name = name
+func (p *PlayPayload) SetObjectNamespacedName(namespacedName types.NamespacedName) {
+	p.Object.NamespacedName = namespacedName
 }
 
 func (p *PlayPayload) Send(URL string) error {

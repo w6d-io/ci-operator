@@ -7,6 +7,7 @@ import (
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/pkg/webhook"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -38,8 +39,12 @@ var _ = Describe("Webhook", func() {
 				Expect(webhook.GetPayLoad().GetStatus()).Should(Equal(ci.Running))
 			})
 			It("Get the object name", func() {
-				webhook.GetPayLoad().SetObjectName("test")
-				Expect(webhook.GetPayLoad().GetObjectName()).Should(Equal("test"))
+				webhook.GetPayLoad().SetObjectNamespacedName(types.NamespacedName{
+					Name: "test",
+					Namespace: "test",
+				})
+				Expect(webhook.GetPayLoad().GetObjectNamespacedName().String()).
+					Should(Equal("test/test"))
 			})
 		})
 		Context("When some resource creation failed", func() {
