@@ -17,6 +17,7 @@ Created on 20/01/2021
 package webhook
 
 import (
+	"k8s.io/apimachinery/pkg/types"
 	"net/url"
 
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
@@ -36,10 +37,10 @@ type Payload interface {
 	SetStatus(ci.State)
 
 	// GetObjectName return the name of the object in Payload
-	GetObjectName() string
+	GetObjectNamespacedName() types.NamespacedName
 
 	// SetObjectName record the status in the Payload
-	SetObjectName(string)
+	SetObjectNamespacedName(name types.NamespacedName)
 }
 
 var payload Payload
