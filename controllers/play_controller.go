@@ -45,11 +45,15 @@ type PlayReconciler struct {
 // +kubebuilder:rbac:groups=ci.w6d.io,resources=plays,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=ci.w6d.io,resources=plays/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=tekton.dev,resources=pipelineresources,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=tekton.dev,resources=pipelineresources/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=tekton.dev,resources=pipelineruns,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=tekton.dev,resources=pipelineruns/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=tekton.dev,resources=pipelines,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=tekton.dev,resources=runs,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=tekton.dev,resources=pipelines/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=tekton.dev,resources=taskruns,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=tekton.dev,resources=taskruns/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=tekton.dev,resources=tasks,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=tekton.dev,resources=tasks/status,verbs=get;update;patch
 
 func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()

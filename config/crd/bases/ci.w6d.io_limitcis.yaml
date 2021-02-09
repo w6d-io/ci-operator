@@ -37,8 +37,8 @@ spec:
             description: LimitCiSpec defines the desired state of LimitCi
             properties:
               concurrent:
-                description: Foo is an example field of LimitCi. Edit LimitCi_types.go
-                  to remove/update
+                description: Concurrent contains the number of pipeline running in
+                  concurrency
                 format: int64
                 type: integer
             type: object

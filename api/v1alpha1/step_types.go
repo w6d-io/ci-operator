@@ -26,7 +26,7 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // StepSpec defines the desired state of Step
-type StepStep struct {
+type StepSpec struct {
 	tkn.Step `json:",inline"`
 }
 
@@ -43,7 +43,7 @@ type Step struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Step   StepStep   `json:"step"`
+	Step   StepSpec   `json:"step"`
 	Status StepStatus `json:"status,omitempty"`
 }
 

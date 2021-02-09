@@ -1,0 +1,109 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+aggregationRule:
+  clusterRoleSelectors:
+    - matchLabels:
+      rbac.w6d.io/aggregate-ci-operator-role: "true"
+metadata:
+  name: operator-role
+rules: []
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ci-p6e-editor-role
+  labels:
+    rbac.w6d.io/aggregate-ci-operator-role: "true"
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - serviceaccounts
+      - serviceaccounts/status
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - delete
+      - patch
+      - update
+  - apiGroups:
+      - "rbac.authorization.k8s.io"
+    resources:
+      - rolebindings
+      - rolebindings/status
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - delete
+      - patch
+      - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: bot-role
+  labels:
+    rbac.w6d.io/aggregate-ci-operator-role: "true"
+rules:
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+      - cronjobs
+    verbs:
+      - create
+      - update
+      - delete
+      - get
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - extensions
+      - apps
+    resources:
+      - deployments
+      - statefulsets
+      - replicasets
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - secrets
+      - persistentvolumeclaims
+      - pods
+      - services
+      - endpoints
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - extensions
+    resources:
+      - ingresses
+    verbs:
+      - create
+      - update
+      - patch
+      - delete
+      - get
+      - list
+      - watch
