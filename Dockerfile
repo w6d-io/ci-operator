@@ -1,7 +1,7 @@
 # Build the ci-operator binary
-ARG GOVERSION=1.14.6
+ARG GOVERSION=1.15.5
 FROM golang:$GOVERSION as builder
-ARG GOVERSION=1.14.6
+ARG GOVERSION=1.15.5
 ARG VCS_REF
 ARG BUILD_DATE
 ARG VERSION
@@ -14,21 +14,20 @@ WORKDIR /workspace
 # Copy the Go Modules manifests
 COPY go.mod go.mod
 COPY go.sum go.sum
-# cache deps before building and copying source so that we don't need to re-download as much
-# and so that source changes don't invalidate our downloaded layer
-RUN go mod download
-
+COPY vendor/ vendor
 # Copy the go source
 COPY main.go main.go
 COPY api/ api/
 COPY controllers/ controllers/
-COPY internal/util/ util/
+COPY internal/ internal/
+COPY pkg/ pkg/
 
 # Build
 RUN  go build \
      -ldflags="-X 'main.Version=${VERSION}' -X 'main.Revision=${VCS_REF}' -X 'main.GoVersion=go${GOVERSION}' -X 'main.Built=${BUILD_DATE}' -X 'main.OsArch=${GOOS}/${GOARCH}'" \
      -mod=vendor \
      -a -o ci-operator main.go
+RUN chown 1001:1001 ci-operator
 
 # Use distroless as minimal base image to package the ci-operator binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
@@ -46,7 +45,6 @@ LABEL maintainer="${USER_NAME} <${USER_EMAIL}>" \
         io.w6d.ci.version=$VERSION
 WORKDIR /
 COPY --from=builder /workspace/ci-operator .
-RUN chown 1001:1001 /usr/local/bin/ci-operator
 USER 1001:1001
 
-ENTRYPOINT ["/usr/local/bin/ci-operator"]
+ENTRYPOINT ["/ci-operator"]

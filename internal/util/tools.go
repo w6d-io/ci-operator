@@ -102,7 +102,7 @@ func GetCILabels(p *ci.Play) map[string]string {
 
 // GetDockerImageTag return the URL of the Docker repository
 func GetDockerImageTag(play *ci.Play) (*url.URL, error) {
-	// TODO find a way to get the user docker registry
+	// TODO find a way to set this in config
 	rawURL := fmt.Sprintf("reg-ext.w6d.io/cxcm/%v/%v:%v-%v",
 		play.Spec.ProjectID, play.Spec.Name, play.Spec.Commit.SHA[:8], play.Spec.Commit.Ref)
 	if play.Spec.DockerURL != "" {

@@ -40,7 +40,7 @@ var _ = Describe("Webhook", func() {
 			})
 			It("Get the object name", func() {
 				webhook.GetPayLoad().SetObjectNamespacedName(types.NamespacedName{
-					Name: "test",
+					Name:      "test",
 					Namespace: "test",
 				})
 				Expect(webhook.GetPayLoad().GetObjectNamespacedName().String()).

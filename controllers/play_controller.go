@@ -45,11 +45,15 @@ type PlayReconciler struct {
 // +kubebuilder:rbac:groups=ci.w6d.io,resources=plays,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=ci.w6d.io,resources=plays/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=tekton.dev,resources=pipelineresources,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=tekton.dev,resources=pipelineresources/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=tekton.dev,resources=pipelineruns,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=tekton.dev,resources=pipelineruns/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=tekton.dev,resources=pipelines,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=tekton.dev,resources=runs,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=tekton.dev,resources=pipelines/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=tekton.dev,resources=taskruns,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=tekton.dev,resources=taskruns/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=tekton.dev,resources=tasks,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=tekton.dev,resources=tasks/status,verbs=get;update;patch
 
 func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
@@ -129,7 +133,8 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 		return ctrl.Result{}, nil
 	}
-	if err := play.CreateCI(ctx, p, r.Log, r, r.Scheme); err != nil {
+	err = play.CreateCI(ctx, p, r.Log, r, r.Scheme)
+	if err != nil {
 		log.Error(err, "Failed to create CI")
 		p.Status.State = ci.Errored
 		if err := r.Status().Update(ctx, p); err != nil {
@@ -137,12 +142,17 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 		return ctrl.Result{}, err
 	}
+	p.Status.State = ci.Succeeded
+	if err := r.Status().Update(ctx, p); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	if err := webhook.BuildPlayPayload(p, ci.Unknown, log); err != nil {
 		log.Error(err, "build payload of play")
 	}
 
 	payload := webhook.GetPayLoad()
-	payload.SetStatus(p.Status.State)
+	payload.SetStatus(ci.Succeeded)
 	payload.SetObjectNamespacedName(req.NamespacedName)
 	if err := payload.DoSend(config.GetWebhooks()); err != nil {
 		log.Error(err, "webhook")
