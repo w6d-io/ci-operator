@@ -84,7 +84,7 @@ func Validate() error {
 	}{
 		{config.DefaultDomain, "domain"},
 		{config.Ingress.Class, "ingress.class"},
-		{config.Volume.Name, "volume.name"},
+		//{config.Volume.Name, "volume.name"},
 	} {
 		if f.v == "" {
 			unset = append(unset, f.name)
