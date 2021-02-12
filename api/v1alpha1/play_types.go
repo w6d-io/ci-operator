@@ -297,6 +297,7 @@ const (
 const (
 	AnnotationOrder    string = "ci.w6d.io/order"
 	AnnotationTask     string = "ci.w6d.io/task"
+	AnnotationKind     string = "ci.w6d.io/kind"
 	AnnotationLanguage string = "ci.w6d.io/language"
 	AnnotationPackage  string = "ci.w6d.io/package"
 )
