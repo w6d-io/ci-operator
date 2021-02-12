@@ -41,6 +41,9 @@ func (p *Pipeline) SetPipelineBuild(play *ci.Play, logger logr.Logger) error {
 	p.Params = append(p.Params, tkn.ParamSpec{
 		Name: "build_flags",
 		Type: tkn.ParamTypeArray,
+	}, tkn.ParamSpec{
+		Name: "build_s3DockerfilePath",
+		Type: tkn.ParamTypeString,
 	})
 	params := []tkn.Param{
 		{
@@ -48,6 +51,13 @@ func (p *Pipeline) SetPipelineBuild(play *ci.Play, logger logr.Logger) error {
 			Value: tkn.ArrayOrString{
 				Type:     tkn.ParamTypeArray,
 				ArrayVal: flags,
+			},
+		},
+		{
+			Name: "s3DockerfilePath",
+			Value: tkn.ArrayOrString{
+				Type:      tkn.ParamTypeString,
+				StringVal: "$(params.build_s3DockerfilePath)",
 			},
 		},
 	}
