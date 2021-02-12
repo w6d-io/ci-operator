@@ -198,6 +198,10 @@ func GetNamespace() string {
 	return config.Namespace
 }
 
+func SetNamespace(namespace string) {
+	config.Namespace = namespace
+}
+
 // GetWebhooks returns the list of url where to send the event
 func GetWebhooks() []webhook.Webhook {
 	return config.Webhooks

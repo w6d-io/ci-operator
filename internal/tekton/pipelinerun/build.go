@@ -18,7 +18,9 @@ Created on 17/12/2020
 package pipelinerun
 
 import (
+	"fmt"
 	"github.com/go-logr/logr"
+	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/util"
 
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
@@ -42,6 +44,15 @@ func (p *PipelineRun) SetBuild(pos int, log logr.Logger) error {
 		Value: tkn.ArrayOrString{
 			Type:     tkn.ParamTypeArray,
 			ArrayVal: flags,
+		},
+	}, tkn.Param{
+		Name: "build_s3DockerfilePath",
+		Value: tkn.ArrayOrString{
+			Type: tkn.ParamTypeString,
+			StringVal: fmt.Sprintf("%v/%v/%v/Dockerfile",
+				config.GetMinio().Bucket,
+				p.Play.Spec.ProjectID,
+				p.Play.Spec.PipelineID),
 		},
 	})
 

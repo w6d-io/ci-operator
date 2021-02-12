@@ -89,9 +89,9 @@ func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) ([]tkn.Step, er
 }
 
 // FilteredSteps return a ci.Steps filtered by annotation
-func (s *Step) FilteredSteps(log logr.Logger, steps ci.Steps, isTest bool) ci.Steps {
+func (s *Step) FilteredSteps(logger logr.Logger, steps ci.Steps, isTest bool) ci.Steps {
 	filteredSteps := ci.Steps{}
-	log = log.WithName("FilteredSteps").WithValues("task", s.TaskType, "stack", s.PlaySpec.Stack,
+	log := logger.WithName("FilteredSteps").WithValues("task", s.TaskType, "stack", s.PlaySpec.Stack,
 		"ops-namespace", config.GetNamespace())
 	log.V(2).Info("filtering")
 	_, mongoOK := s.PlaySpec.Dependencies[ci.MongoDB]
@@ -128,5 +128,29 @@ func (s *Step) FilteredSteps(log logr.Logger, steps ci.Steps, isTest bool) ci.St
 		}
 		filteredSteps = append(filteredSteps, step)
 	}
+	if len(filteredSteps) == 0 {
+		filteredSteps = s.GetGenericSteps(logger, steps)
+	}
 	return filteredSteps
+}
+
+// GetGenericStep returns the steps bind with the task type
+func (s *Step) GetGenericSteps(logger logr.Logger, steps ci.Steps) ci.Steps {
+	log := logger.WithName("GetGenericSteps")
+	data := ci.Steps{}
+	log.V(1).Info("get generic steps")
+
+	for _, step := range steps {
+		if config.GetNamespace() != "" && step.Namespace != config.GetNamespace() {
+			continue
+		}
+		if step.Annotations[ci.AnnotationKind] != "generic" {
+			continue
+		}
+		if step.Annotations[ci.AnnotationTask] != s.TaskType.String() {
+			continue
+		}
+		data = append(data, step)
+	}
+	return data
 }

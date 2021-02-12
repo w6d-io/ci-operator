@@ -118,6 +118,10 @@ func (b *BuildTask) Create(ctx context.Context, r client.Client, log logr.Logger
 		}
 		taskResource.Spec.Params = append(taskResource.Spec.Params, []tkn.ParamSpec{
 			{
+				Name: "s3DockerfilePath",
+				Type: tkn.ParamTypeString,
+			},
+			{
 				Name: "DOCKERFILE",
 				Type: tkn.ParamTypeString,
 			},
