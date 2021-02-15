@@ -73,6 +73,15 @@ ingress:
   issuer: {{ .Internal.ingress.issuer | quote }}
 {{- end }}
 
+{{- if .Values.secret }}
+{{- range $key, $value := .Values.secret }}
+{{- if eq $key ".dockerconfigjson" }}
+dockerSecret:
+  config: {{ $value }}
+{{- end }}
+{{- end }}
+{{- end }}
+
 {{- if .Values.Dependencies }}
 secrets:
 {{- range $db := .Values.Dependencies }}
