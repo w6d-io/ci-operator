@@ -24,6 +24,7 @@ import (
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/values"
 )
+//docker_url: reg.example.com/group/repo:test
 
 var playSpec = `
 commit:
@@ -34,7 +35,6 @@ environment: staging
 name: test
 pipeline_id: 1
 project_id: 1
-docker_url: reg.example.com/group/repo:test
 repo_url: https://example.com/group/repo
 scope: {}
 secret:
@@ -77,6 +77,37 @@ var _ = Describe("Values", func() {
 			Expect(err).ToNot(Succeed())
 		})
 		It("get a good values.yaml", func() {
+			templ := values.Templates{
+				Values:   config.GetRaw(p.Spec),
+				Internal: config.GetConfigRaw(),
+			}
+			valueBuf := new(bytes.Buffer)
+			err := templ.GetValues(valueBuf)
+			Expect(err).To(Succeed())
+			Expect(valueBuf.String()).To(Equal(`---
+env:
+  - name: TEST
+    value: "test"
+
+lifecycle:
+  enabled: true
+
+image:
+  repository: reg-ext.w6d.io/cxcm/1/test
+  tag: 3d553161-main
+
+service:
+  name: test-app
+
+podLabels:
+  application: test
+dockerSecret:
+  config: '{"auths":{"reg.example.com":{"auth":"dGVzdDp0ZXN0Cg=="}}}'
+
+`))
+		})
+		It("get a good values.yaml", func() {
+			p.Spec.DockerURL = "reg.example.com/group/repo:test"
 			templ := values.Templates{
 				Values:   config.GetRaw(p.Spec),
 				Internal: config.GetConfigRaw(),
