@@ -22,9 +22,9 @@ import (
 )
 
 const (
-	FileNameValues           string = "values.yaml"
-	PostgresqlFileNameValues string = "values-postgresql.yaml"
-	MongoDBFileNameValues    string = "values-mongodb.yaml"
+	FileNameValues string = "values.yaml"
+	//PostgresqlFileNameValues string = "values-postgresql.yaml"
+	//MongoDBFileNameValues    string = "values-mongodb.yaml"
 )
 
 // TODO replace or add these templates by configmap or a new resource
@@ -34,7 +34,7 @@ const (
 var HelmValuesTemplate = `---
 {{- $defaultDomain := printf "%v.%s" (.Values.project_id | hashID) .Internal.domain }}
 {{- $repository := (printf "reg-ext.w6d.io/cxcm/%v/%v" .Values.project_id .Values.name) }}
-{{- $tag := (printf "%v-%v" (substr 0 7 .Values.commit.sha) .Values.commit.ref) }}
+{{- $tag := printf "%v-%v" (substr 0 7 .Values.commit.sha) .Values.commit.ref }}
 {{- if .Values.docker_url }}
 {{- $part := split ":" .Values.docker_url }}
 {{- $repository = $part._0 }}
@@ -77,7 +77,7 @@ ingress:
 {{- range $key, $value := .Values.secret }}
 {{- if eq $key ".dockerconfigjson" }}
 dockerSecret:
-  config: {{ $value }}
+  config: {{ $value | squote }}
 {{- end }}
 {{- end }}
 {{- end }}
@@ -97,44 +97,44 @@ secrets:
 `
 
 // MongoDBValuesTemplate MongoDB values chart template
-var MongoDBValuesTemplate = `---
-architecture: "standalone"
-replicaCount: {{ default 1 .MongoDB.Replicas }}
-auth:
-  enabled: true
-  rootPassword: {{ .MongoDB.RootPassword }}
-  password:     {{ .MongoDB.Password}}
-  username:     {{ .MongoDB.Username }}
-  database:     {{ .MongoDB.Database }}
-persistence:
-  enabled: true
-  size: {{ default 5Gi .MongoDB.Size }}
-arbiter:
-  enabled: false
-metrics:
-  enabled: true
-  serviceMonitor:
-    enabled: true
-    namespace: monitoring
-`
+//var MongoDBValuesTemplate = `---
+//architecture: "standalone"
+//replicaCount: {{ default 1 .MongoDB.Replicas }}
+//auth:
+//  enabled: true
+//  rootPassword: {{ .MongoDB.RootPassword }}
+//  password:     {{ .MongoDB.Password}}
+//  username:     {{ .MongoDB.Username }}
+//  database:     {{ .MongoDB.Database }}
+//persistence:
+//  enabled: true
+//  size: {{ default 5Gi .MongoDB.Size }}
+//arbiter:
+//  enabled: false
+//metrics:
+//  enabled: true
+//  serviceMonitor:
+//    enabled: true
+//    namespace: monitoring
+//`
 
 // PostgresqlValuesTemplate PostgreSQL values chart template
-var PostgresqlValuesTemplate = `---
-{{- $pass := randAlphaNum 20 }}
-global:
-  postgresql:
-    postgresqlDatabase: {{ .Postgres.Database }}
-    postgresqlUsername: {{ .Postgres.Username }}
-    postgresqlPassword: {{ default $pass .Postgres.Password }}
-postgresqlPostgresPassword: {{ .Postgres.PostgresPassword }}
-persistence:
-  enabled: true
-  size: {{ default 5Gi .Postgres.Size }}
-metrics:
-  enabled: true
-  serviceMonitor:
-    enabled: true
-`
+//var PostgresqlValuesTemplate = `---
+//{{- $pass := randAlphaNum 20 }}
+//global:
+//  postgresql:
+//    postgresqlDatabase: {{ .Postgres.Database }}
+//    postgresqlUsername: {{ .Postgres.Username }}
+//    postgresqlPassword: {{ default $pass .Postgres.Password }}
+//postgresqlPostgresPassword: {{ .Postgres.PostgresPassword }}
+//persistence:
+//  enabled: true
+//  size: {{ default 5Gi .Postgres.Size }}
+//metrics:
+//  enabled: true
+//  serviceMonitor:
+//    enabled: true
+//`
 
 // GetValues builds the values from the template from Play resource
 func (in *Templates) GetValues(out *bytes.Buffer) error {
@@ -146,25 +146,24 @@ func (in *Templates) GetValues(out *bytes.Buffer) error {
 	return nil
 }
 
-// GetMongoDBValues builds the values for mongoDB charts with dependencies elements from
-// Play resource
-func (in *Templates) GetMongoDBValues(out *bytes.Buffer) error {
-	log := ValueLog.WithName("GetMongoDBValues")
-	log.V(1).Info("templating")
-	if err := in.PrintTemplate(out, MongoDBFileNameValues, MongoDBValuesTemplate); err != nil {
-		return err
-	}
-	return nil
-}
-
-// GetPostgresValues builds the values for mongoDB charts with dependencies elements from
-// Play resource
-func (in *Templates) GetPostgresValues(out *bytes.Buffer) error {
-	log := ValueLog.WithName("GetPostgresValues")
-	log.V(1).Info("templating")
-
-	if err := in.PrintTemplate(out, PostgresqlFileNameValues, PostgresqlValuesTemplate); err != nil {
-		return err
-	}
-	return nil
-}
+//// GetMongoDBValues builds the values for mongoDB charts with dependencies elements from
+//// Play resource
+//func (in *Templates) GetMongoDBValues(out *bytes.Buffer) error {
+//	log := ValueLog.WithName("GetMongoDBValues")
+//	log.V(1).Info("templating")
+//	if err := in.PrintTemplate(out, MongoDBFileNameValues, MongoDBValuesTemplate); err != nil {
+//		return err
+//	}
+//	return nil
+//}
+//
+//// GetPostgresValues builds the values for mongoDB charts with dependencies elements from
+//// Play resource
+//func (in *Templates) GetPostgresValues(out *bytes.Buffer) error {
+//	log := ValueLog.WithName("GetPostgresValues")
+//	log.V(1).Info("templating")
+//	if err := in.PrintTemplate(out, PostgresqlFileNameValues, PostgresqlValuesTemplate); err != nil {
+//		return err
+//	}
+//	return nil
+//}
