@@ -31,6 +31,11 @@ jobs:
         uses: docker/build-push-action@v2.2.2
         with:
           push: true
+          build-arg: |
+            VERSION=${GITHUB_REF/refs\/tags\//}
+            VCS_REF=$GITHUB_SHA
+            BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            PROJECT_URL=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}
           tags: |
             w6dio/ci-operator:latest
 
