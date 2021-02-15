@@ -49,7 +49,7 @@ jobs:
             BUILD_DATE=${{ steps.build_var.outputs.BUILD_DATE }}
             PROJECT_URL=${{ steps.build_var.outputs.PROJECT_URL }}
           tags: |
-            w6dio/ci-operator:$GITHUB_REF
+            w6dio/ci-operator:${{ steps.build_var.outputs.SOURCE_TAG }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
