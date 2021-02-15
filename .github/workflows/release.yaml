@@ -43,6 +43,7 @@ jobs:
           echo ::set-output name=VCS_REF::$GITHUB_SHA
 
       - name: Build and push Docker images
+        id: docker_build
         uses: docker/build-push-action@v2.2.2
         with:
           push: true
@@ -54,3 +55,5 @@ jobs:
           tags: |
             w6dio/ci-operator:latest
 
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
