@@ -34,7 +34,7 @@ const (
 var HelmValuesTemplate = `---
 {{- $defaultDomain := printf "%v.%s" (.Values.project_id | hashID) .Internal.domain }}
 {{- $repository := (printf "reg-ext.w6d.io/cxcm/%v/%v" .Values.project_id .Values.name) }}
-{{- $tag := printf "%v-%v" (substr 0 7 .Values.commit.sha) .Values.commit.ref }}
+{{- $tag := printf "%v-%v" (substr 0 8 .Values.commit.sha) .Values.commit.ref }}
 {{- if .Values.docker_url }}
 {{- $part := split ":" .Values.docker_url }}
 {{- $repository = $part._0 }}
