@@ -25,7 +25,7 @@ import (
 
 func TestValues(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "HashID Suite")
+	RunSpecs(t, "Values Suite")
 }
 
 var _ = BeforeSuite(func(done Done) {
