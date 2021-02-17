@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/w6d-io/ci-operator/internal/config"
@@ -65,6 +66,8 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		log.Error(err, "unable to fetch Play")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+	p.Spec.Name = strings.ToLower(p.Spec.Name)
+	p.Spec.Environment = strings.ToLower(p.Spec.Environment)
 	log = log.WithValues("cx-namespace", util.InNamespace(p))
 	log.V(1).Info("req name " + req.Name)
 	log.V(1).Info("get pipelinerun " + util.GetCINamespacedName(pipelinerun.Prefix, p).String())
