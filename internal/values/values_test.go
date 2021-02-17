@@ -90,6 +90,8 @@ env:
   - name: TEST
     value: "test"
 
+serviceAccount: sa-1
+
 lifecycle:
   enabled: true
 
@@ -120,6 +122,8 @@ dockerSecret:
 env:
   - name: TEST
     value: "test"
+
+serviceAccount: sa-1
 
 lifecycle:
   enabled: true
