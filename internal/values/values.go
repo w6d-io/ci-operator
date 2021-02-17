@@ -52,6 +52,8 @@ env:
 {{- end -}}
 {{- end }}
 
+serviceAccount: {{ printf "sa-%v" .Values.project_id }}
+
 lifecycle:
   enabled: true
 

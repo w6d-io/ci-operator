@@ -48,8 +48,8 @@ type ImagePR struct {
 
 // Create implements the CIInterface method
 func (i *ImagePR) Create(ctx context.Context, r client.Client, log logr.Logger) error {
-	log = log.WithName("Create").WithValues("pipelineResource", "image")
-	log.V(1).Info("create image pipelineResource")
+	log = log.WithName("Create").WithValues("type", "pipelineResource", "for", "image")
+	log.V(1).Info("creating")
 	imageResource := &resourcev1alpha1.PipelineResource{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        i.NamespacedName.Name,

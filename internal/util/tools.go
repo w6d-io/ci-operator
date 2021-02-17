@@ -86,7 +86,7 @@ func GetCINamespacedName(prefix string, play *ci.Play) types.NamespacedName {
 // GetCINamespacedName return CI namespacedName
 func GetDeployNamespacedName(prefix string, play *ci.Play) types.NamespacedName {
 	return types.NamespacedName{
-		Name:      fmt.Sprintf("%s-%v-%v", prefix, play.Spec.ProjectID, play.Spec.PipelineID),
+		Name:      fmt.Sprintf("%s-%v", prefix, play.Spec.ProjectID),
 		Namespace: fmt.Sprintf("%s-%v-%v", prefix, play.Spec.Environment, play.Spec.ProjectID),
 	}
 }

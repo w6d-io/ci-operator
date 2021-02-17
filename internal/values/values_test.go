@@ -24,6 +24,7 @@ import (
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/values"
 )
+
 //docker_url: reg.example.com/group/repo:test
 
 var playSpec = `

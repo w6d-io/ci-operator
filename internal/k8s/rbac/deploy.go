@@ -47,7 +47,7 @@ func (in *Deploy) Create(ctx context.Context, r client.Client, logger logr.Logge
 	log.V(1).WithValues("namespaced", namespacedName).Info("debug")
 	resource := &rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        namespacedName.Name,
+			Name:        deployNamespacedNamed.Name,
 			Namespace:   deployNamespacedNamed.Namespace,
 			Annotations: make(map[string]string),
 			Labels:      util.GetCILabels(in.Play),
@@ -65,14 +65,14 @@ func (in *Deploy) Create(ctx context.Context, r client.Client, logger logr.Logge
 			},
 			{
 				Kind:      rbacv1.ServiceAccountKind,
-				Name:      util.GetCINamespacedName(sa.Prefix, in.Play).Name,
+				Name:      util.GetDeployNamespacedName(sa.Prefix, in.Play).Name,
 				Namespace: deployNamespacedNamed.Namespace,
 			},
 		},
 	}
 	resource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
 	// TODO find a way to link this resource with oper
-	log.V(1).Info(fmt.Sprintf("rolbinding contains\n%v",
+	log.V(1).Info(fmt.Sprintf("rolebinding contains\n%v",
 		util.GetObjectContain(resource)))
 	if err := r.Create(ctx, resource); err != nil {
 		return err

@@ -48,8 +48,9 @@ type GitPR struct {
 
 // Create implements the CIInterface method
 func (g GitPR) Create(ctx context.Context, r client.Client, log logr.Logger) error {
-	log = log.WithName("Create").WithValues("pipelineResource", "git")
-	log.V(1).Info("create git pipelineResource")
+	log = log.WithName("Create").WithValues("type", "pipelineResource", "for", "git")
+	log.V(1).Info("creating")
+
 	gitResource := &resourcev1alpha1.PipelineResource{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        g.NamespacedName.Name,

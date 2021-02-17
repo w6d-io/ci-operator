@@ -46,36 +46,47 @@ func CreateCI(ctx context.Context, p *ci.Play, logger logr.Logger,
 	//	wf = New(r, scheme)
 
 	if err := wf.CreateValues(p, logger); err != nil {
+		log.Error(err, "CreateValues")
 		return err
 	}
 	if err := wf.ServiceAccount(p, logger); err != nil {
+		log.Error(err, "ServiceAccount")
 		return err
 	}
 	if err := wf.Rbac(p, logger); err != nil {
+		log.Error(err, "Rbac")
 		return err
 	}
 	if err := wf.GitSecret(p, logger); err != nil {
+		log.Error(err, "Git Secret")
 		return err
 	}
 	if err := wf.DockerCredSecret(p, logger); err != nil {
+		log.Error(err, "DockerCredSecret")
 		return err
 	}
 	if err := wf.MinIOSecret(p, logger); err != nil {
+		log.Error(err, "MinioSecret")
 		return err
 	}
 	if err := wf.SetGitCreate(p, logger); err != nil {
+		log.Error(err, "GIT pipeline resource")
 		return err
 	}
 	if err := wf.SetImageCreate(p, logger); err != nil {
+		log.Error(err, "Image pipeline resource")
 		return err
 	}
 	if err := wf.SetTask(ctx, p, logger); err != nil {
+		log.Error(err, "Tasks")
 		return err
 	}
 	if err := wf.SetPipeline(p, logger); err != nil {
+		log.Error(err, "Pipeline")
 		return err
 	}
 	if err := wf.SetPipelineRun(p, logger); err != nil {
+		log.Error(err, "PipelineRun")
 		return err
 	}
 	log.Info("Launch creation")
