@@ -24,6 +24,7 @@ import (
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/values"
 )
+
 //docker_url: reg.example.com/group/repo:test
 
 var playSpec = `
@@ -89,6 +90,8 @@ env:
   - name: TEST
     value: "test"
 
+serviceAccount: sa-1
+
 lifecycle:
   enabled: true
 
@@ -119,6 +122,8 @@ dockerSecret:
 env:
   - name: TEST
     value: "test"
+
+serviceAccount: sa-1
 
 lifecycle:
   enabled: true

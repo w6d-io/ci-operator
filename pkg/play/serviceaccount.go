@@ -27,8 +27,7 @@ import (
 
 func (wf *WFType) ServiceAccount(p *ci.Play, logger logr.Logger) error {
 	log := logger.WithName("GitSecret").WithValues("cx-namespace", util.InNamespace(p))
-	log.V(1).Info("Build git sa")
-
+	log.V(1).Info("Build service account")
 	ci := &sa.CI{
 		WorkFlowStruct: internal.WorkFlowStruct{
 			Play:   p,
