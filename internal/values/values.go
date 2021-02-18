@@ -67,7 +67,7 @@ service:
 podLabels:
   application: {{ .Values.name }}
 
-{{- if .Values.domain }}
+{{- if .Values.expose }}
 ingress:
   enabled: true
   class: {{ .Internal.ingress.class }}

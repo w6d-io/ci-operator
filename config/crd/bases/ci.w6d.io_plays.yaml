@@ -97,6 +97,10 @@ spec:
               environment:
                 description: Environment contains application environment
                 type: string
+              expose:
+                description: Expose toggles the creation of the ingress in case of
+                  deployment
+                type: boolean
               name:
                 description: Name of project
                 type: string
