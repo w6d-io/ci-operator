@@ -20,6 +20,8 @@ package rbac
 import (
 	"context"
 	"fmt"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 	"time"
 
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -39,15 +41,15 @@ type Deploy struct {
 }
 
 func (in *Deploy) Create(ctx context.Context, r client.Client, logger logr.Logger) error {
-	log := logger.WithName("Create").WithValues("action", Prefix)
+	log := logger.WithName("Deploy").WithName("Create").WithValues("action", Prefix)
 	log.V(1).Info("creating")
 
-	namespacedName := util.GetCINamespacedName(Prefix, in.Play)
+	namespacedNamed := util.GetCINamespacedName2(Prefix, in.Play)
 	deployNamespacedNamed := util.GetDeployNamespacedName(config.GetDeployPrefix(), in.Play)
-	log.V(1).WithValues("namespaced", namespacedName).Info("debug")
+	log.V(1).WithValues("namespaced", namespacedNamed).Info("debug")
 	resource := &rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        deployNamespacedNamed.Name,
+			Name:        namespacedNamed.Name,
 			Namespace:   deployNamespacedNamed.Namespace,
 			Annotations: make(map[string]string),
 			Labels:      util.GetCILabels(in.Play),
@@ -60,8 +62,8 @@ func (in *Deploy) Create(ctx context.Context, r client.Client, logger logr.Logge
 		Subjects: []rbacv1.Subject{
 			{
 				Kind:      rbacv1.ServiceAccountKind,
-				Name:      util.GetCINamespacedName(sa.Prefix, in.Play).Name,
-				Namespace: namespacedName.Namespace,
+				Name:      util.GetCINamespacedName2(sa.Prefix, in.Play).Name,
+				Namespace: namespacedNamed.Namespace,
 			},
 			{
 				Kind:      rbacv1.ServiceAccountKind,
@@ -74,7 +76,17 @@ func (in *Deploy) Create(ctx context.Context, r client.Client, logger logr.Logge
 	// TODO find a way to link this resource with oper
 	log.V(1).Info(fmt.Sprintf("rolebinding contains\n%v",
 		util.GetObjectContain(resource)))
-	if err := r.Create(ctx, resource); err != nil {
+	old := &rbacv1.RoleBinding{}
+	err := r.Get(ctx, types.NamespacedName{}, old)
+	if apierrors.IsNotFound(err) {
+		if err := r.Create(ctx, resource); err != nil {
+			log.Error(err, "create")
+			return err
+		}
+		return nil
+	}
+	if err := r.Update(ctx, resource); err != nil {
+		log.Error(err, "update")
 		return err
 	}
 	return nil

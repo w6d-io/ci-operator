@@ -12,17 +12,12 @@ replace (
 )
 
 require (
-	github.com/Bowery/prompt v0.0.0-20190916142128-fa8279994f75 // indirect
-	github.com/Masterminds/goutils v1.1.0 // indirect
-	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/avast/retry-go v3.0.0+incompatible
-	github.com/dchest/safefile v0.0.0-20151022103144-855e8d98f185 // indirect
+	github.com/docker/distribution v2.7.1+incompatible
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v0.2.1
-	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/hashicorp/vault/api v1.0.4
-	github.com/kardianos/govendor v1.0.9 // indirect
 	github.com/minio/minio-go/v6 v6.0.57
 	github.com/onsi/ginkgo v1.12.1
 	github.com/onsi/gomega v1.10.1
@@ -34,7 +29,6 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	k8s.io/api v0.19.0
 	k8s.io/apimachinery v0.19.0
-	k8s.io/cli-runtime v0.19.0 // indirect
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
 	knative.dev/pkg v0.0.0-20200922164940-4bf40ad82aab
 	sigs.k8s.io/controller-runtime v0.6.1

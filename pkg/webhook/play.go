@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"time"
 
@@ -29,6 +28,7 @@ import (
 
 	"github.com/avast/retry-go"
 	"github.com/go-logr/logr"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 var (
