@@ -82,7 +82,7 @@ func (p *PipelineRun) Create(ctx context.Context, r client.Client, log logr.Logg
 		},
 		Spec: tkn.PipelineRunSpec{
 			PipelineRef:        &tkn.PipelineRef{Name: util.GetCINamespacedName("pipeline", p.Play).Name},
-			ServiceAccountName: util.GetCINamespacedName(sa.Prefix, p.Play).Name,
+			ServiceAccountName: util.GetCINamespacedName2(sa.Prefix, p.Play).Name,
 			Resources:          p.getPipelineResourceBinding(p.Play),
 			Workspaces:         p.getWorkspaceBinding(),
 			Params:             p.Params,

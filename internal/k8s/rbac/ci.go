@@ -48,7 +48,7 @@ func (in *CI) Create(ctx context.Context, r client.Client, logger logr.Logger) e
 	log := logger.WithName("Create").WithValues("action", Prefix)
 	log.V(1).Info("creating")
 
-	namespacedName := util.GetCINamespacedName(Prefix, in.Play)
+	namespacedName := util.GetCINamespacedName2(Prefix, in.Play)
 	log.V(1).WithValues("namespaced", namespacedName).Info("debug")
 	resource := &rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
@@ -65,7 +65,7 @@ func (in *CI) Create(ctx context.Context, r client.Client, logger logr.Logger) e
 		Subjects: []rbacv1.Subject{
 			{
 				Kind:      rbacv1.ServiceAccountKind,
-				Name:      util.GetCINamespacedName(sa.Prefix, in.Play).Name,
+				Name:      util.GetCINamespacedName2(sa.Prefix, in.Play).Name,
 				Namespace: namespacedName.Namespace,
 			},
 		},
