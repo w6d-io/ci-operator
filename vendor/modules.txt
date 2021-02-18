@@ -1,12 +1,8 @@
 # cloud.google.com/go v0.65.0
 cloud.google.com/go/compute/metadata
-# github.com/Bowery/prompt v0.0.0-20190916142128-fa8279994f75
-## explicit
 # github.com/Masterminds/goutils v1.1.0
-## explicit
 github.com/Masterminds/goutils
 # github.com/Masterminds/semver v1.5.0
-## explicit
 github.com/Masterminds/semver
 # github.com/Masterminds/sprig v2.22.0+incompatible
 ## explicit
@@ -24,8 +20,10 @@ github.com/beorn7/perks/quantile
 github.com/cespare/xxhash/v2
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/dchest/safefile v0.0.0-20151022103144-855e8d98f185
+# github.com/docker/distribution v2.7.1+incompatible
 ## explicit
+github.com/docker/distribution/digestset
+github.com/docker/distribution/reference
 # github.com/emicklei/go-restful v2.9.5+incompatible
 github.com/emicklei/go-restful
 github.com/emicklei/go-restful/log
@@ -72,8 +70,6 @@ github.com/google/go-cmp/cmp/internal/value
 github.com/google/go-containerregistry/pkg/name
 # github.com/google/gofuzz v1.1.0
 github.com/google/gofuzz
-# github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
-## explicit
 # github.com/google/uuid v1.1.1
 github.com/google/uuid
 # github.com/googleapis/gnostic v0.4.1
@@ -121,8 +117,6 @@ github.com/huandu/xstrings
 github.com/imdario/mergo
 # github.com/json-iterator/go v1.1.10
 github.com/json-iterator/go
-# github.com/kardianos/govendor v1.0.9
-## explicit
 # github.com/klauspost/cpuid v1.2.3
 github.com/klauspost/cpuid
 # github.com/mailru/easyjson v0.7.1-0.20191009090205-6c0755d89d1e
@@ -198,6 +192,8 @@ github.com/onsi/gomega/matchers/support/goraph/edge
 github.com/onsi/gomega/matchers/support/goraph/node
 github.com/onsi/gomega/matchers/support/goraph/util
 github.com/onsi/gomega/types
+# github.com/opencontainers/go-digest v1.0.0-rc1
+github.com/opencontainers/go-digest
 # github.com/pierrec/lz4 v2.2.6+incompatible
 github.com/pierrec/lz4
 github.com/pierrec/lz4/internal/xxh32
@@ -464,8 +460,6 @@ k8s.io/apimachinery/pkg/version
 k8s.io/apimachinery/pkg/watch
 k8s.io/apimachinery/third_party/forked/golang/json
 k8s.io/apimachinery/third_party/forked/golang/reflect
-# k8s.io/cli-runtime v0.19.0
-## explicit
 # k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible => k8s.io/client-go v0.19.0
 ## explicit
 k8s.io/client-go/discovery
