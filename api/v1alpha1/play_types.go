@@ -39,6 +39,7 @@ type PlaySpec struct {
 	Stack Stack `json:"stack,omitempty"`
 
 	// Scope contains the name of scope and list of projects id
+	// +optional
 	Scope Scope `json:"scope,omitempty"`
 
 	// Environment contains application environment
@@ -60,6 +61,10 @@ type PlaySpec struct {
 	// +kubebuilder:validation:Pattern=^([A-Za-z0–9\-\.]+)+([A-Za-z0-9\.]+)*\.[A-Za-z][A-Za-z]+$
 	// +optional
 	Domain string `json:"domain,omitempty"`
+
+	// Expose toggles the creation of the ingress in case of deployment
+	// +optional
+	Expose bool `json:"expose"`
 
 	// Tasks contains the list of task to be created by Play
 	Tasks []map[TaskType]Task `json:"tasks,omitempty"`

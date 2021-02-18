@@ -14,7 +14,7 @@ replace (
 require (
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/avast/retry-go v3.0.0+incompatible
-	github.com/docker/distribution v2.7.1+incompatible
+	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v0.2.1
 	github.com/hashicorp/vault/api v1.0.4
