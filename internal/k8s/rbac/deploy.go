@@ -62,7 +62,7 @@ func (in *Deploy) Create(ctx context.Context, r client.Client, logger logr.Logge
 		Subjects: []rbacv1.Subject{
 			{
 				Kind:      rbacv1.ServiceAccountKind,
-				Name:      util.GetCINamespacedName2(sa.Prefix, in.Play).Name,
+				Name:      util.GetCINamespacedName(sa.Prefix, in.Play).Name,
 				Namespace: namespacedNamed.Namespace,
 			},
 			{
@@ -77,14 +77,17 @@ func (in *Deploy) Create(ctx context.Context, r client.Client, logger logr.Logge
 	log.V(1).Info(fmt.Sprintf("rolebinding contains\n%v",
 		util.GetObjectContain(resource)))
 	old := &rbacv1.RoleBinding{}
-	err := r.Get(ctx, types.NamespacedName{}, old)
+	err := r.Get(ctx, types.NamespacedName{Name: namespacedNamed.Name,
+		Namespace: deployNamespacedNamed.Namespace}, old)
 	if apierrors.IsNotFound(err) {
+		log.V(2).Info("Create")
 		if err := r.Create(ctx, resource); err != nil {
 			log.Error(err, "create")
 			return err
 		}
 		return nil
 	}
+	log.V(2).Info("Update")
 	if err := r.Update(ctx, resource); err != nil {
 		log.Error(err, "update")
 		return err

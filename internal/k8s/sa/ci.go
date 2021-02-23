@@ -47,7 +47,7 @@ func (s *CI) Create(ctx context.Context, r client.Client, log logr.Logger) error
 	log = log.WithName("Create").WithValues("action", Prefix)
 	log.V(1).Info("creating")
 
-	namespacedName := util.GetCINamespacedName2(Prefix, s.Play)
+	namespacedName := util.GetCINamespacedName(Prefix, s.Play)
 	log.V(1).WithValues("namespaced", namespacedName).Info("debug")
 	resource := &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
