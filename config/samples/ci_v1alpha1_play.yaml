@@ -19,6 +19,7 @@ spec:
     sha: 3010508ce47519b9b7444dcd2d2961796c874cff
     ref: main
   domain: nodejs-sample.example.ci
+  expose: true
   tasks:
     - unit-tests:
         image: node:latest
