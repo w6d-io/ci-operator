@@ -170,7 +170,8 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	payload := webhook.GetPayLoad()
 	payload.SetStatus(ci.Succeeded)
-	payload.SetObjectNamespacedName(req.NamespacedName)
+	nn := util.GetCINamespacedName("pipeline-run", p)
+	payload.SetObjectNamespacedName(nn)
 	if err := payload.DoSend(config.GetWebhooks()); err != nil {
 		log.Error(err, "webhook")
 		return ctrl.Result{}, nil
