@@ -65,7 +65,7 @@ func (s *Secret) DockerCredCreate(ctx context.Context, r client.Client, log logr
 		return err
 	}
 	if err := sa.Update(ctx, resource.Name,
-		util.GetCINamespacedName2(sa.Prefix, s.Play), r); err != nil {
+		util.GetCINamespacedName(sa.Prefix, s.Play), r); err != nil {
 		return err
 	}
 
