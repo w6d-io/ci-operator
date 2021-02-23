@@ -23,9 +23,7 @@ import (
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal/config"
-	"github.com/w6d-io/ci-operator/internal/k8s/secrets"
 	"github.com/w6d-io/ci-operator/internal/util"
-	corev1 "k8s.io/api/core/v1"
 )
 
 // SetDeploy builds the params adn add the minio volume for the tekton pipelineRun resource
@@ -77,20 +75,6 @@ func (p *PipelineRun) SetDeploy(pos int, log logr.Logger) error {
 			StringVal: util.GetDeployNamespacedName("cx", p.Play).Namespace,
 		},
 	})
-
-	p.PodTemplate = &tkn.PodTemplate{}
-	if config.GetMinio().Host != "" {
-		p.PodTemplate.Volumes = []corev1.Volume{
-			{
-				Name: secrets.MinIOPrefixSecret,
-				VolumeSource: corev1.VolumeSource{
-					Secret: &corev1.SecretVolumeSource{
-						SecretName: util.GetCINamespacedName(secrets.MinIOPrefixSecret, p.Play).Name,
-					},
-				},
-			},
-		}
-	}
 
 	return nil
 }

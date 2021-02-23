@@ -68,7 +68,6 @@ func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) ([]tkn.Step, er
 	}
 	sort.Sort(&sortedSteps)
 	var steps []tkn.Step
-	// TODO get step by annotation in Step kind
 	for _, step := range sortedSteps {
 		newStep := tkn.Step{
 			Container: step.Step.Container,
