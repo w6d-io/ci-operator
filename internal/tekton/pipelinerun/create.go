@@ -22,7 +22,9 @@ import (
 	"fmt"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/k8s/sa"
+	"github.com/w6d-io/ci-operator/internal/k8s/secrets"
 	"github.com/w6d-io/ci-operator/internal/util"
+	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"time"
 
@@ -66,6 +68,19 @@ func (p *PipelineRun) Parse(log logr.Logger) error {
 			}
 		}
 	}
+	p.PodTemplate = &tkn.PodTemplate{}
+	if config.GetMinio().Host != "" {
+		p.PodTemplate.Volumes = []corev1.Volume{
+			{
+				Name: secrets.MinIOPrefixSecret,
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: util.GetCINamespacedName(secrets.MinIOPrefixSecret, p.Play).Name,
+					},
+				},
+			},
+		}
+	}
 	return nil
 }
 
@@ -82,7 +97,7 @@ func (p *PipelineRun) Create(ctx context.Context, r client.Client, log logr.Logg
 		},
 		Spec: tkn.PipelineRunSpec{
 			PipelineRef:        &tkn.PipelineRef{Name: util.GetCINamespacedName("pipeline", p.Play).Name},
-			ServiceAccountName: util.GetCINamespacedName2(sa.Prefix, p.Play).Name,
+			ServiceAccountName: util.GetCINamespacedName(sa.Prefix, p.Play).Name,
 			Resources:          p.getPipelineResourceBinding(p.Play),
 			Workspaces:         p.getWorkspaceBinding(),
 			Params:             p.Params,

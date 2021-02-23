@@ -1,6 +1,6 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= w6dio/ci-opertor:latest
+IMG ?= w6dio/ci-operator:latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
@@ -11,14 +11,25 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
+
+REF=$(shell git symbolic-ref --quiet HEAD 2> /dev/null)
+VERSION=$(shell basename $(REF) )
+VCS_REF=$(shell git rev-parse HEAD)
+GOVERSION=$(shell go version | awk '{ print $3 }' | sed 's/go//')
+BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+GOOS=$(shell uname -s | tr "[:upper:]" "[:lower:]")
+GOARCH=$(shell uname -p)
+
+
 all: ci-operator
 
 # Run tests
 test: generate fmt vet manifests
-	go test ./... -coverprofile cover.out
+	go test -v -coverpkg=./... -coverprofile=cover.out ./...
+	@go tool cover -func cover.out | grep total
 
 # Build ci-operator binary
-ci-operator: generate fmt vet
+ci-operator: generate fmt vet vendor
 	go build -o bin/ci-operator main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
@@ -50,16 +61,19 @@ fmt:
 vet:
 	go vet ./...
 
+vendor:
+	go mod vendor
+
 # Generate code
 generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 # Build the docker image
-docker-build: test
-	docker build . -t ${IMG}
+build: test
+	docker build . --build-arg=VERSION=${VERSION} --build-arg=VCS_REF=${VCS_REF} --build-arg=BUILD_DATE=${BUILD_DATE} -t ${IMG}
 
 # Push the docker image
-docker-push:
+push:
 	docker push ${IMG}
 
 # find or download controller-gen
