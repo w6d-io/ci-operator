@@ -92,7 +92,6 @@ spec:
                 type: string
               domain:
                 description: Domain contains the url for exposition
-                pattern: ^([A-Za-z0–9\-\.]+)+([A-Za-z0-9\.]+)*\.[A-Za-z][A-Za-z]+$
                 type: string
               environment:
                 description: Environment contains application environment

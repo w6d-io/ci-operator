@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/w6d-io/ci-operator/internal/config"
@@ -28,12 +29,12 @@ import (
 	"github.com/w6d-io/ci-operator/pkg/webhook"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
-	controller "sigs.k8s.io/controller-runtime/pkg/controller"
 )
 
 // PlayReconciler reconciles a Play object
@@ -144,7 +145,8 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if err := r.Status().Update(ctx, p); err != nil {
 			return ctrl.Result{}, err
 		}
-		return ctrl.Result{}, nil
+		return ctrl.Result{Requeue: true, RequeueAfter: 5*time.Second}, nil
+		//return ctrl.Result{}, nil
 	}
 	err = play.CreateCI(ctx, p, r.Log, r, r.Scheme)
 	if err != nil {
