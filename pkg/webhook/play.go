@@ -124,6 +124,7 @@ func (p *PlayPayload) Send(URL string) error {
 					log.Error(err, "get response body")
 				}
 				log.Info(string(data))
+				return nil
 			}
 			log.Error(err, "Post data returns failed")
 			return err
