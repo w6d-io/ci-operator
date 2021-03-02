@@ -60,6 +60,9 @@ func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) ([]tkn.Step, er
 		return nil, err
 	}
 	log.WithValues("nbr", len(steplist.Items)).V(2).Info("List return")
+	if len(s.PlaySpec.Tasks) < s.Index + 1 {
+		return nil, errors.New("no such task")
+	}
 	sortedSteps := s.FilteredSteps(logger, steplist.Items, s.TaskType == ci.UnitTests || s.TaskType == ci.IntegrationTests)
 	log.WithValues("nbr", len(sortedSteps)).V(2).Info("Filtered list return")
 	if len(sortedSteps) == 0 {

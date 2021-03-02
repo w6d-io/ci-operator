@@ -42,31 +42,21 @@ func (p *Pipeline) Parse(logger logr.Logger) error {
 	for pos, m := range p.Play.Spec.Tasks {
 		for name := range m {
 			switch name {
+			case ci.UnitTests:
+				_ = p.SetPipelineUnitTest(logger)
 			case ci.Build:
 				p.Pos = pos
-				if err := p.SetPipelineBuild(p.Play, logger); err != nil {
-					return err
-				}
+				_ = p.SetPipelineBuild(logger)
 			case ci.Sonar:
-				if err := p.SetPipelineSonar(p.Play, logger); err != nil {
-					return err
-				}
-			case ci.UnitTests:
-				if err := p.SetPipelineUnitTest(p.Play, logger); err != nil {
-					return err
-				}
-			case ci.IntegrationTests:
-				if err := p.SetPipelineIntTest(p.Play, logger); err != nil {
-					return err
-				}
+				_ = p.SetPipelineSonar(logger)
 			case ci.Deploy:
-				if err := p.SetPipelineDeploy(p.Play, logger); err != nil {
-					return err
-				}
+				_ = p.SetPipelineDeploy(logger)
+			case ci.IntegrationTests:
+				_ = p.SetPipelineIntTest(logger)
 			case ci.Clean:
-				if err := p.SetPipelineClean(p.Play, logger); err != nil {
-					return err
-				}
+				_ = p.SetPipelineClean(logger)
+			case ci.E2ETests:
+				_ = p.SetPipelineE2ETest(logger)
 			}
 		}
 	}

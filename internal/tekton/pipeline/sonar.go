@@ -25,8 +25,8 @@ import (
 	"github.com/w6d-io/ci-operator/internal/util"
 )
 
-func (p *Pipeline) SetPipelineSonar(play *ci.Play, logger logr.Logger) error {
-	log := logger.WithName("SetPipelineSonar").WithValues(" cx-namespace", util.InNamespace(play))
+func (p *Pipeline) SetPipelineSonar(logger logr.Logger) error {
+	log := logger.WithName("SetPipelineSonar").WithValues(" cx-namespace", util.InNamespace(p.Play))
 
 	log.V(1).Info("add task in pipeline")
 
@@ -37,7 +37,7 @@ func (p *Pipeline) SetPipelineSonar(play *ci.Play, logger logr.Logger) error {
 		Resources: getPipelineTaskResources(false),
 		TaskRef: &tkn.TaskRef{
 			Kind: tkn.NamespacedTaskKind,
-			Name: util.GetCINamespacedName(ci.Sonar.String(), play).Name,
+			Name: util.GetCINamespacedName(ci.Sonar.String(), p.Play).Name,
 		},
 		Workspaces: wks,
 		RunAfter:   p.RunAfter,

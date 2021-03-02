@@ -41,30 +41,22 @@ func (p *PipelineRun) Parse(log logr.Logger) error {
 	for pos, m := range p.Play.Spec.Tasks {
 		for name := range m {
 			switch name {
+			case ci.UnitTests:
+				_ = p.SetUnitTest(pos, log)
 			case ci.Build:
 				if err := p.SetBuild(pos, log); err != nil {
 					return err
 				}
-			case ci.Clean:
-				if err := p.SetClean(pos, log); err != nil {
-					return err
-				}
-			case ci.Deploy:
-				if err := p.SetDeploy(pos, log); err != nil {
-					return err
-				}
-			case ci.IntegrationTests:
-				if err := p.SetIntTest(pos, log); err != nil {
-					return err
-				}
 			case ci.Sonar:
-				if err := p.SetSonar(pos, log); err != nil {
-					return err
-				}
-			case ci.UnitTests:
-				if err := p.SetUnitTest(pos, log); err != nil {
-					return err
-				}
+				_ = p.SetSonar(pos, log)
+			case ci.Deploy:
+				_ = p.SetDeploy(pos, log)
+			case ci.IntegrationTests:
+				_ = p.SetIntTest(pos, log)
+			case ci.Clean:
+				_ = p.SetClean(pos, log)
+			case ci.E2ETests:
+				_ = p.SetE2ETest(pos, log)
 			}
 		}
 	}

@@ -1,0 +1,6 @@
+---
+minio:
+  host: mino.svc:9000
+  access_key: ACCESSKEYSAMPLE
+  secret_key: secretkeysample
+  bucket: values

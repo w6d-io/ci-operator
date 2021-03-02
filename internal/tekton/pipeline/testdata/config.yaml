@@ -1,0 +1,5 @@
+---
+workspaces:
+  - name: values
+    description: "Values file place holder"
+    mountPath: /helm/values

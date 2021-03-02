@@ -32,6 +32,7 @@ import (
 //   - IntTest   => create a integration test Tekton Task
 //   - Sonar     => create a sonar Tekton Task
 //   - UnitTests => create a unit test Tekton Task
+//   - E2ETests  => create a e2e test Tekton Task
 func (wf *WFType) SetTask(ctx context.Context, p *ci.Play, logger logr.Logger) error {
 	log := logger.WithName("SetTask").WithValues("cx-namespace", util.InNamespace(p))
 	log.Info("Build tasks")

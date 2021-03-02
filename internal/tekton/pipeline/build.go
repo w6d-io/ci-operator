@@ -25,9 +25,9 @@ import (
 )
 
 // SetBuild adds build tasks elements in pipeline
-func (p *Pipeline) SetPipelineBuild(play *ci.Play, logger logr.Logger) error {
+func (p *Pipeline) SetPipelineBuild(logger logr.Logger) error {
 
-	log := logger.WithName("SetPipelineBuild").WithValues("cx-namespace", util.InNamespace(play))
+	log := logger.WithName("SetPipelineBuild").WithValues("cx-namespace", util.InNamespace(p.Play))
 	tk := p.Play.Spec.Tasks[p.Pos][ci.Build]
 	var flags []string
 	if len(tk.Variables) != 0 {
@@ -61,7 +61,7 @@ func (p *Pipeline) SetPipelineBuild(play *ci.Play, logger logr.Logger) error {
 			},
 		},
 	}
-	if util.IsBuildStage(play) {
+	if util.IsBuildStage(p.Play) {
 		log.V(1).Info("add parameter")
 		params = append(params,
 			getParamString("DOCKERFILE"),
@@ -81,13 +81,13 @@ func (p *Pipeline) SetPipelineBuild(play *ci.Play, logger logr.Logger) error {
 	}
 	task := tkn.PipelineTask{
 		Name:       ci.Build.String(),
-		Resources:  getPipelineTaskResources(util.IsBuildStage(play)),
+		Resources:  getPipelineTaskResources(util.IsBuildStage(p.Play)),
 		Workspaces: wks,
 		Params:     params,
 		RunAfter:   p.RunAfter,
 		TaskRef: &tkn.TaskRef{
 			Kind: tkn.NamespacedTaskKind,
-			Name: util.GetCINamespacedName(ci.Build.String(), play).Name,
+			Name: util.GetCINamespacedName(ci.Build.String(), p.Play).Name,
 		},
 	}
 	p.Tasks = append(p.Tasks, task)
