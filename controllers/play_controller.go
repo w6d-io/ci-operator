@@ -145,7 +145,7 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if err := r.Status().Update(ctx, p); err != nil {
 			return ctrl.Result{}, err
 		}
-		return ctrl.Result{Requeue: true, RequeueAfter: 5*time.Second}, nil
+		return ctrl.Result{Requeue: true, RequeueAfter: 5 * time.Second}, nil
 		//return ctrl.Result{}, nil
 	}
 	err = play.CreateCI(ctx, p, r.Log, r, r.Scheme)

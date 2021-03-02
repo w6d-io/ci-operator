@@ -17,38 +17,38 @@ Created on 02/03/2021
 package pipelinerun_test
 
 import (
-    . "github.com/onsi/ginkgo"
-    . "github.com/onsi/gomega"
-    ci "github.com/w6d-io/ci-operator/api/v1alpha1"
-    "github.com/w6d-io/ci-operator/internal"
-    "github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
-    ctrl "sigs.k8s.io/controller-runtime"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	"github.com/w6d-io/ci-operator/internal"
+	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var _ = Describe("integration test in pipeline run", func() {
-    Context("setting", func() {
-        It("does", func() {
-            p := pipelinerun.PipelineRun{
-                WorkFlowStruct: internal.WorkFlowStruct{
-                    Play: &ci.Play{
-                        Spec: ci.PlaySpec{
-                            Tasks: []map[ci.TaskType]ci.Task{
-                                {
-                                    ci.IntegrationTests: ci.Task{
-                                        Image: "test/test:test",
-                                        Script: []string{
-                                            "echo",
-                                            "test",
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            }
-            err := p.SetIntTest(0,ctrl.Log)
-            Expect(err).To(Succeed())
-        })
-    })
+	Context("setting", func() {
+		It("does", func() {
+			p := pipelinerun.PipelineRun{
+				WorkFlowStruct: internal.WorkFlowStruct{
+					Play: &ci.Play{
+						Spec: ci.PlaySpec{
+							Tasks: []map[ci.TaskType]ci.Task{
+								{
+									ci.IntegrationTests: ci.Task{
+										Image: "test/test:test",
+										Script: []string{
+											"echo",
+											"test",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+			err := p.SetIntTest(0, ctrl.Log)
+			Expect(err).To(Succeed())
+		})
+	})
 })

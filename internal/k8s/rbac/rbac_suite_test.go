@@ -14,34 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 Created on 02/03/2021
 */
-package pipeline_test
+package rbac_test
 
 import (
-	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
-	"github.com/w6d-io/ci-operator/internal/tekton/pipeline"
-
-	ctrl "sigs.k8s.io/controller-runtime"
+	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Set deploy", func() {
-	Context("", func() {
-		BeforeEach(func() {
-		})
-		AfterEach(func() {
-		})
-		It("", func() {
-			p := pipeline.Pipeline{
-				Play: &ci.Play{
-					Spec: ci.PlaySpec{
-						ProjectID: 1,
-					},
-				},
-			}
-			err := p.SetPipelineDeploy(ctrl.Log)
-			Expect(err).To(Succeed())
-		})
-	})
-})
+func TestRBAC(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "RBAC Suite")
+}

@@ -32,8 +32,8 @@ var _ = Describe("build in pipeline run", func() {
 				WorkFlowStruct: internal.WorkFlowStruct{
 					Play: &ci.Play{
 						Spec: ci.PlaySpec{
-							Name: "test",
-							ProjectID: 1,
+							Name:       "test",
+							ProjectID:  1,
 							PipelineID: 1,
 							Stack: ci.Stack{
 								Language: "test",
@@ -60,7 +60,7 @@ var _ = Describe("build in pipeline run", func() {
 					},
 				},
 			}
-			err := p.SetBuild(0,ctrl.Log)
+			err := p.SetBuild(0, ctrl.Log)
 			Expect(err).To(Succeed())
 		})
 		It("does and failed", func() {
@@ -68,10 +68,10 @@ var _ = Describe("build in pipeline run", func() {
 				WorkFlowStruct: internal.WorkFlowStruct{
 					Play: &ci.Play{
 						Spec: ci.PlaySpec{
-							Name: "test",
-							ProjectID: 1,
+							Name:       "test",
+							ProjectID:  1,
 							PipelineID: 1,
-							DockerURL: "http://{}",
+							DockerURL:  "http://{}",
 							Stack: ci.Stack{
 								Language: "test",
 							},
@@ -97,7 +97,7 @@ var _ = Describe("build in pipeline run", func() {
 					},
 				},
 			}
-			err := p.SetBuild(0,ctrl.Log)
+			err := p.SetBuild(0, ctrl.Log)
 			Expect(err).ToNot(Succeed())
 			Expect(err.Error()).To(ContainSubstring("invalid character"))
 		})

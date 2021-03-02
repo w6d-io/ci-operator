@@ -14,34 +14,39 @@ See the License for the specific language governing permissions and
 limitations under the License.
 Created on 02/03/2021
 */
-package pipeline_test
+package rbac_test
 
 import (
-	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
-	"github.com/w6d-io/ci-operator/internal/tekton/pipeline"
-
-	ctrl "sigs.k8s.io/controller-runtime"
-
 	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	"github.com/w6d-io/ci-operator/internal/config"
+	"github.com/w6d-io/ci-operator/internal/k8s/rbac"
 )
 
-var _ = Describe("Set deploy", func() {
+var _ = Describe("RBAC", func() {
 	Context("", func() {
 		BeforeEach(func() {
 		})
 		AfterEach(func() {
 		})
+		config.New("testdata/config.yaml")
 		It("", func() {
-			p := pipeline.Pipeline{
-				Play: &ci.Play{
-					Spec: ci.PlaySpec{
-						ProjectID: 1,
-					},
+			p := &ci.Play{
+				Spec: ci.PlaySpec{
+					ProjectID:  1,
+					PipelineID: 1,
 				},
 			}
-			err := p.SetPipelineDeploy(ctrl.Log)
-			Expect(err).To(Succeed())
+			_ = rbac.GetRoleBinding(p)
+		})
+		It("", func() {
+			p := &ci.Play{
+				Spec: ci.PlaySpec{
+					ProjectID:  1,
+					PipelineID: 1,
+				},
+			}
+			_ = rbac.GetSubject(p)
 		})
 	})
 })

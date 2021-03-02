@@ -17,219 +17,219 @@ Created on 02/03/2021
 package pipelinerun_test
 
 import (
-    "context"
-    . "github.com/onsi/ginkgo"
-    . "github.com/onsi/gomega"
-    "github.com/w6d-io/ci-operator/internal"
-    "github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
-    corev1 "k8s.io/api/core/v1"
-    metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-    "k8s.io/client-go/kubernetes/scheme"
+	"context"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	"github.com/w6d-io/ci-operator/internal"
+	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes/scheme"
 
-    ci "github.com/w6d-io/ci-operator/api/v1alpha1"
-    ctrl "sigs.k8s.io/controller-runtime"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var _ = Describe("Create", func() {
-    Context("test all methods", func() {
-        It("parses", func() {
-            p := pipelinerun.PipelineRun{
-                WorkFlowStruct: internal.WorkFlowStruct{
-                    Play: &ci.Play{
-                        Spec: ci.PlaySpec{
-                            Name: "test",
-                            ProjectID: 1,
-                            PipelineID: 1,
-                            Stack: ci.Stack{
-                                Language: "test",
-                            },
-                            Commit: ci.Commit{
-                                SHA: "test_test_test",
-                                Ref: "test",
-                            },
-                            Tasks: []map[ci.TaskType]ci.Task{
-                                {
-                                    ci.UnitTests: ci.Task{
-                                        Image: "test/test:test",
-                                        Script: []string{
-                                            "echo",
-                                            "test",
-                                        },
-                                    },
-                                    ci.Build: ci.Task{
-                                        Variables: map[string]string{
-                                            "TEST": "Test",
-                                        },
-                                        Image: "test/test:test",
-                                        Script: []string{
-                                            "echo",
-                                            "test",
-                                        },
-                                    },
-                                    ci.Sonar: ci.Task{},
-                                    ci.Deploy: ci.Task{
-                                        Variables: map[string]string{
-                                            "TEST": "Test",
-                                        },
-                                        Image: "test/test:test",
-                                        Script: []string{
-                                            "echo",
-                                            "test",
-                                        },
-                                    },
-                                    ci.IntegrationTests: ci.Task{
-                                        Image: "test/test:test",
-                                        Script: []string{
-                                            "echo",
-                                            "test",
-                                        },
-                                    },
-                                    ci.Clean: ci.Task{},
-                                    ci.E2ETests: ci.Task{
-                                        Image: "test/test:test",
-                                        Script: []string{
-                                            "echo",
-                                            "test",
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            }
-            err := p.Parse(ctrl.Log)
-            Expect(err).To(Succeed())
-        })
-        It("failed creation", func() {
-            p := pipelinerun.PipelineRun{
-                WorkFlowStruct: internal.WorkFlowStruct{
-                    Play: &ci.Play{
-                        ObjectMeta: metav1.ObjectMeta{
-                            Name: "test-create-1",
-                            Namespace: "default",
-                            UID: "uuid-uuid-uuid-uuid",
-                        },
-                        Spec: ci.PlaySpec{
-                            Name: "test",
-                            ProjectID: 1,
-                            PipelineID: 1,
-                            Stack: ci.Stack{
-                                Language: "test",
-                            },
-                            Commit: ci.Commit{
-                                SHA: "test_test_test",
-                                Ref: "test",
-                            },
-                            Tasks: []map[ci.TaskType]ci.Task{
-                                {
-                                    ci.Build: ci.Task{
-                                        Variables: map[string]string{
-                                            "TEST": "Test",
-                                        },
-                                        Image: "test/test:test",
-                                        Script: []string{
-                                            "echo",
-                                            "test",
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            }
-            err := p.Create(context.TODO(), k8sClient, ctrl.Log)
-            Expect(err).ToNot(Succeed())
-            Expect(err.Error()).To(ContainSubstring("cross-namespace owner references"))
-        })
-        It("create", func() {
-            ns := &corev1.Namespace{
-                ObjectMeta: metav1.ObjectMeta{
-                    Name: "p6e-cx-1",
-                },
-            }
-            err := k8sClient.Create(context.TODO(), ns)
-            Expect(err).To(Succeed())
-            p := pipelinerun.PipelineRun{
-                WorkFlowStruct: internal.WorkFlowStruct{
-                    Scheme: scheme.Scheme,
-                    Play: &ci.Play{
-                        ObjectMeta: metav1.ObjectMeta{
-                            Name: "test-create-1",
-                            Namespace: "p6e-cx-1",
-                            UID: "uuid-uuid-uuid-uuid",
-                        },
-                        Spec: ci.PlaySpec{
-                            Name: "test",
-                            ProjectID: 1,
-                            PipelineID: 1,
-                            Stack: ci.Stack{
-                                Language: "test",
-                            },
-                            Commit: ci.Commit{
-                                SHA: "test_test_test",
-                                Ref: "test",
-                            },
-                            Tasks: []map[ci.TaskType]ci.Task{
-                                {
-                                    ci.Build: ci.Task{
-                                        Variables: map[string]string{
-                                            "TEST": "Test",
-                                        },
-                                        Image: "test/test:test",
-                                        Script: []string{
-                                            "echo",
-                                            "test",
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            }
-            err = p.Create(context.TODO(), k8sClient, ctrl.Log)
-            Expect(err).To(Succeed())
-        })
+	Context("test all methods", func() {
+		It("parses", func() {
+			p := pipelinerun.PipelineRun{
+				WorkFlowStruct: internal.WorkFlowStruct{
+					Play: &ci.Play{
+						Spec: ci.PlaySpec{
+							Name:       "test",
+							ProjectID:  1,
+							PipelineID: 1,
+							Stack: ci.Stack{
+								Language: "test",
+							},
+							Commit: ci.Commit{
+								SHA: "test_test_test",
+								Ref: "test",
+							},
+							Tasks: []map[ci.TaskType]ci.Task{
+								{
+									ci.UnitTests: ci.Task{
+										Image: "test/test:test",
+										Script: []string{
+											"echo",
+											"test",
+										},
+									},
+									ci.Build: ci.Task{
+										Variables: map[string]string{
+											"TEST": "Test",
+										},
+										Image: "test/test:test",
+										Script: []string{
+											"echo",
+											"test",
+										},
+									},
+									ci.Sonar: ci.Task{},
+									ci.Deploy: ci.Task{
+										Variables: map[string]string{
+											"TEST": "Test",
+										},
+										Image: "test/test:test",
+										Script: []string{
+											"echo",
+											"test",
+										},
+									},
+									ci.IntegrationTests: ci.Task{
+										Image: "test/test:test",
+										Script: []string{
+											"echo",
+											"test",
+										},
+									},
+									ci.Clean: ci.Task{},
+									ci.E2ETests: ci.Task{
+										Image: "test/test:test",
+										Script: []string{
+											"echo",
+											"test",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+			err := p.Parse(ctrl.Log)
+			Expect(err).To(Succeed())
+		})
+		It("failed creation", func() {
+			p := pipelinerun.PipelineRun{
+				WorkFlowStruct: internal.WorkFlowStruct{
+					Play: &ci.Play{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "test-create-1",
+							Namespace: "default",
+							UID:       "uuid-uuid-uuid-uuid",
+						},
+						Spec: ci.PlaySpec{
+							Name:       "test",
+							ProjectID:  1,
+							PipelineID: 1,
+							Stack: ci.Stack{
+								Language: "test",
+							},
+							Commit: ci.Commit{
+								SHA: "test_test_test",
+								Ref: "test",
+							},
+							Tasks: []map[ci.TaskType]ci.Task{
+								{
+									ci.Build: ci.Task{
+										Variables: map[string]string{
+											"TEST": "Test",
+										},
+										Image: "test/test:test",
+										Script: []string{
+											"echo",
+											"test",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+			err := p.Create(context.TODO(), k8sClient, ctrl.Log)
+			Expect(err).ToNot(Succeed())
+			Expect(err.Error()).To(ContainSubstring("cross-namespace owner references"))
+		})
+		It("create", func() {
+			ns := &corev1.Namespace{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "p6e-cx-1",
+				},
+			}
+			err := k8sClient.Create(context.TODO(), ns)
+			Expect(err).To(Succeed())
+			p := pipelinerun.PipelineRun{
+				WorkFlowStruct: internal.WorkFlowStruct{
+					Scheme: scheme.Scheme,
+					Play: &ci.Play{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "test-create-1",
+							Namespace: "p6e-cx-1",
+							UID:       "uuid-uuid-uuid-uuid",
+						},
+						Spec: ci.PlaySpec{
+							Name:       "test",
+							ProjectID:  1,
+							PipelineID: 1,
+							Stack: ci.Stack{
+								Language: "test",
+							},
+							Commit: ci.Commit{
+								SHA: "test_test_test",
+								Ref: "test",
+							},
+							Tasks: []map[ci.TaskType]ci.Task{
+								{
+									ci.Build: ci.Task{
+										Variables: map[string]string{
+											"TEST": "Test",
+										},
+										Image: "test/test:test",
+										Script: []string{
+											"echo",
+											"test",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+			err = p.Create(context.TODO(), k8sClient, ctrl.Log)
+			Expect(err).To(Succeed())
+		})
 
-        It("does", func() {
-            p := pipelinerun.PipelineRun{
-                WorkFlowStruct: internal.WorkFlowStruct{
-                    Play: &ci.Play{
-                        Spec: ci.PlaySpec{
-                            Name: "test",
-                            ProjectID: 1,
-                            PipelineID: 1,
-                            DockerURL: "http://{}",
-                            Stack: ci.Stack{
-                                Language: "test",
-                            },
-                            Commit: ci.Commit{
-                                SHA: "test_test_test",
-                                Ref: "test",
-                            },
-                            Tasks: []map[ci.TaskType]ci.Task{
-                                {
-                                    ci.Build: ci.Task{
-                                        Variables: map[string]string{
-                                            "TEST": "Test",
-                                        },
-                                        Image: "test/test:test",
-                                        Script: []string{
-                                            "echo",
-                                            "test",
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            }
-            err := p.Parse(ctrl.Log)
-            Expect(err).ToNot(Succeed())
-            Expect(err.Error()).To(ContainSubstring("invalid character"))
-        })
-    })
+		It("does", func() {
+			p := pipelinerun.PipelineRun{
+				WorkFlowStruct: internal.WorkFlowStruct{
+					Play: &ci.Play{
+						Spec: ci.PlaySpec{
+							Name:       "test",
+							ProjectID:  1,
+							PipelineID: 1,
+							DockerURL:  "http://{}",
+							Stack: ci.Stack{
+								Language: "test",
+							},
+							Commit: ci.Commit{
+								SHA: "test_test_test",
+								Ref: "test",
+							},
+							Tasks: []map[ci.TaskType]ci.Task{
+								{
+									ci.Build: ci.Task{
+										Variables: map[string]string{
+											"TEST": "Test",
+										},
+										Image: "test/test:test",
+										Script: []string{
+											"echo",
+											"test",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+			err := p.Parse(ctrl.Log)
+			Expect(err).ToNot(Succeed())
+			Expect(err.Error()).To(ContainSubstring("invalid character"))
+		})
+	})
 })

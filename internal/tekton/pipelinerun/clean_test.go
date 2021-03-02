@@ -17,31 +17,31 @@ Created on 02/03/2021
 package pipelinerun_test
 
 import (
-    "github.com/w6d-io/ci-operator/internal"
-    "github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
+	"github.com/w6d-io/ci-operator/internal"
+	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
 
-    . "github.com/onsi/ginkgo"
-    . "github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 
-    ci "github.com/w6d-io/ci-operator/api/v1alpha1"
-    ctrl "sigs.k8s.io/controller-runtime"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var _ = Describe("clean in pipeline run", func() {
-    Context("setting", func() {
-        It("does", func() {
-            p := pipelinerun.PipelineRun{
-                WorkFlowStruct: internal.WorkFlowStruct{
-                    Play: &ci.Play{
-                        Spec: ci.PlaySpec{
-                            ProjectID: 1,
-                            PipelineID: 1,
-                        },
-                    },
-                },
-            }
-            err := p.SetClean(0,ctrl.Log)
-            Expect(err).To(Succeed())
-        })
-    })
+	Context("setting", func() {
+		It("does", func() {
+			p := pipelinerun.PipelineRun{
+				WorkFlowStruct: internal.WorkFlowStruct{
+					Play: &ci.Play{
+						Spec: ci.PlaySpec{
+							ProjectID:  1,
+							PipelineID: 1,
+						},
+					},
+				},
+			}
+			err := p.SetClean(0, ctrl.Log)
+			Expect(err).To(Succeed())
+		})
+	})
 })

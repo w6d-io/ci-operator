@@ -17,40 +17,40 @@ Created on 02/03/2021
 package pipelinerun_test
 
 import (
-    . "github.com/onsi/ginkgo"
-    . "github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 
-    "github.com/w6d-io/ci-operator/internal"
-    "github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
+	"github.com/w6d-io/ci-operator/internal"
+	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
 
-    ci "github.com/w6d-io/ci-operator/api/v1alpha1"
-    ctrl "sigs.k8s.io/controller-runtime"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var _ = Describe("unit test in pipeline run", func() {
-    Context("setting", func() {
-        It("does", func() {
-            p := pipelinerun.PipelineRun{
-                WorkFlowStruct: internal.WorkFlowStruct{
-                    Play: &ci.Play{
-                        Spec: ci.PlaySpec{
-                            Tasks: []map[ci.TaskType]ci.Task{
-                                {
-                                    ci.UnitTests: ci.Task{
-                                        Image: "test/test:test",
-                                        Script: []string{
-                                            "echo",
-                                            "test",
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            }
-            err := p.SetUnitTest(0,ctrl.Log)
-            Expect(err).To(Succeed())
-        })
-    })
+	Context("setting", func() {
+		It("does", func() {
+			p := pipelinerun.PipelineRun{
+				WorkFlowStruct: internal.WorkFlowStruct{
+					Play: &ci.Play{
+						Spec: ci.PlaySpec{
+							Tasks: []map[ci.TaskType]ci.Task{
+								{
+									ci.UnitTests: ci.Task{
+										Image: "test/test:test",
+										Script: []string{
+											"echo",
+											"test",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+			err := p.SetUnitTest(0, ctrl.Log)
+			Expect(err).To(Succeed())
+		})
+	})
 })
