@@ -36,6 +36,7 @@ type PlaySpec struct {
 	Name string `json:"name,omitempty"`
 
 	// Stack of the project
+	// +optional
 	Stack Stack `json:"stack,omitempty"`
 
 	// Scope contains the name of scope and list of projects id
@@ -180,6 +181,9 @@ type Docker struct {
 type TaskType string
 
 const (
+	// E2ETests is the task type for unit tests"
+	E2ETests TaskType = "e2e-tests"
+
 	// UnitTests is the task type for unit tests"
 	UnitTests TaskType = "unit-tests"
 

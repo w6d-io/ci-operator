@@ -25,8 +25,8 @@ import (
 	"github.com/w6d-io/ci-operator/internal/util"
 )
 
-func (p *Pipeline) SetPipelineIntTest(play *ci.Play, logger logr.Logger) error {
-	log := logger.WithName("SetPipelineIntTest").WithValues("cx-namespace", util.InNamespace(play))
+func (p *Pipeline) SetPipelineIntTest(logger logr.Logger) error {
+	log := logger.WithName("SetPipelineIntTest").WithValues("cx-namespace", util.InNamespace(p.Play))
 
 	log.V(1).Info("add task in pipeline")
 	wks := getWorkspacePipelineTaskBinding()
@@ -61,7 +61,7 @@ func (p *Pipeline) SetPipelineIntTest(play *ci.Play, logger logr.Logger) error {
 		RunAfter:   p.RunAfter,
 		TaskRef: &tkn.TaskRef{
 			Kind: tkn.NamespacedTaskKind,
-			Name: util.GetCINamespacedName(ci.IntegrationTests.String(), play).Name,
+			Name: util.GetCINamespacedName(ci.IntegrationTests.String(), p.Play).Name,
 		},
 	}
 	p.Tasks = append(p.Tasks, task)

@@ -40,12 +40,13 @@ type Pipeline struct {
 }
 
 type Interface interface {
-	SetPipelineUnitTest(*ci.Play, logr.Logger) error
-	SetPipelineBuild(*ci.Play, logr.Logger) error
-	SetPipelineDeploy(*ci.Play, logr.Logger) error
-	SetPipelineIntTest(*ci.Play, logr.Logger) error
-	SetPipelineClean(*ci.Play, logr.Logger) error
-	SetPipelineSonar(*ci.Play, logr.Logger) error
+	SetPipelineUnitTest(logr.Logger) error
+	SetPipelineBuild(logr.Logger) error
+	SetPipelineDeploy(logr.Logger) error
+	SetPipelineIntTest(logr.Logger) error
+	SetPipelineClean(logr.Logger) error
+	SetPipelineSonar(logr.Logger) error
+	SetPipelineE2ETest(logr.Logger) error
 }
 
 var _ Interface = &Pipeline{}

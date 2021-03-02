@@ -33,3 +33,25 @@ step:
     - --destination=$(params.IMAGE)
     - --context=$(resources.inputs.source.path)/$(params.CONTEXT)
 ```
+
+Add `ci.w6d.io/language: js` in the annotation to set a `Step` as a javascript
+
+#### Sample
+```yaml
+apiVersion: ci.w6d.io/v1alpha1
+kind: Step
+metadata:
+  name: unittest-step-npm
+  annotations:
+    ci.w6d.io/language: js
+    ci.w6d.io/task: unit-tests
+    ci.w6d.io/order: "0"
+    ci.w6d.io/package: npm
+step:
+  name: npm-test
+  image: "node:latest"
+  script: |
+    cd $(resources.inputs.source.path)
+    npm install
+    npm test
+```

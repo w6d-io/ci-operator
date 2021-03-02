@@ -75,6 +75,12 @@ func (t *Task) Parse(ctx context.Context, logger logr.Logger) error {
 				if err := t.Clean(ctx, logger); err != nil {
 					return err
 				}
+			case ci.E2ETests:
+				log.WithValues("task", ci.E2ETests).V(1).Info("launch")
+				t.Index = pos
+				if err := t.E2ETest(ctx, logger); err != nil {
+					return err
+				}
 			}
 		}
 	}
