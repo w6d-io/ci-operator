@@ -1,2 +1,3 @@
 ---
-deploy_prefix: "test-"
+deploy_prefix: "test"
+cluster_role: "test"

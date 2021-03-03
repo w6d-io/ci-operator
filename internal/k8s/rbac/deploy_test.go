@@ -17,36 +17,105 @@ Created on 02/03/2021
 package rbac_test
 
 import (
-	. "github.com/onsi/ginkgo"
-	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	"context"
+	rbacv1 "k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/types"
+
+	"github.com/w6d-io/ci-operator/internal"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/k8s/rbac"
+	"github.com/w6d-io/ci-operator/internal/util"
+
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("RBAC", func() {
-	Context("", func() {
+	Context("Check", func() {
 		BeforeEach(func() {
+			err := config.New("testdata/config.yaml")
+			Expect(err).To(Succeed())
 		})
-		AfterEach(func() {
-		})
-		config.New("testdata/config.yaml")
-		It("", func() {
+		It("get role binding", func() {
 			p := &ci.Play{
 				Spec: ci.PlaySpec{
 					ProjectID:  1,
 					PipelineID: 1,
 				},
 			}
-			_ = rbac.GetRoleBinding(p)
+			r := rbac.GetRoleBinding(p)
+			Expect(r).ToNot(BeNil())
 		})
-		It("", func() {
+		It("get subject", func() {
 			p := &ci.Play{
 				Spec: ci.PlaySpec{
 					ProjectID:  1,
 					PipelineID: 1,
 				},
 			}
-			_ = rbac.GetSubject(p)
+			r := rbac.GetSubject(p)
+			Expect(r).ToNot(BeNil())
+		})
+	})
+	When("in create method", func() {
+		var (
+			play *ci.Play
+			d    rbac.Deploy
+		)
+		BeforeEach(func() {
+			play = &ci.Play{
+				Spec: ci.PlaySpec{
+					Environment: "test",
+					ProjectID:   1,
+					PipelineID:  1,
+				},
+			}
+			ns := &corev1.Namespace{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: util.GetDeployNamespacedName(config.GetDeployPrefix(), play).Namespace,
+				},
+			}
+			_ = k8sClient.Create(context.TODO(), ns)
+			err := config.New("testdata/config.yaml")
+			Expect(err).To(Succeed())
+			d = rbac.Deploy{
+				WorkFlowStruct: internal.WorkFlowStruct{
+					Play: play,
+				},
+			}
+		})
+		Context("we try", func() {
+			It("succeed creation", func() {
+				err := d.Create(context.TODO(), k8sClient, ctrl.Log)
+				Expect(err).To(Succeed())
+				r := rbacv1.RoleBinding{}
+				name := util.GetCINamespacedName2(rbac.Prefix, play).Name
+				ns := util.GetDeployNamespacedName(config.GetDeployPrefix(), play).Namespace
+				err = k8sClient.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: ns}, &r)
+				Expect(err).To(Succeed())
+				//Expect(util.GetObjectContain(&r)).To(Equal(""))
+				Expect(len(r.Subjects)).To(Equal(2))
+			})
+			It("with subject already exist", func() {
+				err := d.Create(context.TODO(), k8sClient, ctrl.Log)
+				Expect(err).To(Succeed())
+			})
+			It("succeed update", func() {
+				play.Spec.PipelineID = 2
+				err := d.Create(context.TODO(), k8sClient, ctrl.Log)
+				Expect(err).To(Succeed())
+				r := rbacv1.RoleBinding{}
+				name := util.GetCINamespacedName2(rbac.Prefix, play).Name
+				ns := util.GetDeployNamespacedName(config.GetDeployPrefix(), play).Namespace
+				err = k8sClient.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: ns}, &r)
+				Expect(err).To(Succeed())
+				Expect(len(r.Subjects)).To(Equal(3))
+			})
 		})
 	})
 })
