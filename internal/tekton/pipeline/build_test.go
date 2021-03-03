@@ -17,42 +17,42 @@ Created on 02/03/2021
 package pipeline_test
 
 import (
-    "github.com/w6d-io/ci-operator/internal/tekton/pipeline"
+	"github.com/w6d-io/ci-operator/internal/tekton/pipeline"
 
-    ci "github.com/w6d-io/ci-operator/api/v1alpha1"
-    ctrl "sigs.k8s.io/controller-runtime"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	ctrl "sigs.k8s.io/controller-runtime"
 
-    . "github.com/onsi/ginkgo"
-    . "github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Set build", func() {
-    Context("", func() {
-        BeforeEach(func() {
-        })
-        AfterEach(func() {
-        })
-        It("", func() {
-            p := pipeline.Pipeline{
-                Play: &ci.Play{
-                    Spec: ci.PlaySpec{
-                        Tasks: []map[ci.TaskType]ci.Task{
-                            {
-                                ci.Build: ci.Task{
-                                    Image:     "",
-                                    Script:    nil,
-                                    Variables: map[string]string{
-                                        "TEST": "test",
-                                    },
-                                    Docker:    ci.Docker{},
-                                },
-                            },
-                        },
-                    },
-                },
-            }
-            err := p.SetPipelineBuild(ctrl.Log)
-            Expect(err).To(Succeed())
-        })
-    })
+	Context("", func() {
+		BeforeEach(func() {
+		})
+		AfterEach(func() {
+		})
+		It("", func() {
+			p := pipeline.Pipeline{
+				Play: &ci.Play{
+					Spec: ci.PlaySpec{
+						Tasks: []map[ci.TaskType]ci.Task{
+							{
+								ci.Build: ci.Task{
+									Image:  "",
+									Script: nil,
+									Variables: map[string]string{
+										"TEST": "test",
+									},
+									Docker: ci.Docker{},
+								},
+							},
+						},
+					},
+				},
+			}
+			err := p.SetPipelineBuild(ctrl.Log)
+			Expect(err).To(Succeed())
+		})
+	})
 })

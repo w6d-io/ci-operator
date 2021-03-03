@@ -17,29 +17,29 @@ Created on 01/03/2021
 package pipelinerun
 
 import (
-    "github.com/go-logr/logr"
-    tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
-    ci "github.com/w6d-io/ci-operator/api/v1alpha1"
-    "strings"
+	"github.com/go-logr/logr"
+	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	"strings"
 )
 
 func (p *PipelineRun) SetE2ETest(pos int, logger logr.Logger) error {
-    log := logger.WithValues("SetE2ETest").WithValues("action", "pipeline-run")
-    log.V(1).Info("set e2e test pipeline run params")
+	log := logger.WithValues("SetE2ETest").WithValues("action", "pipeline-run")
+	log.V(1).Info("set e2e test pipeline run params")
 
-    task := p.Play.Spec.Tasks[pos][ci.E2ETests]
-    p.Params = append(p.Params, tkn.Param{
-        Name: "e2e-tests_script",
-        Value: tkn.ArrayOrString{
-            Type:      tkn.ParamTypeString,
-            StringVal: strings.Join(task.Script, "\n"),
-        },
-    }, tkn.Param{
-        Name:  "e2e-tests_image",
-        Value: tkn.ArrayOrString{
-            Type:      tkn.ParamTypeString,
-            StringVal: task.Image,
-        },
-    })
-    return nil
+	task := p.Play.Spec.Tasks[pos][ci.E2ETests]
+	p.Params = append(p.Params, tkn.Param{
+		Name: "e2e-tests_script",
+		Value: tkn.ArrayOrString{
+			Type:      tkn.ParamTypeString,
+			StringVal: strings.Join(task.Script, "\n"),
+		},
+	}, tkn.Param{
+		Name: "e2e-tests_image",
+		Value: tkn.ArrayOrString{
+			Type:      tkn.ParamTypeString,
+			StringVal: task.Image,
+		},
+	})
+	return nil
 }

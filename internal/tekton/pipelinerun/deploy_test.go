@@ -17,46 +17,46 @@ Created on 02/03/2021
 package pipelinerun_test
 
 import (
-    . "github.com/onsi/ginkgo"
-    . "github.com/onsi/gomega"
-    ci "github.com/w6d-io/ci-operator/api/v1alpha1"
-    "github.com/w6d-io/ci-operator/internal"
-    "github.com/w6d-io/ci-operator/internal/config"
-    "github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
-    ctrl "sigs.k8s.io/controller-runtime"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	"github.com/w6d-io/ci-operator/internal"
+	"github.com/w6d-io/ci-operator/internal/config"
+	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var _ = Describe("deploy in pipeline run", func() {
-    Context("setting", func() {
-        It("does", func() {
-            err := config.New("testdata/config.yaml")
-            Expect(err).To(Succeed())
-            p := pipelinerun.PipelineRun{
-                WorkFlowStruct: internal.WorkFlowStruct{
-                    Play: &ci.Play{
-                        Spec: ci.PlaySpec{
-                            ProjectID: 1,
-                            PipelineID: 1,
-                            Tasks: []map[ci.TaskType]ci.Task{
-                                {
-                                    ci.Deploy: ci.Task{
-                                        Variables: map[string]string{
-                                            "TEST": "Test",
-                                        },
-                                        Image: "test/test:test",
-                                        Script: []string{
-                                            "echo",
-                                            "test",
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            }
-            err = p.SetDeploy(0,ctrl.Log)
-            Expect(err).To(Succeed())
-        })
-    })
+	Context("setting", func() {
+		It("does", func() {
+			err := config.New("testdata/config.yaml")
+			Expect(err).To(Succeed())
+			p := pipelinerun.PipelineRun{
+				WorkFlowStruct: internal.WorkFlowStruct{
+					Play: &ci.Play{
+						Spec: ci.PlaySpec{
+							ProjectID:  1,
+							PipelineID: 1,
+							Tasks: []map[ci.TaskType]ci.Task{
+								{
+									ci.Deploy: ci.Task{
+										Variables: map[string]string{
+											"TEST": "Test",
+										},
+										Image: "test/test:test",
+										Script: []string{
+											"echo",
+											"test",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+			err = p.SetDeploy(0, ctrl.Log)
+			Expect(err).To(Succeed())
+		})
+	})
 })

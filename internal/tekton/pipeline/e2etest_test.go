@@ -17,27 +17,27 @@ Created on 02/03/2021
 package pipeline_test
 
 import (
-    ci "github.com/w6d-io/ci-operator/api/v1alpha1"
-    "github.com/w6d-io/ci-operator/internal/tekton/pipeline"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	"github.com/w6d-io/ci-operator/internal/tekton/pipeline"
 
-    ctrl "sigs.k8s.io/controller-runtime"
+	ctrl "sigs.k8s.io/controller-runtime"
 
-    . "github.com/onsi/ginkgo"
-    . "github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Set e2e test", func() {
-    Context("build", func() {
-        It("succeed", func() {
-            p := pipeline.Pipeline{
-                Play: &ci.Play{
-                    Spec: ci.PlaySpec{
-                        ProjectID: 1,
-                    },
-                },
-            }
-            err := p.SetPipelineE2ETest(ctrl.Log)
-            Expect(err).To(Succeed())
-        })
-    })
+	Context("build", func() {
+		It("succeed", func() {
+			p := pipeline.Pipeline{
+				Play: &ci.Play{
+					Spec: ci.PlaySpec{
+						ProjectID: 1,
+					},
+				},
+			}
+			err := p.SetPipelineE2ETest(ctrl.Log)
+			Expect(err).To(Succeed())
+		})
+	})
 })

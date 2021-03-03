@@ -45,7 +45,7 @@ var _ = BeforeSuite(func(done Done) {
 	testEnv = &envtest.Environment{
 		ErrorIfCRDPathMissing: false,
 		CRDDirectoryPaths: []string{
-			filepath.Join("..", "..", "..", "config", "crd" ,"bases"),
+			filepath.Join("..", "..", "..", "config", "crd", "bases"),
 			filepath.Join("..", "..", "..", "third_party", "tektoncd", "pipeline", "config"),
 		},
 	}
