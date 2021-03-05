@@ -75,6 +75,7 @@ func (o *outputFormatFlag) String() string {
 }
 
 func (o *outputFormatFlag) Set(flagValue string) error {
+	flagValue = LookupEnvOrString("LOG_FORMAT", flagValue)
 	val := strings.ToLower(flagValue)
 	switch val {
 	case "json":
@@ -106,6 +107,7 @@ func (l levelFlag) String() string {
 }
 
 func (l levelFlag) Set(flagValue string) error {
+	flagValue = LookupEnvOrString("LOG_LEVEL", flagValue)
 	level, validLevel := levelStrings[strings.ToLower(flagValue)]
 	if !validLevel {
 		logLevel, err := strconv.Atoi(flagValue)
@@ -168,4 +170,21 @@ func BindFlags(o *zap.Options, fs *flag.FlagSet) {
 
 	var c configFlag
 	fs.Var(&c, "config", "config file")
+}
+
+// LookupEnvOrString adds the capability to get env instead of param flag
+func LookupEnvOrString(key string, defaultVal string) string {
+	if val, ok := os.LookupEnv(key); ok {
+		return val
+	}
+	return defaultVal
+}
+
+// LookupEnvOrBool adds the capability to get env instead of param flag
+func LookupEnvOrBool(key string, defaultVal bool) bool {
+	if val, ok := os.LookupEnv(key); ok {
+		b, _ := strconv.ParseBool(val)
+		return b
+	}
+	return defaultVal
 }

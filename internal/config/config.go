@@ -20,9 +20,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/w6d-io/ci-operator/pkg/webhook"
 	"io/ioutil"
-	"net/url"
 	"os"
 	"sort"
 
@@ -32,6 +30,8 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/w6d-io/ci-operator/internal/values"
+	"github.com/w6d-io/ci-operator/pkg/webhook"
+	"github.com/w6d-io/hook"
 )
 
 var (
@@ -65,11 +65,11 @@ func New(filename string) error {
 	}
 	values.Salt = config.Hash.Salt
 	values.MinLength = config.Hash.MinLength
-	for i, wh := range config.Webhooks {
+	for _, wh := range config.Webhooks {
 		if wh.URLRaw != "" {
-			config.Webhooks[i].URL, err = url.Parse(wh.URLRaw)
-			if err != nil {
-				return fmt.Errorf("webhook (%s) config error %s", wh.Name, err)
+			if err := hook.Subscribe(wh.URLRaw, wh.Scope); err != nil {
+				log.Error(err, "subscription failed")
+				return err
 			}
 		}
 	}

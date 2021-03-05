@@ -34,7 +34,7 @@ ci-operator: generate fmt vet vendor
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
-	go run ./main.go -config config/tests/config.yaml -log-level 2 -metrics-addr ":8081"
+	go run ./main.go -config config/tests/config.yaml -log-format text -log-level 2  -metrics-addr ":8081"
 
 # Install CRDs into a cluster
 install: manifests

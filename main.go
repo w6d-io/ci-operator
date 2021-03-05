@@ -26,6 +26,7 @@ import (
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	resourcev1alpha1 "github.com/tektoncd/pipeline/pkg/apis/resource/v1alpha1"
 	civ1alpha1 "github.com/w6d-io/ci-operator/api/v1alpha1"
+	zapraw "go.uber.org/zap"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 
@@ -74,8 +75,9 @@ func main() {
 	var enableLeaderElection bool
 
 	setupLog.Info("managed flag")
-	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
-	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
+	flag.StringVar(&metricsAddr, "metrics-addr",
+		util.LookupEnvOrString("METRICS_ADDRESS", ":8080"), "The address the metric endpoint binds to.")
+	flag.BoolVar(&enableLeaderElection, "enable-leader-election", util.LookupEnvOrBool("ENABLE_LEADER", false),
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	opts := zap.Options{
@@ -99,7 +101,7 @@ func main() {
 	setupLog.Info("set opts")
 	opts.Development = os.Getenv("RELEASE") != "prod"
 	opts.StacktraceLevel = zapcore.PanicLevel
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts), zap.RawZapOpts(zapraw.AddCaller())))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,

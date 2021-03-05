@@ -12,30 +12,30 @@ var _ = Describe("Config", func() {
 	Describe("Parse yaml configuration", func() {
 		Context("Manage config issues", func() {
 			It("File does not exist", func() {
-				Expect(config.New("../../test/config/no-file.yaml")).ToNot(BeNil())
+				Expect(config.New("testdata/no-file.yaml")).ToNot(BeNil())
 			})
 			It("load bad file", func() {
-				Expect(config.New("../../test/config/file3.yaml")).ToNot(BeNil())
+				Expect(config.New("testdata/file3.yaml")).ToNot(BeNil())
 			})
 			It("Webhook part misconfigured ", func() {
-				Expect(config.New("../../test/config/file4.yaml")).ToNot(BeNil())
+				Expect(config.New("testdata/file4.yaml")).ToNot(BeNil())
 			})
 		})
 		Context("Validate config", func() {
 			It("File exists", func() {
-				Expect(config.New("../../test/config/file1.yaml")).To(BeNil())
+				Expect(config.New("testdata/file1.yaml")).To(BeNil())
 			})
 			It("Check mandatory value", func() {
 				Expect(config.Validate()).To(BeNil())
 			})
 			It("load file without mandatory part", func() {
-				Expect(config.New("../../test/config/file2.yaml")).To(BeNil())
+				Expect(config.New("testdata/file2.yaml")).To(BeNil())
 			})
 			It("Missing mandatory part", func() {
 				Expect(config.Validate()).ToNot(BeNil())
 			})
 			It("load tiny config ", func() {
-				Expect(config.New("../../test/config/file5.yaml")).To(BeNil())
+				Expect(config.New("testdata/file5.yaml")).To(BeNil())
 			})
 			It("GetConfig function", func() {
 				Expect(config.GetConfig()).To(Equal(&config.Config{
@@ -65,9 +65,18 @@ var _ = Describe("Config", func() {
 			})
 			It("GetMinio function", func() {
 				Expect(config.GetMinio()).To(Equal(&config.Minio{}))
+				err := config.New("testdata/file1.yaml")
+				Expect(err).To(Succeed())
+				Expect(config.GetMinio()).ToNot(BeNil())
+				Expect(config.GetMinio().GetBucket()).To(Equal("values"))
+
 			})
 			It("GetMinioRaw function", func() {
 				Expect(len(config.GetMinioRaw())).To(Equal(0))
+				err := config.New("testdata/file5.yaml")
+				Expect(err).To(Succeed())
+				config.GetMinioRaw()
+
 			})
 			It("GetRaw function", func() {
 				Expect(config.GetRaw(make(chan int))).To(BeNil())
@@ -79,7 +88,7 @@ var _ = Describe("Config", func() {
 		})
 		Context("Check Minio Method", func() {
 			It("load tiny config ", func() {
-				Expect(config.New("../../test/config/file5.yaml")).To(BeNil())
+				Expect(config.New("testdata/file5.yaml")).To(BeNil())
 			})
 			It("GetHost method", func() {
 				Expect(config.GetMinio().GetHost()).To(Equal(""))
@@ -96,7 +105,7 @@ var _ = Describe("Config", func() {
 		})
 		Context("Test config function", func() {
 			It("Load config", func() {
-				Expect(config.New("../../test/config/file1.yaml")).To(BeNil())
+				Expect(config.New("testdata/file1.yaml")).To(BeNil())
 			})
 			It("Workspace function", func() {
 				Expect(len(config.Workspaces())).Should(Equal(4))

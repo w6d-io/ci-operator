@@ -1,60 +1,53 @@
+/*
+Copyright 2020 WILDCARD SA.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+Created on 04/03/2021
+*/
 package webhook_test
 
 import (
-	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+
 	"github.com/w6d-io/ci-operator/pkg/webhook"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var _ = Describe("Webhook", func() {
-	var (
-		play   *ci.Play
-		status ci.State
-		logger logr.Logger
-	)
-	BeforeEach(func() {
-		play = &ci.Play{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: ci.GroupVersion.Group + "/" + ci.GroupVersion.Version,
-			},
-		}
-		status = ci.Running
-		logger = ctrl.Log.WithName("test")
-	})
-	Describe("Send payload", func() {
-		Context("When all resource has been created", func() {
-			It("Build payload", func() {
-				Expect(webhook.BuildPlayPayload(play, status, logger)).To(BeNil())
-			})
-			It("Send to subscribers", func() {
-				Expect(webhook.GetPayLoad().Send("")).To(BeNil())
-			})
-			It("Get the play status", func() {
-				webhook.GetPayLoad().SetStatus(ci.Running)
-				Expect(webhook.GetPayLoad().GetStatus()).Should(Equal(ci.Running))
-			})
-			It("Get the object name", func() {
-				webhook.GetPayLoad().SetObjectNamespacedName(types.NamespacedName{
-					Name:      "test",
-					Namespace: "test",
-				})
-				Expect(webhook.GetPayLoad().GetObjectNamespacedName().String()).
-					Should(Equal("test/test"))
-			})
-		})
-		Context("When some resource creation failed", func() {
-			It("Build payload", func() {
-				Expect(webhook.BuildPlayPayload(
-					&ci.Play{},
-					ci.Failed,
-					logger,
-				)).To(BeNil())
-			})
+	Context("play", func() {
+		It("get payload", func() {
+			p := &ci.Play{
+				Spec: ci.PlaySpec{
+					Stack: ci.Stack{
+						Language: "js",
+						Package:  "npm",
+					},
+					ProjectID:  1,
+					PipelineID: 1,
+					RepoURL:    "https://github.com/w6d-io/nodejs-sample",
+					Commit: ci.Commit{
+						SHA: "commit_sha",
+						Ref: "main",
+					},
+				},
+				Status: ci.PlayStatus{
+					State: ci.Succeeded,
+				},
+			}
+			payload := webhook.GetPayLoad(p)
+			Expect(payload).ToNot(BeNil())
 		})
 	})
 })
