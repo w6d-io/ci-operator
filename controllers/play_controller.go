@@ -22,11 +22,11 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
 	"github.com/w6d-io/ci-operator/internal/util"
 	"github.com/w6d-io/ci-operator/pkg/play"
 	"github.com/w6d-io/ci-operator/pkg/webhook"
+	"github.com/w6d-io/hook"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -145,6 +145,10 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if err := r.Status().Update(ctx, p); err != nil {
 			return ctrl.Result{}, err
 		}
+		lp := webhook.GetLimitPayload(p, limits.Items[0], "concurrent")
+		if err := hook.Send(lp, ctrl.Log, "concurrent"); err != nil {
+			return ctrl.Result{Requeue: true}, err
+		}
 		return ctrl.Result{Requeue: true, RequeueAfter: 5 * time.Second}, nil
 		//return ctrl.Result{}, nil
 	}
@@ -166,18 +170,11 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	if err := webhook.BuildPlayPayload(p, ci.Unknown, log); err != nil {
-		log.Error(err, "build payload of play")
+	payload := webhook.GetPayLoad(p)
+	if err := hook.Send(payload, ctrl.Log, "end"); err != nil {
+		return ctrl.Result{Requeue: false}, err
 	}
 
-	payload := webhook.GetPayLoad()
-	payload.SetStatus(ci.Succeeded)
-	nn := util.GetCINamespacedName("pipeline-run", p)
-	payload.SetObjectNamespacedName(nn)
-	if err := payload.DoSend(config.GetWebhooks()); err != nil {
-		log.Error(err, "webhook")
-		return ctrl.Result{}, nil
-	}
 	return ctrl.Result{}, nil
 }
 

@@ -16,37 +16,31 @@ Created on 20/01/2021
 */
 package webhook
 
-import (
-	"k8s.io/apimachinery/pkg/types"
-	"net/url"
-
-	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
-)
-
-type Payload interface {
-	// Send sends the event to a webhook address
-	Send(string) error
-
-	// DoSend loop on webhook address and call Send
-	DoSend([]Webhook) error
-
-	// GetStatus return the name of the object in Payload
-	GetStatus() ci.State
-
-	// SetStatus record the status in the Payload
-	SetStatus(ci.State)
-
-	// GetObjectName return the name of the object in Payload
-	GetObjectNamespacedName() types.NamespacedName
-
-	// SetObjectName record the status in the Payload
-	SetObjectNamespacedName(name types.NamespacedName)
-}
-
-var payload Payload
+//
+//type Payload interface {
+//	// Send sends the event to a webhook address
+//	Send(string) error
+//
+//	// DoSend loop on webhook address and call Send
+//	DoSend([]Webhook) error
+//
+//	// GetStatus return the name of the object in Payload
+//	GetStatus() ci.State
+//
+//	// SetStatus record the status in the Payload
+//	SetStatus(ci.State)
+//
+//	// GetObjectName return the name of the object in Payload
+//	GetObjectNamespacedName() types.NamespacedName
+//
+//	// SetObjectName record the status in the Payload
+//	SetObjectNamespacedName(name types.NamespacedName)
+//}
+//
+//var payload Payload
 
 type Webhook struct {
 	Name   string `json:"name" yaml:"name"`
 	URLRaw string `json:"url" yaml:"url"`
-	URL    *url.URL
+	Scope  string `json:"scope" yaml:"scope"`
 }

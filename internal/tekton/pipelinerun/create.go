@@ -20,20 +20,21 @@ package pipelinerun
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/go-logr/logr"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/k8s/sa"
 	"github.com/w6d-io/ci-operator/internal/k8s/secrets"
 	"github.com/w6d-io/ci-operator/internal/util"
-	corev1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"time"
 
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/go-logr/logr"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func (p *PipelineRun) Parse(log logr.Logger) error {
@@ -79,7 +80,7 @@ func (p *PipelineRun) Parse(log logr.Logger) error {
 func (p *PipelineRun) Create(ctx context.Context, r client.Client, log logr.Logger) error {
 	log = log.WithName("Create").WithValues("action", "pipeline-run")
 	log.V(1).Info("creating")
-	namespacedName := util.GetCINamespacedName("pipeline-run", p.Play)
+	namespacedName := util.GetCINamespacedName(Prefix, p.Play)
 	pipelineRunResource := &tkn.PipelineRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        namespacedName.Name,
