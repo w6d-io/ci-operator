@@ -31,7 +31,7 @@ RUN chown 1001:1001 ci-operator
 
 # Use distroless as minimal base image to package the ci-operator binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/static:nonroot
+FROM gcr.io/distroless/base:nonroot
 ARG VCS_REF
 ARG BUILD_DATE
 ARG VERSION
