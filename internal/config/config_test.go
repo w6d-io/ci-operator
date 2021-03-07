@@ -72,11 +72,10 @@ var _ = Describe("Config", func() {
 
 			})
 			It("GetMinioRaw function", func() {
-				Expect(len(config.GetMinioRaw())).To(Equal(0))
 				err := config.New("testdata/file5.yaml")
 				Expect(err).To(Succeed())
-				config.GetMinioRaw()
-
+				Expect(len(config.GetMinioRaw())).To(Equal(0))
+				//config.GetMinioRaw()
 			})
 			It("GetRaw function", func() {
 				Expect(config.GetRaw(make(chan int))).To(BeNil())
