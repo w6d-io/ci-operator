@@ -116,7 +116,7 @@ func (u *IntTestTask) Create(ctx context.Context, r client.Client, log logr.Logg
 	if err := controllerutil.SetControllerReference(u.Play, taskResource, u.Scheme); err != nil {
 		return err
 	}
-	log.V(2).Info(fmt.Sprintf("task contains\n%v", util.GetObjectContain(taskResource)))
+	log.V(1).Info(fmt.Sprintf("task contains\n%v", util.GetObjectContain(taskResource)))
 	if err := r.Create(ctx, taskResource); err != nil {
 		return err
 	}

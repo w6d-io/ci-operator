@@ -59,12 +59,13 @@ func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) ([]tkn.Step, er
 	if err != nil {
 		return nil, err
 	}
-	log.WithValues("nbr", len(steplist.Items)).V(2).Info("List return")
+	log.WithValues("nbr", len(steplist.Items)).V(1).Info("List return")
 	if len(s.PlaySpec.Tasks) < s.Index+1 {
 		return nil, errors.New("no such task")
 	}
-	sortedSteps := s.FilteredSteps(logger, steplist.Items, s.TaskType == ci.UnitTests || s.TaskType == ci.IntegrationTests)
-	log.WithValues("nbr", len(sortedSteps)).V(2).Info("Filtered list return")
+	sortedSteps := s.FilteredSteps(logger, steplist.Items, s.TaskType == ci.UnitTests ||
+		s.TaskType == ci.IntegrationTests || s.TaskType == ci.E2ETests)
+	log.WithValues("nbr", len(sortedSteps)).V(1).Info("Filtered list return")
 	if len(sortedSteps) == 0 {
 		log.Error(errors.New("get steps error"), "list empty")
 		return []tkn.Step{}, nil
@@ -95,7 +96,7 @@ func (s *Step) FilteredSteps(logger logr.Logger, steps ci.Steps, isTest bool) ci
 	filteredSteps := ci.Steps{}
 	log := logger.WithName("FilteredSteps").WithValues("task", s.TaskType, "stack", s.PlaySpec.Stack,
 		"ops-namespace", config.GetNamespace())
-	log.V(2).Info("filtering")
+	log.V(1).Info("filtering")
 	_, mongoOK := s.PlaySpec.Dependencies[ci.MongoDB]
 	_, postgresOK := s.PlaySpec.Dependencies[ci.Postgresql]
 	_, mariaDBOK := s.PlaySpec.Dependencies[ci.MariaDB]
@@ -113,7 +114,7 @@ func (s *Step) FilteredSteps(logger logr.Logger, steps ci.Steps, isTest bool) ci
 		}
 		log.WithValues("package", step.Annotations[ci.AnnotationPackage],
 			"task", step.Annotations[ci.AnnotationTask],
-			"language", step.Annotations[ci.AnnotationLanguage]).V(2).Info("annotations")
+			"language", step.Annotations[ci.AnnotationLanguage]).V(1).Info("annotations")
 		if isTest {
 			if (len(task.Script) == 0) && (step.Annotations[ci.AnnotationPackage] != s.PlaySpec.Stack.Package) {
 				continue

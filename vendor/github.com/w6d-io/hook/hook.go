@@ -35,7 +35,7 @@ func init() {
 }
 
 func Send(payload interface{}, logger logr.Logger, scope string) error {
-    logger.V(2).Info("to send", "payload", payload)
+    logger.V(1).Info("to send", "payload", payload)
     go func(payload interface{}, logger logr.Logger) {
         if err := DoSend(payload, logger, scope); err != nil {
             logger.Error(err, "DoSend")
@@ -55,7 +55,7 @@ func DoSend(payload interface{}, logger logr.Logger, scope string) error {
     for _, sub := range subscribers {
         log := log.WithValues("scheme", sub.URL.Scheme)
         if !isInScope(sub, scope) {
-            log.V(2).Info("skip", "sub", sub.URL.String())
+            log.V(1).Info("skip", "sub", sub.URL.String())
             continue
         }
         go func(payload interface{}, URL *url.URL) {

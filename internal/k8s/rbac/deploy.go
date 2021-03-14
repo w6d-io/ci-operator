@@ -52,7 +52,7 @@ func (in *Deploy) Create(ctx context.Context, r client.Client, logger logr.Logge
 	err := r.Get(ctx, types.NamespacedName{Name: namespacedNamed.Name,
 		Namespace: deployNamespacedNamed.Namespace}, resource)
 	if apierrors.IsNotFound(err) {
-		log.V(2).Info("Create")
+		log.V(1).Info("Create")
 		resource = GetRoleBinding(in.Play)
 		resource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
 		if err := r.Create(ctx, resource); err != nil {
@@ -61,7 +61,7 @@ func (in *Deploy) Create(ctx context.Context, r client.Client, logger logr.Logge
 		}
 		return nil
 	}
-	log.V(2).Info("Update")
+	log.V(1).Info("Update")
 	if isSubjectExist(GetSubject(in.Play), resource.Subjects) {
 		return nil
 	}

@@ -90,7 +90,7 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 		if util.Condition(childPr.Status.Conditions) != p.Status.State {
 			p.Status.State = util.Condition(childPr.Status.Conditions)
-			log.V(2).Info("update status", "status", p.Status.State,
+			log.V(1).Info("update status", "status", p.Status.State,
 				"step", "1")
 			p.Status.State = ci.Succeeded
 			if err := r.Status().Update(ctx, p); err != nil {
@@ -106,7 +106,7 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if err := r.List(ctx, &prs, util.InNamespace(p)); util.IgnoreNotExists(err) != nil {
 		log.Error(err, "Unable to list PipelineRuns in ", util.InNamespace(p))
 		p.Status.State = ci.Errored
-		log.V(2).Info("update status", "status", p.Status.State,
+		log.V(1).Info("update status", "status", p.Status.State,
 			"step", "2")
 		if err := r.Status().Update(ctx, p); err != nil {
 			return ctrl.Result{}, err
@@ -129,7 +129,7 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if err := r.List(ctx, &limits, util.InNamespace(p)); client.IgnoreNotFound(err) != nil {
 		log.Error(err, "unable to list LimitCi")
 		p.Status.State = ci.Errored
-		log.V(2).Info("update status", "status", p.Status.State,
+		log.V(1).Info("update status", "status", p.Status.State,
 			"step", "3")
 		if err := r.Status().Update(ctx, p); err != nil {
 			return ctrl.Result{}, err
@@ -140,7 +140,7 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if len(limits.Items) > 0 && (limits.Items[0].Spec.Concurrent <= int64(len(runningPipeline))) {
 		log.V(1).Info("limit ci", "action", "queued")
 		p.Status.State = ci.Queued
-		log.V(2).Info("update status", "status", p.Status.State,
+		log.V(1).Info("update status", "status", p.Status.State,
 			"step", "4")
 		if err := r.Status().Update(ctx, p); err != nil {
 			return ctrl.Result{}, err
@@ -156,7 +156,7 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if err != nil {
 		log.Error(err, "Failed to create CI")
 		p.Status.State = ci.Errored
-		log.V(2).Info("update status", "status", p.Status.State,
+		log.V(1).Info("update status", "status", p.Status.State,
 			"step", "5")
 		if err := r.Status().Update(ctx, p); err != nil {
 			return ctrl.Result{}, err
@@ -164,7 +164,7 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 	p.Status.State = ci.Succeeded
-	log.V(2).Info("update status", "status", p.Status.State,
+	log.V(1).Info("update status", "status", p.Status.State,
 		"step", "6")
 	if err := r.Status().Update(ctx, p); err != nil {
 		return ctrl.Result{}, err

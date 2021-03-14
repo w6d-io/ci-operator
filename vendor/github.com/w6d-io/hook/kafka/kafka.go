@@ -62,7 +62,7 @@ func (k *Kafka) Send(payload interface{}, URL *url.URL) error {
     ); err != nil {
         return err
     }
-    //logger.V(2).Info("send payload by kafka", "payload", payload,
+    //logger.V(1).Info("send payload by kafka", "payload", payload,
     //	"address", URL.Host)
     return nil
 }
