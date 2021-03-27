@@ -25,7 +25,7 @@ import (
 )
 
 func (p *Pipeline) SetPipelineDeploy(logger logr.Logger) error {
-	log := logger.WithName("SetPipelineDeploy").WithValues("cx-namespace", util.InNamespace(p.Play))
+	log := logger.WithName("SetPipelineDeploy")
 
 	log.V(1).Info("add task in pipeline")
 	wks := getWorkspacePipelineTaskBinding()

@@ -50,7 +50,8 @@ type Step struct {
 
 // GetSteps return the list of step according the task
 func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) ([]tkn.Step, error) {
-	log := logger.WithName("GetSteps").WithValues("task", s.TaskType)
+	logger = logger.WithValues("task", s.TaskType)
+	log := logger.WithName("GetSteps")
 	// get Step by annotation
 	var steplist ci.StepList
 	//var opts []client.ListOption
@@ -94,7 +95,7 @@ func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) ([]tkn.Step, er
 // FilteredSteps return a ci.Steps filtered by annotation
 func (s *Step) FilteredSteps(logger logr.Logger, steps ci.Steps, isTest bool) ci.Steps {
 	filteredSteps := ci.Steps{}
-	log := logger.WithName("FilteredSteps").WithValues("task", s.TaskType, "stack", s.PlaySpec.Stack,
+	log := logger.WithName("FilteredSteps").WithValues("stack", s.PlaySpec.Stack,
 		"ops-namespace", config.GetNamespace())
 	log.V(1).Info("filtering")
 	_, mongoOK := s.PlaySpec.Dependencies[ci.MongoDB]

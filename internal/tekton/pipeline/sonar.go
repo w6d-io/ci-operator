@@ -26,7 +26,7 @@ import (
 )
 
 func (p *Pipeline) SetPipelineSonar(logger logr.Logger) error {
-	log := logger.WithName("SetPipelineSonar").WithValues(" cx-namespace", util.InNamespace(p.Play))
+	log := logger.WithName("SetPipelineSonar")
 
 	log.V(1).Info("add task in pipeline")
 

@@ -20,19 +20,16 @@ package play
 import (
 	"context"
 	"github.com/go-logr/logr"
-	"github.com/w6d-io/ci-operator/internal/util"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 )
 
 // CreateCI takes a Play struct to create tekton Pipeline
 func CreateCI(ctx context.Context, p *ci.Play, logger logr.Logger,
 	r client.Client, scheme *runtime.Scheme) error {
-
-	log := logger.WithName("CreateCI").WithValues("cx-namespace", util.InNamespace(p))
+	log := logger.WithName("CreateCI")
 	p.Status.State = ci.Creating
 	if err := r.Status().Update(ctx, p); err != nil {
 		return err

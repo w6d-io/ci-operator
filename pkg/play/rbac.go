@@ -23,11 +23,10 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/w6d-io/ci-operator/internal"
 	"github.com/w6d-io/ci-operator/internal/k8s/rbac"
-	"github.com/w6d-io/ci-operator/internal/util"
 )
 
 func (wf *WFType) Rbac(p *ci.Play, logger logr.Logger) error {
-	log := logger.WithName("Rbac").WithValues("cx-namespace", util.InNamespace(p))
+	log := logger.WithName("Rbac")
 	log.V(1).Info("Build CI role-binding")
 
 	resourceCI := &rbac.CI{

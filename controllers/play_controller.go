@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"strings"
 	"time"
 
@@ -58,8 +59,10 @@ type PlayReconciler struct {
 // +kubebuilder:rbac:groups=tekton.dev,resources=tasks/status,verbs=get;update;patch
 
 func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
-	log := r.Log.WithName("Reconcile").WithValues("play", req.NamespacedName)
+	correlationID := uuid.New().String()
+	ctx := context.WithValue(context.Background(), "correlation_id", correlationID)
+	logger := r.Log.WithValues("play", req.NamespacedName, "correlation_id", correlationID)
+	log := logger.WithName("Reconcile")
 	// get the play resource
 	p := new(ci.Play)
 
@@ -69,8 +72,6 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 	p.Spec.Name = strings.ToLower(p.Spec.Name)
 	p.Spec.Environment = strings.ToLower(p.Spec.Environment)
-	log = log.WithValues("cx-namespace", util.InNamespace(p))
-	log.V(1).Info("req name " + req.Name)
 	log.V(1).Info("get pipelinerun " + util.GetCINamespacedName(pipelinerun.Prefix, p).String())
 	var childPr tkn.PipelineRun
 	err := r.Get(ctx, util.GetCINamespacedName(pipelinerun.Prefix, p), &childPr)
@@ -121,8 +122,7 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			runningPipeline = append(runningPipeline, pr)
 		}
 	}
-	log.V(1).Info("pipelinerun", "running", len(runningPipeline),
-		"cx-namespace", util.InNamespace(p))
+	log.V(1).Info("pipelinerun", "running", len(runningPipeline))
 
 	log.V(1).Info("get limitCi")
 	var limits ci.LimitCiList
@@ -152,7 +152,7 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{Requeue: true, RequeueAfter: 5 * time.Second}, nil
 		//return ctrl.Result{}, nil
 	}
-	err = play.CreateCI(ctx, p, r.Log, r, r.Scheme)
+	err = play.CreateCI(ctx, p, logger, r, r.Scheme)
 	if err != nil {
 		log.Error(err, "Failed to create CI")
 		p.Status.State = ci.Errored

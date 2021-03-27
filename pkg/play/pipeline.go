@@ -23,11 +23,10 @@ import (
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 
 	intpipeline "github.com/w6d-io/ci-operator/internal/tekton/pipeline"
-	"github.com/w6d-io/ci-operator/internal/util"
 )
 
 func (wf *WFType) SetPipeline(p *ci.Play, logger logr.Logger) error {
-	log := logger.WithName("SetPipeline").WithValues("cx-namespace", util.InNamespace(p))
+	log := logger.WithName("SetPipeline")
 	log.Info("Build pipeline")
 	pipeline := &intpipeline.Pipeline{
 		Play:   p,
