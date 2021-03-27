@@ -27,7 +27,7 @@ import (
 // SetBuild adds build tasks elements in pipeline
 func (p *Pipeline) SetPipelineBuild(logger logr.Logger) error {
 
-	log := logger.WithName("SetPipelineBuild").WithValues("cx-namespace", util.InNamespace(p.Play))
+	log := logger.WithName("SetPipelineBuild")
 	tk := p.Play.Spec.Tasks[p.Pos][ci.Build]
 	var flags []string
 	if len(tk.Variables) != 0 {

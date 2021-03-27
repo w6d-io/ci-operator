@@ -20,8 +20,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/w6d-io/ci-operator/internal/config"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	resourcev1alpha1 "github.com/tektoncd/pipeline/pkg/apis/resource/v1alpha1"
@@ -31,6 +33,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/w6d-io/ci-operator/controllers"
+	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/util"
 	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -101,7 +104,7 @@ func main() {
 	setupLog.Info("set opts")
 	opts.Development = os.Getenv("RELEASE") != "prod"
 	opts.StacktraceLevel = zapcore.PanicLevel
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts), zap.RawZapOpts(zapraw.AddCaller())))
+	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts), zap.RawZapOpts(zapraw.AddCaller(), zapraw.AddCallerSkip(-1))))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
@@ -114,14 +117,28 @@ func main() {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
-	if err = (&controllers.PlayReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Play"),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+	c, err := controller.New("play", mgr, controller.Options{
+		Reconciler: &controllers.PlayReconciler{
+			Client: mgr.GetClient(),
+			Log:    ctrl.Log.WithName("controllers").WithName("Play"),
+			Scheme: mgr.GetScheme(),
+		},
+	})
+	if err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Play")
 		os.Exit(1)
 	}
+	if err := c.Watch(&source.Kind{Type: &civ1alpha1.Play{}}, &handler.EnqueueRequestForObject{}); err != nil {
+		setupLog.Error(err, "unable to watch play")
+		os.Exit(1)
+	}
+	if err := c.Watch(&source.Kind{Type: &tkn.PipelineRun{}}, &handler.EnqueueRequestForOwner{
+		OwnerType: &civ1alpha1.Play{}, IsController: true,
+	}); err != nil {
+		setupLog.Error(err, "unable to watch PipelineRun")
+		os.Exit(1)
+	}
+
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
 		if err = (&civ1alpha1.Play{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "Play")
@@ -129,7 +146,6 @@ func main() {
 		}
 	}
 	// +kubebuilder:scaffold:builder
-
 	setupLog.Info("starting manager", "Version", Version, "Built",
 		Built, "Revision", Revision, "Arch", OsArch, "GoVersion", GoVersion)
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {

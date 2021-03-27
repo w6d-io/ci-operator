@@ -23,12 +23,11 @@ import (
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 
 	"github.com/go-logr/logr"
-	"github.com/w6d-io/ci-operator/internal/util"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func (t *Task) Parse(ctx context.Context, logger logr.Logger) error {
-	log := logger.WithName("Parse").WithValues("cx-namespace", util.InNamespace(t.Play))
+	log := logger.WithName("Parse")
 
 	for pos, m := range t.Play.Spec.Tasks {
 		for name := range m {

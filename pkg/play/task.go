@@ -22,7 +22,6 @@ import (
 	"github.com/go-logr/logr"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal/tekton/task"
-	"github.com/w6d-io/ci-operator/internal/util"
 )
 
 // SetTask executes the Task according the TaskType
@@ -34,7 +33,7 @@ import (
 //   - UnitTests => create a unit test Tekton Task
 //   - E2ETests  => create a e2e test Tekton Task
 func (wf *WFType) SetTask(ctx context.Context, p *ci.Play, logger logr.Logger) error {
-	log := logger.WithName("SetTask").WithValues("cx-namespace", util.InNamespace(p))
+	log := logger.WithName("SetTask")
 	log.Info("Build tasks")
 	var t = task.Task{
 		Client: wf.Client,

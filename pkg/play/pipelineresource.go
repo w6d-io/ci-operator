@@ -30,7 +30,7 @@ import (
 
 // SetGitCreate adds git pipeline resource
 func (wf *WFType) SetGitCreate(p *ci.Play, logger logr.Logger) error {
-	log := logger.WithName("SetGitCreate").WithValues("cx-namespace", util.InNamespace(p))
+	log := logger.WithName("SetGitCreate")
 	log.V(1).Info("Check repository URL")
 	URL, err := url.Parse(p.Spec.RepoURL)
 	if err != nil {
@@ -46,6 +46,7 @@ func (wf *WFType) SetGitCreate(p *ci.Play, logger logr.Logger) error {
 		Play:           p,
 		Scheme:         wf.Scheme,
 	}
+	log.V(1).Info("add pipeline resource create method for git")
 	if err := wf.Add(git.Create); err != nil {
 		return err
 	}
@@ -57,7 +58,7 @@ func (wf *WFType) SetGitCreate(p *ci.Play, logger logr.Logger) error {
 // SetImageCreate adds image pipeline resource
 func (wf *WFType) SetImageCreate(p *ci.Play, logger logr.Logger) error {
 	if util.IsBuildStage(p) {
-		log := logger.WithName("SetImageCreate").WithValues("cx-namespace", util.InNamespace(p))
+		log := logger.WithName("SetImageCreate")
 		URL, err := util.GetDockerImageTag(p)
 		if err != nil {
 			log.Error(err, "get repository address failed")
@@ -72,6 +73,7 @@ func (wf *WFType) SetImageCreate(p *ci.Play, logger logr.Logger) error {
 			Play:   p,
 			Scheme: wf.Scheme,
 		}
+		log.V(1).Info("add pipeline resource create method for image")
 		if err := wf.Add(image.Create); err != nil {
 			return err
 		}

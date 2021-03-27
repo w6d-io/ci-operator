@@ -44,7 +44,7 @@ func (wf *WFType) CreateValues(p *ci.Play, logger logr.Logger) error {
 	// put values.yaml in MinIO
 	m := minio.New(logger)
 	if m == nil {
-		return fmt.Errorf("create minio instance return nil")
+		return fmt.Errorf("minio connection failed")
 	}
 	if err := m.PutString(logger, valueBuf.String(), BuildTarget(p, values.FileNameValues)); err != nil {
 		return err

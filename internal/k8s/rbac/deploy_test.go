@@ -98,7 +98,6 @@ var _ = Describe("RBAC", func() {
 				ns := util.GetDeployNamespacedName(config.GetDeployPrefix(), play).Namespace
 				err = k8sClient.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: ns}, &r)
 				Expect(err).To(Succeed())
-				//Expect(util.GetObjectContain(&r)).To(Equal(""))
 				Expect(len(r.Subjects)).To(Equal(2))
 			})
 			It("with subject already exist", func() {

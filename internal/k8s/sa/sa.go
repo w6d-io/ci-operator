@@ -21,19 +21,30 @@ import (
 	"context"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func Update(ctx context.Context, name string, nn types.NamespacedName, r client.Client) error {
 	// Add secret in CI
-	saResource := new(corev1.ServiceAccount)
-	if err := r.Get(ctx, nn, saResource); err != nil {
+
+	resource := new(corev1.ServiceAccount)
+	if err := r.Get(ctx, nn, resource); err != nil {
 		return err
 	}
-	if !isContainSecret(name, saResource.Secrets) {
-		saResource.Secrets = append(saResource.Secrets,
+	if !isContainSecret(name, resource.Secrets) {
+		resource.Secrets = append(resource.Secrets,
 			corev1.ObjectReference{Name: name})
-		if err := r.Update(ctx, saResource); err != nil {
+		err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			if err := r.Get(ctx, nn, resource); err != nil {
+				return err
+			}
+			if err := r.Update(ctx, resource); err != nil {
+				return err
+			}
+			return nil
+		})
+		if err != nil {
 			return err
 		}
 	}

@@ -92,6 +92,7 @@ func (s *Secret) MinIOCreate(ctx context.Context, r client.Client, log logr.Logg
 		return err
 	}
 	if err := r.Create(ctx, resource); err != nil {
+		log.Error(err, "create")
 		return err
 	}
 	return nil

@@ -50,7 +50,7 @@ type ImagePR struct {
 func (i *ImagePR) Create(ctx context.Context, r client.Client, log logr.Logger) error {
 	log = log.WithName("Create").WithValues("type", "pipelineResource", "for", "image")
 	log.V(1).Info("creating")
-	imageResource := &resourcev1alpha1.PipelineResource{
+	resource := &resourcev1alpha1.PipelineResource{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        i.NamespacedName.Name,
 			Namespace:   i.NamespacedName.Namespace,
@@ -69,19 +69,20 @@ func (i *ImagePR) Create(ctx context.Context, r client.Client, log logr.Logger) 
 	}
 
 	// set the current time in the new pipeline resource image type resource in annotation
-	imageResource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
-	if err := controllerutil.SetControllerReference(i.Play, imageResource, i.Scheme); err != nil {
+	resource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
+	if err := controllerutil.SetControllerReference(i.Play, resource, i.Scheme); err != nil {
 		return err
 	}
-	log.V(1).Info(fmt.Sprintf("pipelineResource contains\n%v",
-		util.GetObjectContain(imageResource)))
+	log.V(1).Info(resource.Kind, "contains", fmt.Sprintf("%v",
+		util.GetObjectContain(resource)))
 
-	if err := r.Create(ctx, imageResource); err != nil {
+	if err := r.Create(ctx, resource); err != nil {
 		if apierrors.IsAlreadyExists(err) {
 			log.Error(err, "creating failed")
 			return nil
 		}
 		return err
 	}
+
 	return nil
 }

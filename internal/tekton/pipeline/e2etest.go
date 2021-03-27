@@ -26,7 +26,7 @@ import (
 )
 
 func (p *Pipeline) SetPipelineE2ETest(logger logr.Logger) error {
-	log := logger.WithName("SetPipelineE2ETest").WithValues("cx-namespace", util.InNamespace(p.Play))
+	log := logger.WithName("SetPipelineE2ETest")
 
 	log.V(1).Info("add task in pipeline")
 	wks := getWorkspacePipelineTaskBinding()

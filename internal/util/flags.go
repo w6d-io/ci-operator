@@ -21,12 +21,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/w6d-io/ci-operator/internal/config"
-	"go.uber.org/zap/zapcore"
 	"os"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"strconv"
 	"strings"
+
+	"github.com/w6d-io/ci-operator/internal/config"
+	"go.uber.org/zap/zapcore"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 // JsonEncoderConfig returns an opinionated EncoderConfig
@@ -54,6 +55,7 @@ func TextEncoderConfig() zapcore.EncoderConfig {
 		LevelKey:       "L",
 		NameKey:        "N",
 		CallerKey:      "C",
+		FunctionKey:    "",
 		MessageKey:     "M",
 		StacktraceKey:  "S",
 		LineEnding:     zapcore.DefaultLineEnding,
@@ -83,7 +85,7 @@ func (o *outputFormatFlag) Set(flagValue string) error {
 	case "text":
 		o.zapOptions.Encoder = zapcore.NewConsoleEncoder(TextEncoderConfig())
 	default:
-		return fmt.Errorf("invalid \"%s\"", flagValue)
+		return fmt.Errorf(`invalid "%s"`, flagValue)
 	}
 	o.value = flagValue
 	return nil

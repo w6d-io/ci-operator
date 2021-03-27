@@ -22,13 +22,11 @@ import (
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal"
 	"github.com/w6d-io/ci-operator/internal/k8s/secrets"
-	"github.com/w6d-io/ci-operator/internal/util"
 )
 
 // GitSecret fills the secret structure and add the git create method in the run list
 func (wf *WFType) GitSecret(p *ci.Play, logger logr.Logger) error {
-	log := logger.WithName("GitSecret").WithValues("cx-namespace",
-		util.InNamespace(p))
+	log := logger.WithName("GitSecret")
 	log.V(1).Info("Build git secret")
 	secret := &secrets.Secret{
 		WorkFlowStruct: internal.WorkFlowStruct{
@@ -42,8 +40,7 @@ func (wf *WFType) GitSecret(p *ci.Play, logger logr.Logger) error {
 
 // DockerCredSecret fills the secret structure and add the Docker credential create method in the run list
 func (wf *WFType) DockerCredSecret(p *ci.Play, logger logr.Logger) error {
-	log := logger.WithName("DockerCredSecret").WithValues("cx-namespace",
-		util.InNamespace(p))
+	log := logger.WithName("DockerCredSecret")
 	log.V(1).Info("Build docker credential secret")
 	secret := &secrets.Secret{
 		WorkFlowStruct: internal.WorkFlowStruct{
@@ -57,8 +54,7 @@ func (wf *WFType) DockerCredSecret(p *ci.Play, logger logr.Logger) error {
 
 // MinIOSecret fills the secret structure to add minio create method in the run list
 func (wf *WFType) MinIOSecret(p *ci.Play, logger logr.Logger) error {
-	log := logger.WithName("MinIOSecret").WithValues("cx-namespace",
-		util.InNamespace(p))
+	log := logger.WithName("MinIOSecret")
 	log.V(1).Info("Build minio secret")
 	secret := &secrets.Secret{
 		WorkFlowStruct: internal.WorkFlowStruct{

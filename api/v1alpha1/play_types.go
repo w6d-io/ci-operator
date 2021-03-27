@@ -95,11 +95,16 @@ type PlayStatus struct {
 	// States Running, Failed, Succeeded, Errored
 	// +optional
 	State State `json:"state,omitempty"`
+
+	// Message contains the pipeline message
+	// +optional
+	Message string `json:"message,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.state"
 // +kubebuilder:printcolumn:name="PipelineRun",type="string",priority=1,JSONPath=".status.pipeline_run_name"
+// +kubebuilder:printcolumn:name="Message",type="string",priority=1,JSONPath=".status.message"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",description="CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC."
 // +kubebuilder:subresource:status
 // Play is the Schema for the plays API

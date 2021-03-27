@@ -17,6 +17,7 @@ require (
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v0.4.0
+	github.com/google/uuid v1.1.1
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/minio/minio-go/v6 v6.0.57
 	github.com/onsi/ginkgo v1.15.0
@@ -24,7 +25,7 @@ require (
 	github.com/speps/go-hashids v2.0.0+incompatible
 	github.com/tektoncd/pipeline v0.18.1
 	github.com/w6d-io/hook v0.1.1
-	go.uber.org/zap v1.15.0
+	go.uber.org/zap v1.16.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	k8s.io/api v0.19.7
 	k8s.io/apimachinery v0.19.7

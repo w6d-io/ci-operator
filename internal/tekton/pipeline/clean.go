@@ -25,7 +25,7 @@ import (
 )
 
 func (p *Pipeline) SetPipelineClean(logger logr.Logger) error {
-	log := logger.WithName("SetPipelineClean").WithValues("cx-namespace", util.InNamespace(p.Play))
+	log := logger.WithName("SetPipelineClean")
 
 	log.V(1).Info("add task in pipeline")
 	wks := getWorkspacePipelineTaskBinding()

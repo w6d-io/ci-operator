@@ -23,12 +23,11 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/w6d-io/ci-operator/internal"
 	"github.com/w6d-io/ci-operator/internal/k8s/rbac"
-	"github.com/w6d-io/ci-operator/internal/util"
 )
 
 func (wf *WFType) Rbac(p *ci.Play, logger logr.Logger) error {
-	log := logger.WithName("GitSecret").WithValues("cx-namespace", util.InNamespace(p))
-	log.V(1).Info("Build git sa")
+	log := logger.WithName("Rbac")
+	log.V(1).Info("Build CI role-binding")
 
 	resourceCI := &rbac.CI{
 		WorkFlowStruct: internal.WorkFlowStruct{
@@ -38,6 +37,7 @@ func (wf *WFType) Rbac(p *ci.Play, logger logr.Logger) error {
 	}
 
 	if err := wf.Add(resourceCI.Create); err != nil {
+		log.V(1).Info("Build Deploy role-binding")
 		return err
 	}
 	resourceDeploy := &rbac.Deploy{

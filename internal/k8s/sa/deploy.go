@@ -52,9 +52,10 @@ func (s *Deploy) Create(ctx context.Context, r client.Client, log logr.Logger) e
 		},
 	}
 	resource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
-	log.V(1).Info(fmt.Sprintf("Secret contains\n%v",
+	log.V(1).Info(resource.Kind, "contains", fmt.Sprintf("%v",
 		util.GetObjectContain(resource)))
 	if err := r.Create(ctx, resource); err != nil {
+		log.Error(err, "create")
 		return err
 	}
 

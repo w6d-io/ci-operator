@@ -36,7 +36,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// Condition returns a Play State
+// Condition returns a kubernetes State
 func Condition(c v1beta1.Conditions) (status ci.State) {
 	if len(c) == 0 {
 		return "---"
@@ -56,6 +56,14 @@ func Condition(c v1beta1.Conditions) (status ci.State) {
 		}
 	}
 	return
+}
+
+// Message returns a kubernetes Message
+func Message(c v1beta1.Conditions) string {
+	if len(c) == 0 {
+		return ""
+	}
+	return c[0].Message
 }
 
 // IsPipelineRunning return whether or not the pipeline is running

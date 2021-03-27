@@ -79,7 +79,7 @@ func (b *BuildTask) Create(ctx context.Context, r client.Client, log logr.Logger
 	log.V(1).Info("creating")
 	namespacedName := util.GetCINamespacedName(ci.Build.String(), b.Play)
 
-	taskResource := &tkn.Task{
+	resource := &tkn.Task{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        namespacedName.Name,
 			Namespace:   namespacedName.Namespace,
@@ -108,7 +108,7 @@ func (b *BuildTask) Create(ctx context.Context, r client.Client, log logr.Logger
 		},
 	}
 	if b.BuildDocker {
-		taskResource.Spec.Resources.Outputs = []tkn.TaskResource{
+		resource.Spec.Resources.Outputs = []tkn.TaskResource{
 			{
 				ResourceDeclaration: tkn.ResourceDeclaration{
 					Name: ci.ResourceImage,
@@ -116,7 +116,7 @@ func (b *BuildTask) Create(ctx context.Context, r client.Client, log logr.Logger
 				},
 			},
 		}
-		taskResource.Spec.Params = append(taskResource.Spec.Params, []tkn.ParamSpec{
+		resource.Spec.Params = append(resource.Spec.Params, []tkn.ParamSpec{
 			{
 				Name: "s3DockerfilePath",
 				Type: tkn.ParamTypeString,
@@ -137,12 +137,13 @@ func (b *BuildTask) Create(ctx context.Context, r client.Client, log logr.Logger
 	}
 
 	// set the current time in the resource annotations
-	taskResource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
-	if err := controllerutil.SetControllerReference(b.Play, taskResource, b.Scheme); err != nil {
+	resource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
+	if err := controllerutil.SetControllerReference(b.Play, resource, b.Scheme); err != nil {
 		return err
 	}
-	log.V(1).Info(fmt.Sprintf("task contains\n%v", util.GetObjectContain(taskResource)))
-	if err := r.Create(ctx, taskResource); err != nil {
+	log.V(1).Info(resource.Kind, "contains", fmt.Sprintf("%v",
+		util.GetObjectContain(resource)))
+	if err := r.Create(ctx, resource); err != nil {
 		return err
 	}
 	// All went well

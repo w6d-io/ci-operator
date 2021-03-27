@@ -23,12 +23,11 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/w6d-io/ci-operator/internal"
 	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
-	"github.com/w6d-io/ci-operator/internal/util"
 )
 
 // SetPipelineRun prepares the PipelineRun and add create method into the run list
 func (wf *WFType) SetPipelineRun(play *ci.Play, log logr.Logger) error {
-	log = log.WithName("SetPipelineRun").WithValues("cx-namespace", util.InNamespace(play))
+	log = log.WithName("SetPipelineRun")
 	log.Info("Build pipeline run")
 
 	pipelineRun := &pipelinerun.PipelineRun{

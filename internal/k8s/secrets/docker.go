@@ -62,6 +62,7 @@ func (s *Secret) DockerCredCreate(ctx context.Context, r client.Client, log logr
 		return err
 	}
 	if err := r.Create(ctx, resource); err != nil {
+		log.Error(err, "create")
 		return err
 	}
 	if err := sa.Update(ctx, resource.Name,
