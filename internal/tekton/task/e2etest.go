@@ -74,7 +74,7 @@ func (e *E2ETestTask) Create(ctx context.Context, r client.Client, log logr.Logg
 	log.V(1).Info("creating")
 
 	namespacedName := util.GetCINamespacedName(ci.E2ETests.String(), e.Play)
-	taskResource := &tkn.Task{
+	resource := &tkn.Task{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        namespacedName.Name,
 			Namespace:   namespacedName.Namespace,
@@ -106,12 +106,13 @@ func (e *E2ETestTask) Create(ctx context.Context, r client.Client, log logr.Logg
 			Steps: e.Steps,
 		},
 	}
-	taskResource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
-	if err := controllerutil.SetControllerReference(e.Play, taskResource, e.Scheme); err != nil {
+	resource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
+	if err := controllerutil.SetControllerReference(e.Play, resource, e.Scheme); err != nil {
 		return err
 	}
-	log.V(1).Info(fmt.Sprintf("task contains\n%v", util.GetObjectContain(taskResource)))
-	if err := r.Create(ctx, taskResource); err != nil {
+	log.V(1).Info(resource.Kind, "contains", fmt.Sprintf("%v",
+		util.GetObjectContain(resource)))
+	if err := r.Create(ctx, resource); err != nil {
 		return err
 	}
 	return nil

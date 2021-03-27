@@ -18,24 +18,23 @@ package controllers
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/google/uuid"
+	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
 	"github.com/w6d-io/ci-operator/internal/util"
 	"github.com/w6d-io/ci-operator/pkg/play"
 	"github.com/w6d-io/ci-operator/pkg/webhook"
 	"github.com/w6d-io/hook"
-	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-
-	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
-	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // PlayReconciler reconciles a Play object
@@ -72,34 +71,49 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 	p.Spec.Name = strings.ToLower(p.Spec.Name)
 	p.Spec.Environment = strings.ToLower(p.Spec.Environment)
-	log.V(1).Info("get pipelinerun " + util.GetCINamespacedName(pipelinerun.Prefix, p).String())
+	log.V(1).Info("get", "pipelinerun", util.GetCINamespacedName(pipelinerun.Prefix, p).String())
 	var childPr tkn.PipelineRun
 	err := r.Get(ctx, util.GetCINamespacedName(pipelinerun.Prefix, p), &childPr)
 	if client.IgnoreNotFound(err) != nil {
-		log.Error(err, "Unable to list child PipelineRuns")
+		log.Error(err, "Unable to get PipelineRun")
 		return ctrl.Result{}, err
 	}
 
 	if !apierrors.IsNotFound(err) {
 		if childPr.Name != "" && p.Status.PipelineRunName != childPr.Name {
-			p.Status.PipelineRunName = childPr.Name
-			log.V(1).Info("updating play status")
-			if err := r.Status().Update(ctx, p); err != nil {
-				log.Error(err, "unable to update Play status")
-				return ctrl.Result{}, err
+			err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+				if err := r.Get(ctx, req.NamespacedName, p); err != nil {
+					return client.IgnoreNotFound(err)
+				}
+				p.Status.PipelineRunName = childPr.Name
+				log.V(1).Info("updating play status")
+				if err := r.Status().Update(ctx, p); err != nil {
+					log.Error(err, "update")
+					return err
+				}
+				return nil
+			})
+			if err != nil {
+				return ctrl.Result{Requeue: true}, client.IgnoreNotFound(err)
 			}
 		}
-		if util.Condition(childPr.Status.Conditions) != p.Status.State {
-			p.Status.State = util.Condition(childPr.Status.Conditions)
-			log.V(1).Info("update status", "status", p.Status.State,
+		err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			//p.Status.State = util.Condition(childPr.Status.Conditions)
+			log.V(1).Info("update status", "status",
+				util.Condition(childPr.Status.Conditions),
 				"step", "1")
-			p.Status.State = ci.Succeeded
+			p.Status.State = util.Condition(childPr.Status.Conditions)
+			p.Status.Message = util.Message(childPr.Status.Conditions)
 			if err := r.Status().Update(ctx, p); err != nil {
 				log.Error(err, "unable to update Play status")
-				return ctrl.Result{}, err
+				return err
 			}
+			return nil
+		})
+		if err != nil {
+			return ctrl.Result{Requeue: true}, err
 		}
-		return ctrl.Result{}, nil
+		return ctrl.Result{Requeue: false}, nil
 	}
 	log.V(1).Info("pipelinerun not found")
 	log.V(1).Info("getting all pipeline run")
@@ -156,6 +170,7 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if err != nil {
 		log.Error(err, "Failed to create CI")
 		p.Status.State = ci.Errored
+		p.Status.Message = err.Error()
 		log.V(1).Info("update status", "status", p.Status.State,
 			"step", "5")
 		if err := r.Status().Update(ctx, p); err != nil {
@@ -163,7 +178,7 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 		return ctrl.Result{}, err
 	}
-	p.Status.State = ci.Succeeded
+	p.Status.State = "---"
 	log.V(1).Info("update status", "status", p.Status.State,
 		"step", "6")
 	if err := r.Status().Update(ctx, p); err != nil {
@@ -175,14 +190,5 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{Requeue: false}, err
 	}
 
-	return ctrl.Result{}, nil
-}
-
-func (r *PlayReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
-		For(&ci.Play{}).
-		WithOptions(controller.Options{
-			MaxConcurrentReconciles: 10,
-		}).
-		Complete(r)
+	return ctrl.Result{Requeue: false}, nil
 }

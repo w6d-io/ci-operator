@@ -25,7 +25,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-
 func Update(ctx context.Context, name string, nn types.NamespacedName, r client.Client) error {
 	// Add secret in CI
 

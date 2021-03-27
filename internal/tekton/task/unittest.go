@@ -80,7 +80,7 @@ func (u *UnitTestTask) Create(ctx context.Context, r client.Client, log logr.Log
 	namespacedName := util.GetCINamespacedName(ci.UnitTests.String(), u.Play)
 
 	// build Tekton Task resource
-	taskResource := &tkn.Task{
+	resource := &tkn.Task{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        namespacedName.Name,
 			Namespace:   namespacedName.Namespace,
@@ -114,12 +114,13 @@ func (u *UnitTestTask) Create(ctx context.Context, r client.Client, log logr.Log
 	}
 
 	// set the current time in the resource annotations
-	taskResource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
-	if err := controllerutil.SetControllerReference(u.Play, taskResource, u.Scheme); err != nil {
+	resource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
+	if err := controllerutil.SetControllerReference(u.Play, resource, u.Scheme); err != nil {
 		return err
 	}
-	log.V(1).Info(fmt.Sprintf("task contains\n%v", util.GetObjectContain(taskResource)))
-	if err := r.Create(ctx, taskResource); err != nil {
+	log.V(1).Info(resource.Kind, "contains", fmt.Sprintf("%v",
+		util.GetObjectContain(resource)))
+	if err := r.Create(ctx, resource); err != nil {
 		return err
 	}
 	// All went well

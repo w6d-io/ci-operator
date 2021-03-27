@@ -34,7 +34,7 @@ func (wf *WFType) ServiceAccount(p *ci.Play, logger logr.Logger) error {
 		},
 	}
 	if err := wf.Add(ci.Create); err != nil {
-	log.V(1).Info("Build service account for deploy")
+		log.V(1).Info("Build service account for deploy")
 		return err
 	}
 	deploy := &sa.Deploy{

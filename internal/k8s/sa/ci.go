@@ -61,7 +61,7 @@ func (s *CI) Create(ctx context.Context, r client.Client, log logr.Logger) error
 	if err := controllerutil.SetControllerReference(s.Play, resource, s.Scheme); err != nil {
 		return err
 	}
-	log.V(1).Info(fmt.Sprintf("Secret contains\n%v",
+	log.V(1).Info(resource.Kind, "contains", fmt.Sprintf("%v",
 		util.GetObjectContain(resource)))
 
 	if err := r.Create(ctx, resource); err != nil {

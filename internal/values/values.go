@@ -140,8 +140,8 @@ secrets:
 
 // GetValues builds the values from the template from Play resource
 func (in *Templates) GetValues(out *bytes.Buffer) error {
-	log := ValueLog.WithName("GetValues")
-	log.V(1).Info("templating")
+	//log := ValueLog.WithName("GetValues")
+	//log.V(1).Info("templating")
 	if err := in.PrintTemplate(out, FileNameValues, HelmValuesTemplate); err != nil {
 		return err
 	}

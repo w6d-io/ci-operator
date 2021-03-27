@@ -113,9 +113,9 @@ func (s *Step) FilteredSteps(logger logr.Logger, steps ci.Steps, isTest bool) ci
 			filteredSteps = append(filteredSteps, step)
 			continue
 		}
-		log.WithValues("package", step.Annotations[ci.AnnotationPackage],
-			"task", step.Annotations[ci.AnnotationTask],
-			"language", step.Annotations[ci.AnnotationLanguage]).V(1).Info("annotations")
+		log.WithValues("step_package", step.Annotations[ci.AnnotationPackage],
+			"step_task", step.Annotations[ci.AnnotationTask],
+			"step_language", step.Annotations[ci.AnnotationLanguage]).V(1).Info("annotations")
 		if isTest {
 			if (len(task.Script) == 0) && (step.Annotations[ci.AnnotationPackage] != s.PlaySpec.Stack.Package) {
 				continue

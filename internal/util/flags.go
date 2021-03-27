@@ -55,6 +55,7 @@ func TextEncoderConfig() zapcore.EncoderConfig {
 		LevelKey:       "L",
 		NameKey:        "N",
 		CallerKey:      "C",
+		FunctionKey:    "",
 		MessageKey:     "M",
 		StacktraceKey:  "S",
 		LineEnding:     zapcore.DefaultLineEnding,
@@ -84,7 +85,7 @@ func (o *outputFormatFlag) Set(flagValue string) error {
 	case "text":
 		o.zapOptions.Encoder = zapcore.NewConsoleEncoder(TextEncoderConfig())
 	default:
-		return fmt.Errorf("invalid \"%s\"", flagValue)
+		return fmt.Errorf(`invalid "%s"`, flagValue)
 	}
 	o.value = flagValue
 	return nil

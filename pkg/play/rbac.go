@@ -37,7 +37,7 @@ func (wf *WFType) Rbac(p *ci.Play, logger logr.Logger) error {
 	}
 
 	if err := wf.Add(resourceCI.Create); err != nil {
-	log.V(1).Info("Build Deploy role-binding")
+		log.V(1).Info("Build Deploy role-binding")
 		return err
 	}
 	resourceDeploy := &rbac.Deploy{

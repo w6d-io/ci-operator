@@ -80,7 +80,7 @@ func (p *PipelineRun) Create(ctx context.Context, r client.Client, log logr.Logg
 	log = log.WithName("Create").WithValues("action", "pipeline-run")
 	log.V(1).Info("creating")
 	namespacedName := util.GetCINamespacedName(Prefix, p.Play)
-	pipelineRunResource := &tkn.PipelineRun{
+	resource := &tkn.PipelineRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        namespacedName.Name,
 			Namespace:   namespacedName.Namespace,
@@ -96,13 +96,13 @@ func (p *PipelineRun) Create(ctx context.Context, r client.Client, log logr.Logg
 			PodTemplate:        p.PodTemplate,
 		},
 	}
-	pipelineRunResource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
-	if err := controllerutil.SetControllerReference(p.Play, pipelineRunResource, p.Scheme); err != nil {
+	resource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
+	if err := controllerutil.SetControllerReference(p.Play, resource, p.Scheme); err != nil {
 		return err
 	}
-	log.V(1).Info(fmt.Sprintf("pipelineRun contains\n%v",
-		util.GetObjectContain(pipelineRunResource)))
-	if err := r.Create(ctx, pipelineRunResource); err != nil {
+	log.V(1).Info(resource.Kind, "contains", fmt.Sprintf("%v",
+		util.GetObjectContain(resource)))
+	if err := r.Create(ctx, resource); err != nil {
 		return err
 	}
 	// All went well

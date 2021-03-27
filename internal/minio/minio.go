@@ -38,6 +38,9 @@ func New(logger logr.Logger) *Minio {
 		log.Error(err, "get minio client")
 		return nil
 	}
+	if minioClient == nil {
+		return nil
+	}
 	found, err := minioClient.BucketExists(m.Config.Bucket)
 	if err != nil {
 		log.Error(err, "check bucket exists")
