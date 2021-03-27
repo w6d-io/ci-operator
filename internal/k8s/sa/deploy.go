@@ -55,6 +55,7 @@ func (s *Deploy) Create(ctx context.Context, r client.Client, log logr.Logger) e
 	log.V(1).Info(fmt.Sprintf("Secret contains\n%v",
 		util.GetObjectContain(resource)))
 	if err := r.Create(ctx, resource); err != nil {
+		log.Error(err, "create")
 		return err
 	}
 

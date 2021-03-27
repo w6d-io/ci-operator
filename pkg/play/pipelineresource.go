@@ -46,6 +46,7 @@ func (wf *WFType) SetGitCreate(p *ci.Play, logger logr.Logger) error {
 		Play:           p,
 		Scheme:         wf.Scheme,
 	}
+	log.V(1).Info("add pipeline resource create method for git")
 	if err := wf.Add(git.Create); err != nil {
 		return err
 	}
@@ -72,6 +73,7 @@ func (wf *WFType) SetImageCreate(p *ci.Play, logger logr.Logger) error {
 			Play:   p,
 			Scheme: wf.Scheme,
 		}
+		log.V(1).Info("add pipeline resource create method for image")
 		if err := wf.Add(image.Create); err != nil {
 			return err
 		}

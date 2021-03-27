@@ -51,7 +51,7 @@ func (g GitPR) Create(ctx context.Context, r client.Client, log logr.Logger) err
 	log = log.WithName("Create").WithValues("type", "pipelineResource", "for", "git")
 	log.V(1).Info("creating")
 
-	gitResource := &resourcev1alpha1.PipelineResource{
+	resource := &resourcev1alpha1.PipelineResource{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        g.NamespacedName.Name,
 			Namespace:   g.NamespacedName.Namespace,
@@ -74,13 +74,14 @@ func (g GitPR) Create(ctx context.Context, r client.Client, log logr.Logger) err
 	}
 
 	// set the current time in the new pipeline resource git type resource in annotation
-	gitResource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
-	if err := controllerutil.SetControllerReference(g.Play, gitResource, g.Scheme); err != nil {
+	resource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
+	if err := controllerutil.SetControllerReference(g.Play, resource, g.Scheme); err != nil {
 		return err
 	}
 	log.V(1).Info(fmt.Sprintf("pipelineResource contains\n%v",
-		util.GetObjectContain(gitResource)))
-	if err := r.Create(ctx, gitResource); err != nil {
+		util.GetObjectContain(resource)))
+	if err := r.Create(ctx, resource); err != nil {
+		log.Error(err, "create")
 		return err
 	}
 	return nil

@@ -49,7 +49,7 @@ func (in *CI) Create(ctx context.Context, r client.Client, logger logr.Logger) e
 	log.V(1).Info("creating")
 
 	namespacedName := util.GetCINamespacedName(Prefix, in.Play)
-	log.V(1).WithValues("namespaced", namespacedName).Info("debug")
+	log.WithValues("namespaced", namespacedName).V(1).Info("debug")
 	resource := &rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        namespacedName.Name,
@@ -77,8 +77,8 @@ func (in *CI) Create(ctx context.Context, r client.Client, logger logr.Logger) e
 	log.V(1).Info(fmt.Sprintf("rolbinding contains\n%v",
 		util.GetObjectContain(resource)))
 	if err := r.Create(ctx, resource); err != nil {
+		log.Error(err, "create")
 		return err
 	}
-
 	return nil
 }

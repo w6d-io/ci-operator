@@ -21,12 +21,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/w6d-io/ci-operator/internal/config"
-	"go.uber.org/zap/zapcore"
 	"os"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"strconv"
 	"strings"
+
+	"github.com/w6d-io/ci-operator/internal/config"
+	"go.uber.org/zap/zapcore"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 // JsonEncoderConfig returns an opinionated EncoderConfig

@@ -22,6 +22,7 @@ import (
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
 	"time"
 
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -49,8 +50,8 @@ func (in *Deploy) Create(ctx context.Context, r client.Client, logger logr.Logge
 
 	// TODO find a way to link this resource with play
 	resource := &rbacv1.RoleBinding{}
-	err := r.Get(ctx, types.NamespacedName{Name: namespacedNamed.Name,
-		Namespace: deployNamespacedNamed.Namespace}, resource)
+	nn := types.NamespacedName{Name: namespacedNamed.Name, Namespace: deployNamespacedNamed.Namespace}
+	err := r.Get(ctx, nn, resource)
 	if apierrors.IsNotFound(err) {
 		log.V(1).Info("Create")
 		resource = GetRoleBinding(in.Play)
@@ -65,9 +66,18 @@ func (in *Deploy) Create(ctx context.Context, r client.Client, logger logr.Logge
 	if isSubjectExist(GetSubject(in.Play), resource.Subjects) {
 		return nil
 	}
-	resource.Subjects = append(resource.Subjects, GetSubject(in.Play))
-	if err := r.Update(ctx, resource); err != nil {
-		log.Error(err, "update")
+	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		if err := r.Get(ctx, nn, resource); err != nil {
+			return err
+		}
+		resource.Subjects = append(resource.Subjects, GetSubject(in.Play))
+		if err := r.Update(ctx, resource); err != nil {
+			log.Error(err, "update")
+			return err
+		}
+		return nil
+	})
+	if err != nil {
 		return err
 	}
 	return nil

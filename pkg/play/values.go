@@ -24,11 +24,12 @@ import (
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/minio"
+	"github.com/w6d-io/ci-operator/internal/util"
 	"github.com/w6d-io/ci-operator/internal/values"
 )
 
 func (wf *WFType) CreateValues(p *ci.Play, logger logr.Logger) error {
-	log := logger.WithName("CreateValues")
+	log := logger.WithName("CreateValues").WithValues("cx-namespace", util.InNamespace(p))
 	// get the task
 	log.V(1).Info("create values.yaml")
 

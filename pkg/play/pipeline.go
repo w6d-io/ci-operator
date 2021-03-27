@@ -37,6 +37,7 @@ func (wf *WFType) SetPipeline(p *ci.Play, logger logr.Logger) error {
 		return err
 	}
 
+	log.V(1).Info("add pipeline create method")
 	if err := wf.Add(pipeline.Create); err != nil {
 		return err
 	}

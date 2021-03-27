@@ -74,9 +74,9 @@ func (s *Secret) GitCreate(ctx context.Context, r client.Client, log logr.Logger
 		util.GetObjectContain(resource)))
 	// Create Secret
 	if err := r.Create(ctx, resource); err != nil {
+		log.Error(err, "create")
 		return err
 	}
-
 	if err := sa.Update(ctx, resource.Name,
 		util.GetCINamespacedName(sa.Prefix, s.Play), r); err != nil {
 		return err
