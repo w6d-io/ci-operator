@@ -97,6 +97,14 @@ func Validate() error {
 	return nil
 }
 
+// PodTemplate returns the tekton PodTemplate
+func PodTemplate() *tkn.PodTemplate {
+	if config.PodTemplate == nil {
+		config.PodTemplate = new(tkn.PodTemplate)
+	}
+	return config.PodTemplate
+}
+
 // Workspaces returns list of Tekton WorkspaceDeclaration
 func Workspaces() []tkn.WorkspaceDeclaration {
 	return config.Workspaces

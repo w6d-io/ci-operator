@@ -26,7 +26,7 @@ import (
 type Config struct {
 	DefaultDomain string                     `json:"domain" yaml:"domain"`
 	ClusterRole   string                     `json:"cluster_role" yaml:"cluster_role"`
-	PodTemplate   *tkn.PodTemplate           `json:"podTemplate" yaml:"pod_template"`
+	PodTemplate   *tkn.PodTemplate           `json:"podTemplate" yaml:"podTemplate"`
 	Workspaces    []tkn.WorkspaceDeclaration `json:"workspaces" yaml:"workspaces"`
 	Ingress       Ingress                    `json:"ingress" yaml:"ingress"`
 	Volume        tkn.WorkspaceBinding       `json:"volume" yaml:"volume"`

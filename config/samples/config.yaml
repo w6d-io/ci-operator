@@ -16,7 +16,7 @@ workspaces:
   - name: source
     description: "Values source place holder"
     mountPath: /source
-Volume:
+volume:
   name: ws
   volumeClaimTemplate:
     spec:
@@ -25,6 +25,14 @@ Volume:
       resources:
         requests:
           storage: 2Gi
+podTemplate:
+  nodeSelector:
+    role: pipeline
+  tolerations:
+    - effect: PreferNoSchedule
+      key: dedicated
+      operator: Equal
+      value: "pipeline"
 cluster_role: bot-cx-role
 hash:
   salt: wildcard

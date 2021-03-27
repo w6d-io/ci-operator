@@ -28,8 +28,10 @@ type PipelineRun struct {
 	// Params contains list of param for PipelineRun tekton resource
 	Params []tkn.Param
 
-	// PodTemplate is use for add volumes from secrets following
-	// - minio credential
+	// PodTemplate is use for
+	// - volumes
+	// - nodeSelector
+	// - tolerations
 	PodTemplate *tkn.PodTemplate
 }
 

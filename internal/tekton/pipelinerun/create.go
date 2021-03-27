@@ -60,18 +60,16 @@ func (p *PipelineRun) Parse(log logr.Logger) error {
 			}
 		}
 	}
-	p.PodTemplate = &tkn.PodTemplate{}
+	p.PodTemplate = config.PodTemplate()
 	if config.GetMinio().Host != "" {
-		p.PodTemplate.Volumes = []corev1.Volume{
-			{
-				Name: secrets.MinIOPrefixSecret,
-				VolumeSource: corev1.VolumeSource{
-					Secret: &corev1.SecretVolumeSource{
-						SecretName: util.GetCINamespacedName(secrets.MinIOPrefixSecret, p.Play).Name,
-					},
+		p.PodTemplate.Volumes = append(p.PodTemplate.Volumes, corev1.Volume{
+			Name: secrets.MinIOPrefixSecret,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: util.GetCINamespacedName(secrets.MinIOPrefixSecret, p.Play).Name,
 				},
 			},
-		}
+		})
 	}
 	return nil
 }
