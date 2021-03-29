@@ -20,16 +20,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"os"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/source"
-
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	resourcev1alpha1 "github.com/tektoncd/pipeline/pkg/apis/resource/v1alpha1"
 	civ1alpha1 "github.com/w6d-io/ci-operator/api/v1alpha1"
 	zapraw "go.uber.org/zap"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/w6d-io/ci-operator/controllers"
@@ -117,25 +113,13 @@ func main() {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
-	c, err := controller.New("play", mgr, controller.Options{
-		Reconciler: &controllers.PlayReconciler{
-			Client: mgr.GetClient(),
-			Log:    ctrl.Log.WithName("controllers").WithName("Play"),
-			Scheme: mgr.GetScheme(),
-		},
-	})
-	if err != nil {
+
+	if err = (&controllers.PlayReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("Play"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Play")
-		os.Exit(1)
-	}
-	if err := c.Watch(&source.Kind{Type: &civ1alpha1.Play{}}, &handler.EnqueueRequestForObject{}); err != nil {
-		setupLog.Error(err, "unable to watch play")
-		os.Exit(1)
-	}
-	if err := c.Watch(&source.Kind{Type: &tkn.PipelineRun{}}, &handler.EnqueueRequestForOwner{
-		OwnerType: &civ1alpha1.Play{}, IsController: true,
-	}); err != nil {
-		setupLog.Error(err, "unable to watch PipelineRun")
 		os.Exit(1)
 	}
 

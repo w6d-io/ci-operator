@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"strings"
 	"time"
 
@@ -191,4 +192,15 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	return ctrl.Result{Requeue: false}, nil
+}
+
+// SetupWithManager sets up the controller with the Manager.
+func (r *PlayReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&ci.Play{}).
+		Owns(&tkn.PipelineRun{}).
+		WithOptions(controller.Options{
+			MaxConcurrentReconciles: 10,
+		}).
+		Complete(r)
 }
