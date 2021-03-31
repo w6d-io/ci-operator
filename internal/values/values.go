@@ -19,6 +19,12 @@ package values
 
 import (
 	"bytes"
+	"context"
+	"github.com/go-logr/logr"
+	"github.com/w6d-io/ci-operator/internal/config"
+	"github.com/w6d-io/ci-operator/internal/k8s/configmap"
+	corev1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -139,10 +145,14 @@ secrets:
 //`
 
 // GetValues builds the values from the template from Play resource
-func (in *Templates) GetValues(out *bytes.Buffer) error {
-	//log := ValueLog.WithName("GetValues")
-	//log.V(1).Info("templating")
-	if err := in.PrintTemplate(out, FileNameValues, HelmValuesTemplate); err != nil {
+func (in *Templates) GetValues(ctx context.Context, out *bytes.Buffer, logger logr.Logger) error {
+	correlationID := ctx.Value("correlation_id")
+	if correlationID != nil {
+		logger = logger.WithValues("correlation_id", correlationID)
+	}
+	tpl := LookupOrDefaultValues(ctx, in.Client, "deploy", HelmValuesTemplate)
+	if err := in.PrintTemplate(out, FileNameValues, tpl); err != nil {
+		logger.Error(err, "Templating failed")
 		return err
 	}
 	return nil
@@ -169,3 +179,14 @@ func (in *Templates) GetValues(out *bytes.Buffer) error {
 //	}
 //	return nil
 //}
+
+func LookupOrDefaultValues(ctx context.Context, r client.Client, key string, defaultVal string) string {
+	var valueMap = map[string]*corev1.ConfigMapKeySelector{
+		"deploy": config.GetValues().DeployRef,
+	}
+	content := configmap.GetContentFromKeySelector(ctx, r, valueMap[key])
+	if content != "" {
+		return content
+	}
+	return defaultVal
+}

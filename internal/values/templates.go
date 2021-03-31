@@ -20,22 +20,19 @@ package values
 import (
 	"bytes"
 	"fmt"
+	"github.com/w6d-io/ci-operator/internal/config"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"strings"
 	"text/template"
 
 	"github.com/Masterminds/sprig"
-	"github.com/ghodss/yaml"
 	"github.com/speps/go-hashids"
-)
-
-var (
-	Salt      string
-	MinLength int
+	"gopkg.in/yaml.v3"
 )
 
 var (
 	ValueLog = ctrl.Log.WithValues("package", "values")
+	Alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 )
 
 func (in *Templates) PrintTemplate(out *bytes.Buffer, name string, templ string) error {
@@ -55,8 +52,9 @@ func (in *Templates) PrintTemplate(out *bytes.Buffer, name string, templ string)
 // HashID return hash from pid for the prefix url
 func HashID(pid float64) (string, error) {
 	hd := hashids.NewData()
-	hd.Salt = Salt
-	hd.MinLength = MinLength
+	hd.Salt = config.GetHash().Salt
+	hd.MinLength = config.GetHash().MinLength
+	hd.Alphabet = Alphabet
 	h, err := hashids.NewWithData(hd)
 	if err != nil {
 		return "", fmt.Errorf("HashID failed with %s", err.Error())
@@ -70,11 +68,7 @@ func HashID(pid float64) (string, error) {
 
 // ToYaml returns the v interface into yaml format
 func ToYaml(v interface{}) string {
-	data, err := yaml.Marshal(v)
-	if err != nil {
-		// Swallow errors inside of a template.
-		return ""
-	}
+	data, _ := yaml.Marshal(v)
 	return string(data)
 }
 

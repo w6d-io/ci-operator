@@ -17,12 +17,16 @@ package values_test
 
 import (
 	"bytes"
+	"context"
 	"github.com/ghodss/yaml"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/values"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 //docker_url: reg.example.com/group/repo:test
@@ -70,20 +74,24 @@ var _ = Describe("Values", func() {
 		})
 		It("failed the unmarshal", func() {
 			templ := values.Templates{
+				Client:   k8sClient,
 				Values:   config.GetRaw(ci.PlaySpec{}),
 				Internal: config.GetConfigRaw(),
 			}
 			valueBuf := new(bytes.Buffer)
-			err := templ.GetValues(valueBuf)
+			ctx := context.WithValue(context.Background(), "correlation_id", "unit-test")
+			err := templ.GetValues(ctx, valueBuf, ctrl.Log)
 			Expect(err).ToNot(Succeed())
 		})
 		It("get a good values.yaml", func() {
 			templ := values.Templates{
+				Client:   k8sClient,
 				Values:   config.GetRaw(p.Spec),
 				Internal: config.GetConfigRaw(),
 			}
 			valueBuf := new(bytes.Buffer)
-			err := templ.GetValues(valueBuf)
+			ctx := context.WithValue(context.Background(), "correlation_id", "unit-test")
+			err := templ.GetValues(ctx, valueBuf, ctrl.Log)
 			Expect(err).To(Succeed())
 			Expect(valueBuf.String()).To(Equal(`---
 env:
@@ -112,11 +120,13 @@ dockerSecret:
 		It("get a good values.yaml", func() {
 			p.Spec.DockerURL = "reg.example.com/group/repo:test"
 			templ := values.Templates{
+				Client:   k8sClient,
 				Values:   config.GetRaw(p.Spec),
 				Internal: config.GetConfigRaw(),
 			}
 			valueBuf := new(bytes.Buffer)
-			err := templ.GetValues(valueBuf)
+			ctx := context.WithValue(context.Background(), "correlation_id", "unit-test")
+			err := templ.GetValues(ctx, valueBuf, ctrl.Log)
 			Expect(err).To(Succeed())
 			Expect(valueBuf.String()).To(Equal(`---
 env:
@@ -141,6 +151,34 @@ dockerSecret:
   config: '{"auths":{"reg.example.com":{"auth":"dGVzdDp0ZXN0Cg=="}}}'
 
 `))
+		})
+		It("get values from configmap", func() {
+			config.SetNamespace("default")
+			ctx := context.WithValue(context.Background(), "correlation_id", "unit-test")
+			cml := &corev1.NamespaceList{}
+			err := k8sClient.List(ctx, cml)
+			Expect(err).To(Succeed())
+			Expect(len(cml.Items)).ToNot(Equal(0))
+			var names []string
+			for _, ns := range cml.Items {
+				names = append(names, ns.Name)
+			}
+			//Expect(names).To(Equal([]string{}))
+			cm := &corev1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "unit-test",
+					Namespace: config.GetNamespace(),
+				},
+				Data: map[string]string{
+					"values.yaml": "Test",
+				},
+			}
+			err = k8sClient.Create(ctx, cm)
+			Expect(err).To(Succeed())
+			val := values.LookupOrDefaultValues(ctx, k8sClient, "deploy", values.HelmValuesTemplate)
+			Expect(val).To(Equal("Test"))
+			err = k8sClient.Delete(ctx, cm)
+			Expect(err).To(Succeed())
 		})
 	})
 })

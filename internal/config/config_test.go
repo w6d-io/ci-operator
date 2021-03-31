@@ -1,11 +1,13 @@
 package config_test
 
 import (
+	"github.com/w6d-io/ci-operator/internal/config"
+
+	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	corev1 "k8s.io/api/core/v1"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
-	"github.com/w6d-io/ci-operator/internal/config"
-	corev1 "k8s.io/api/core/v1"
 )
 
 var _ = Describe("Config", func() {
@@ -52,7 +54,7 @@ var _ = Describe("Config", func() {
 				}))
 			})
 			It("GetConfigRaw function", func() {
-				Expect(len(config.GetConfigRaw())).Should(Equal(10))
+				Expect(len(config.GetConfigRaw())).Should(Equal(11))
 			})
 			It("GetClusterRole function", func() {
 				Expect(config.GetClusterRole()).Should(Equal(""))

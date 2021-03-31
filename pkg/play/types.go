@@ -37,7 +37,7 @@ type WFInterface interface {
 	// Add func in Creates list
 	Add(ciFunc CIFunc) error
 
-	CreateValues(*ci.Play, logr.Logger) error
+	CreateValues(context.Context, *ci.Play, logr.Logger) error
 
 	// ServiceAccount creates the serviceAccount resource use for running pipeline and handle secret
 	ServiceAccount(*ci.Play, logr.Logger) error

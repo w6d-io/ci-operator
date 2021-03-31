@@ -20,6 +20,7 @@ package config
 import (
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	"github.com/w6d-io/ci-operator/pkg/webhook"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // Config controller common parameter
@@ -31,9 +32,10 @@ type Config struct {
 	Ingress       Ingress                    `json:"ingress" yaml:"ingress"`
 	Volume        tkn.WorkspaceBinding       `json:"volume" yaml:"volume"`
 	Namespace     string                     `json:"namespace" yaml:"namespace"`
+	ValuesRef     Values                     `json:"values,omitempty" yaml:"values,omitEmpty"`
 
 	// Hash is use for provide unpredictable string from an integer
-	Hash Hash `json:"hash" yaml:"hash"`
+	Hash *Hash `json:"hash" yaml:"hash"`
 
 	// Minio contains all minio information for the connection the could be omitted
 	Minio *Minio `json:"minio,omitempty" yaml:"minio,omitempty"`
@@ -44,6 +46,11 @@ type Config struct {
 
 	// WebHooks contains a list of WebHook where payload will be send
 	Webhooks []webhook.Webhook `json:"webhooks" yaml:"webhooks"`
+}
+
+type Values struct {
+	// DeployRef contains the configmap information for templating
+	DeployRef *corev1.ConfigMapKeySelector `json:"deploy,omitempty"`
 }
 
 type Minio struct {

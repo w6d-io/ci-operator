@@ -15,14 +15,14 @@ limitations under the License.
 Created on 21/12/2020
 */
 
-package values
+package values_test
 
 import (
 	"bytes"
 	"fmt"
-	"testing"
-
+	"github.com/w6d-io/ci-operator/internal/values"
 	f "k8s.io/apimachinery/pkg/fields"
+	"testing"
 
 	"github.com/w6d-io/ci-operator/api/v1alpha1"
 )
@@ -84,14 +84,15 @@ func TestTemplates_PrintTemplate(t *testing.T) {
 			args{
 				buf,
 				"test.yaml",
-				HelmValuesTemplate,
+				values.HelmValuesTemplate,
 			},
 			true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			in := &Templates{
+			in := &values.Templates{
+				Client:   k8sClient,
 				Play:     tt.fields.Play,
 				Spec:     tt.fields.Spec,
 				Internal: tt.fields.Internal,
@@ -99,6 +100,92 @@ func TestTemplates_PrintTemplate(t *testing.T) {
 			if err := in.PrintTemplate(tt.args.out, tt.args.name, tt.args.templ); (err != nil) != tt.wantErr {
 				fmt.Printf("out = %s\n", tt.args.out.String())
 				t.Errorf("PrintTemplate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestHashID(t *testing.T) {
+	type args struct {
+		pid float64
+	}
+	tests := []struct {
+		name     string
+		previous func()
+		post     func()
+		args     args
+		want     string
+		wantErr  bool
+	}{
+		// TODO: Add test cases.
+		{
+			"long id",
+			func() {},
+			func() {},
+			args{
+				1236541651684135186185431085485413.21,
+			},
+			"",
+			true,
+		},
+		{
+			"change_alphabet",
+			func() {
+				values.Alphabet = "abc"
+			},
+			func() {
+				values.Alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+			},
+			args{
+				0,
+			},
+			"",
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.previous()
+			got, err := values.HashID(tt.args.pid)
+			tt.post()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("HashID() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("HashID() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestToYaml(t *testing.T) {
+	type args struct {
+		v interface{}
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		// TODO: Add test cases.
+		{
+			"good yaml",
+			args{
+				`---
+test: ok
+`,
+			},
+			`|
+    ---
+    test: ok
+`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := values.ToYaml(tt.args.v); got != tt.want {
+				t.Errorf("ToYaml() = \n%v, want \n%v", got, tt.want)
 			}
 		})
 	}
