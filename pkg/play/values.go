@@ -19,6 +19,7 @@ package play
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"github.com/go-logr/logr"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
@@ -27,7 +28,11 @@ import (
 	"github.com/w6d-io/ci-operator/internal/values"
 )
 
-func (wf *WFType) CreateValues(p *ci.Play, logger logr.Logger) error {
+func (wf *WFType) CreateValues(ctx context.Context, p *ci.Play, logger logr.Logger) error {
+	correlationID := ctx.Value("correlation_id")
+	if correlationID != nil {
+		logger = logger.WithValues("correlation_id", correlationID)
+	}
 	log := logger.WithName("CreateValues")
 	// get the task
 	log.V(1).Info("create values.yaml")
@@ -37,7 +42,7 @@ func (wf *WFType) CreateValues(p *ci.Play, logger logr.Logger) error {
 		Internal: config.GetConfigRaw(),
 	}
 	valueBuf := new(bytes.Buffer)
-	if err := templ.GetValues(valueBuf); err != nil {
+	if err := templ.GetValues(ctx, valueBuf, log); err != nil {
 		return err
 	}
 	// TODO send Value to Minio or create Secret

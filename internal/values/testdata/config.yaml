@@ -25,6 +25,10 @@ volume:
       resources:
         requests:
           storage: 2Gi
+values:
+  deploy:
+    name: unit-test
+    key: values.yaml
 cluster_role: bot-cx-role
 hash:
   salt: wildcard

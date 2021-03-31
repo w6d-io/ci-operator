@@ -29,7 +29,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/ghodss/yaml"
-	"github.com/w6d-io/ci-operator/internal/values"
 	"github.com/w6d-io/ci-operator/pkg/webhook"
 	"github.com/w6d-io/hook"
 )
@@ -63,8 +62,6 @@ func New(filename string) error {
 	if config.DeployPrefix == "" {
 		config.DeployPrefix = "cx"
 	}
-	values.Salt = config.Hash.Salt
-	values.MinLength = config.Hash.MinLength
 	for _, wh := range config.Webhooks {
 		if wh.URLRaw != "" {
 			if err := hook.Subscribe(wh.URLRaw, wh.Scope); err != nil {
@@ -213,4 +210,26 @@ func SetNamespace(namespace string) {
 // GetWebhooks returns the list of url where to send the event
 func GetWebhooks() []webhook.Webhook {
 	return config.Webhooks
+}
+
+// GetValues return ValuesRef
+func GetValues() Values {
+	return config.ValuesRef
+}
+
+func GetHash() *Hash {
+	if config.Hash != nil {
+		return config.Hash
+	}
+	return &Hash{}
+}
+
+// GetSalt return salt
+func (h *Hash) GetSalt() string {
+	return h.Salt
+}
+
+// GetSalt return salt
+func (h *Hash) GetMinLength() int {
+	return h.MinLength
 }
