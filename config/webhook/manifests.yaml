@@ -15,7 +15,7 @@ webhooks:
       namespace: system
       path: /mutate-ci-w6d-io-v1alpha1-play
   failurePolicy: Fail
-  name: mplay.kb.io
+  name: mplay.ci.w6d.io
   rules:
   - apiGroups:
     - ci.w6d.io
@@ -44,7 +44,7 @@ webhooks:
       namespace: system
       path: /validate-ci-w6d-io-v1alpha1-play
   failurePolicy: Fail
-  name: vplay.kb.io
+  name: vplay.ci.w6d.io
   rules:
   - apiGroups:
     - ci.w6d.io
@@ -53,6 +53,7 @@ webhooks:
     operations:
     - CREATE
     - UPDATE
+    - DELETE
     resources:
     - plays
   sideEffects: None

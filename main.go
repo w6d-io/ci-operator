@@ -20,12 +20,15 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
+
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	resourcev1alpha1 "github.com/tektoncd/pipeline/pkg/apis/resource/v1alpha1"
 	civ1alpha1 "github.com/w6d-io/ci-operator/api/v1alpha1"
 	zapraw "go.uber.org/zap"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/w6d-io/ci-operator/controllers"
@@ -60,26 +63,26 @@ var (
 )
 
 func init() {
-
-	_ = clientgoscheme.AddToScheme(scheme)
-
-	_ = civ1alpha1.AddToScheme(scheme)
-	_ = tkn.AddToScheme(scheme)
-	_ = resourcev1alpha1.AddToScheme(scheme)
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+	utilruntime.Must(civ1alpha1.AddToScheme(scheme))
+	utilruntime.Must(tkn.AddToScheme(scheme))
+	utilruntime.Must(resourcev1alpha1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
 func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
-
+	var probeAddr string
 	setupLog.Info("managed flag")
-	flag.StringVar(&metricsAddr, "metrics-addr",
-		util.LookupEnvOrString("METRICS_ADDRESS", ":8080"), "The address the metric endpoint binds to.")
-	flag.BoolVar(&enableLeaderElection, "enable-leader-election", util.LookupEnvOrBool("ENABLE_LEADER", false),
+	flag.StringVar(&metricsAddr, "metrics-bind-address", util.LookupEnvOrString("METRICS_ADDRESS", ":8080"), "The address the metric endpoint binds to.")
+	flag.StringVar(&probeAddr, "health-probe-bind-address", util.LookupEnvOrString("PROBE_ADDRESS", ":8081"), "The address the probe endpoint binds to.")
+	flag.BoolVar(&enableLeaderElection, "leader-elect", util.LookupEnvOrBool("ENABLE_LEADER", false),
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	opts := zap.Options{
+		Development:     os.Getenv("RELEASE") != "prod",
+		StacktraceLevel: zapcore.PanicLevel,
 		Encoder: zapcore.NewConsoleEncoder(util.TextEncoderConfig()),
 	}
 	util.BindFlags(&opts, flag.CommandLine)
@@ -97,9 +100,7 @@ func main() {
 		setupLog.Error(err, "config loading error")
 		os.Exit(1)
 	}
-	setupLog.Info("set opts")
-	opts.Development = os.Getenv("RELEASE") != "prod"
-	opts.StacktraceLevel = zapcore.PanicLevel
+
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts), zap.RawZapOpts(zapraw.AddCaller(), zapraw.AddCallerSkip(-1))))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
@@ -123,13 +124,22 @@ func main() {
 		os.Exit(1)
 	}
 
+	// +kubebuilder:scaffold:builder
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
 		if err = (&civ1alpha1.Play{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "Play")
 			os.Exit(1)
 		}
 	}
-	// +kubebuilder:scaffold:builder
+	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
+		setupLog.Error(err, "unable to set up health check")
+		os.Exit(1)
+	}
+	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
+		setupLog.Error(err, "unable to set up ready check")
+		os.Exit(1)
+	}
+
 	setupLog.Info("starting manager", "Version", Version, "Built",
 		Built, "Revision", Revision, "Arch", OsArch, "GoVersion", GoVersion)
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {

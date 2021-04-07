@@ -60,7 +60,7 @@ func (p *PipelineRun) Parse(log logr.Logger) error {
 			}
 		}
 	}
-	p.PodTemplate = config.PodTemplate()
+	p.PodTemplate = config.PodTemplate().DeepCopy()
 	if config.GetMinio().Host != "" {
 		p.PodTemplate.Volumes = append(p.PodTemplate.Volumes, corev1.Volume{
 			Name: secrets.MinIOPrefixSecret,

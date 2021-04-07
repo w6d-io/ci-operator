@@ -5,11 +5,12 @@
 *.dll
 *.so
 *.dylib
-/bin
+bin/
+testbin/*
 
 # Test binary, build with `go test -c`
 *.test
-
+/config/tests/
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
@@ -18,8 +19,7 @@
 !vendor/**/zz_generated.*
 
 # editor and IDE paraphernalia
-/.idea
+.idea/
 *.swp
 *.swo
 *~
-/config/tests/
