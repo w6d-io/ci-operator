@@ -6,7 +6,9 @@
 ![GitHub](https://img.shields.io/github/license/w6d-io/ci-operator?style=flat)
 
 CI Operator is a kubernetes extension base on Tekton Pipeline that installs and runs on your Kubernetes cluster.
+
 By creates a Play resource it creates all tekton resources defined. 
+
 CI Operator is an open-source project that aims to simplified the CI/CD pipeline creation by using Tekton pipeline
 
 [docs](/docs)
