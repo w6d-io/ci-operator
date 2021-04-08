@@ -74,7 +74,6 @@ func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
-	setupLog.Info("managed flag")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", util.LookupEnvOrString("METRICS_ADDRESS", ":8080"), "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", util.LookupEnvOrString("PROBE_ADDRESS", ":8081"), "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", util.LookupEnvOrBool("ENABLE_LEADER", false),
@@ -83,7 +82,7 @@ func main() {
 	opts := zap.Options{
 		Development:     os.Getenv("RELEASE") != "prod",
 		StacktraceLevel: zapcore.PanicLevel,
-		Encoder: zapcore.NewConsoleEncoder(util.TextEncoderConfig()),
+		Encoder:         zapcore.NewConsoleEncoder(util.TextEncoderConfig()),
 	}
 	util.BindFlags(&opts, flag.CommandLine)
 	flag.Parse()
@@ -104,11 +103,12 @@ func main() {
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts), zap.RawZapOpts(zapraw.AddCaller(), zapraw.AddCallerSkip(-1))))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: metricsAddr,
-		Port:               9443,
-		LeaderElection:     enableLeaderElection,
-		LeaderElectionID:   "2f8df8b9.ci.w6d.io",
+		Scheme:                 scheme,
+		MetricsBindAddress:     metricsAddr,
+		Port:                   9443,
+		HealthProbeBindAddress: probeAddr,
+		LeaderElection:         enableLeaderElection,
+		LeaderElectionID:       "2f8df8b9.ci.w6d.io",
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
