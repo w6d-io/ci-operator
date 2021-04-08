@@ -1,13 +1,36 @@
 domain: w6d.io
+layout: go.kubebuilder.io/v3
+plugins:
+  manifests.sdk.operatorframework.io/v2: {}
+  scorecard.sdk.operatorframework.io/v2: {}
+projectName: ci-operator
 repo: github.com/w6d-io/ci-operator
 resources:
-- group: ci
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: w6d.io
+  group: ci
   kind: Play
+  path: github.com/w6d-io/ci-operator/api/v1alpha1
   version: v1alpha1
-- group: ci
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: w6d.io
+  group: ci
   kind: LimitCi
+  path: github.com/w6d-io/ci-operator/api/v1alpha1
   version: v1alpha1
-- group: ci
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: w6d.io
+  group: ci
   kind: Step
+  path: github.com/w6d-io/ci-operator/api/v1alpha1
   version: v1alpha1
 version: "2"
