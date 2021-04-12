@@ -27,13 +27,13 @@ import (
 func (wf *WFType) ServiceAccount(p *ci.Play, logger logr.Logger) error {
 	log := logger.WithName("GitSecret")
 	log.V(1).Info("Build service account for CI")
-	ci := &sa.CI{
+	cisa := &sa.CI{
 		WorkFlowStruct: internal.WorkFlowStruct{
 			Play:   p,
 			Scheme: wf.Scheme,
 		},
 	}
-	if err := wf.Add(ci.Create); err != nil {
+	if err := wf.Add(cisa.Create); err != nil {
 		log.V(1).Info("Build service account for deploy")
 		return err
 	}

@@ -74,7 +74,7 @@ func (in *CI) Create(ctx context.Context, r client.Client, logger logr.Logger) e
 	if err := controllerutil.SetControllerReference(in.Play, resource, in.Scheme); err != nil {
 		return err
 	}
-	log.V(1).Info(resource.Kind, "contains", fmt.Sprintf("%v",
+	log.V(1).Info(resource.Kind, "content", fmt.Sprintf("%v",
 		util.GetObjectContain(resource)))
 
 	if err := r.Create(ctx, resource); err != nil {

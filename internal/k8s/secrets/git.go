@@ -70,7 +70,7 @@ func (s *Secret) GitCreate(ctx context.Context, r client.Client, log logr.Logger
 	if err := controllerutil.SetControllerReference(s.Play, resource, s.Scheme); err != nil {
 		return err
 	}
-	log.V(1).Info(resource.Kind, "contains", fmt.Sprintf("%v",
+	log.V(1).Info(resource.Kind, "content", fmt.Sprintf("%v",
 		util.GetObjectContain(resource)))
 	// Create Secret
 	if err := r.Create(ctx, resource); err != nil {
@@ -79,6 +79,7 @@ func (s *Secret) GitCreate(ctx context.Context, r client.Client, log logr.Logger
 	}
 	if err := sa.Update(ctx, resource.Name,
 		util.GetCINamespacedName(sa.Prefix, s.Play), r); err != nil {
+		log.Error(err, "update")
 		return err
 	}
 	// All went well
