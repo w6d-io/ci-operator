@@ -73,7 +73,7 @@ func (i *ImagePR) Create(ctx context.Context, r client.Client, log logr.Logger) 
 	if err := controllerutil.SetControllerReference(i.Play, resource, i.Scheme); err != nil {
 		return err
 	}
-	log.V(1).Info(resource.Kind, "contains", fmt.Sprintf("%v",
+	log.V(1).Info(resource.Kind, "content", fmt.Sprintf("%v",
 		util.GetObjectContain(resource)))
 
 	if err := r.Create(ctx, resource); err != nil {
