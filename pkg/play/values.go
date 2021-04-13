@@ -38,6 +38,7 @@ func (wf *WFType) CreateValues(ctx context.Context, p *ci.Play, logger logr.Logg
 	log.V(1).Info("create values.yaml")
 
 	templ := values.Templates{
+		Client:   wf.Client,
 		Values:   config.GetRaw(p.Spec),
 		Internal: config.GetConfigRaw(),
 	}
