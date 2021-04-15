@@ -24,7 +24,7 @@ import (
 )
 
 func (p *PipelineRun) SetE2ETest(pos int, logger logr.Logger) error {
-	log := logger.WithValues("SetE2ETest").WithValues("action", "pipeline-run")
+	log := logger.WithName("SetE2ETest").WithValues("action", "pipeline-run")
 	log.V(1).Info("set e2e test pipeline run params")
 
 	task := p.Play.Spec.Tasks[pos][ci.E2ETests]

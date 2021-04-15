@@ -45,11 +45,11 @@ spec:
           status:
             description: LimitCiStatus defines the observed state of LimitCi
             type: object
-        required:
-        - spec
         type: object
     served: true
     storage: true
+    subresources:
+      status: {}
 status:
   acceptedNames:
     kind: ""

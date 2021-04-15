@@ -4,8 +4,34 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   creationTimestamp: null
-  name: ci-manager-role
+  name: manager-role
 rules:
+- apiGroups:
+  - ci.w6d.io
+  resources:
+  - limitcis
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ci.w6d.io
+  resources:
+  - limitcis/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ci.w6d.io
+  resources:
+  - limitcis/status
+  verbs:
+  - get
+  - patch
+  - update
 - apiGroups:
   - ci.w6d.io
   resources:
@@ -21,7 +47,39 @@ rules:
 - apiGroups:
   - ci.w6d.io
   resources:
+  - plays/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ci.w6d.io
+  resources:
   - plays/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ci.w6d.io
+  resources:
+  - steps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ci.w6d.io
+  resources:
+  - steps/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ci.w6d.io
+  resources:
+  - steps/status
   verbs:
   - get
   - patch

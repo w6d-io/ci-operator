@@ -1,0 +1,50 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+  name: ci-operator.v0.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: Play is the Schema for the plays API
+      displayName: Play
+      kind: Play
+      name: plays.ci.w6d.io
+      version: v1alpha1
+  description: CI operator aims to create tekton pipeline easier
+  displayName: CI Operator
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - ci/cd
+  - kubernetes
+  - tekton
+  links:
+  - name: Ci Operator
+    url: https://ci-operator.domain
+  maintainers:
+  - email: david.alexandre@w6d.io
+    name: David ALEXANDRE
+  maturity: alpha
+  provider:
+    name: Wildcard
+    url: https://github.com/w6d-io/ci-operator
+  version: 0.0.0

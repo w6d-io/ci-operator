@@ -23,6 +23,7 @@ import (
     "io/ioutil"
     "net/http"
     "net/url"
+    "strconv"
     "time"
 )
 
@@ -30,8 +31,20 @@ func (h *HTTP) Send(payload interface{}, URL *url.URL) error {
     log := logger.WithName("Send").WithValues("URL", URL.Redacted())
     h.Username    = URL.User.Username()
     h.Password, _ = URL.User.Password()
+    query := URL.Query()
+    to, ok := query["timeout"]
     client := http.Client{
         Timeout: 5 * time.Second,
+    }
+    if ok {
+        n, err := strconv.ParseInt(to[0], 10, 64)
+        if err != nil {
+            log.Error(err, "convert timeout failed")
+            return err
+        }
+        client = http.Client{
+            Timeout: time.Duration(n) * time.Second,
+        }
     }
     log.V(1).Info("marshal payload")
     data, err := json.Marshal(payload)

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 WILDCARD
+Copyright 2021.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,16 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
+
+	"github.com/w6d-io/ci-operator/controllers"
+	"github.com/w6d-io/ci-operator/internal/config"
+	"github.com/w6d-io/ci-operator/internal/util"
+	"go.uber.org/zap/zapcore"
+	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	resourcev1alpha1 "github.com/tektoncd/pipeline/pkg/apis/resource/v1alpha1"
@@ -30,16 +39,7 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
-
-	"github.com/w6d-io/ci-operator/controllers"
-	"github.com/w6d-io/ci-operator/internal/config"
-	"github.com/w6d-io/ci-operator/internal/util"
-	"go.uber.org/zap/zapcore"
-	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	// +kubebuilder:scaffold:imports
+	//+kubebuilder:scaffold:imports
 )
 
 // Version microservice version
@@ -67,16 +67,16 @@ func init() {
 	utilruntime.Must(civ1alpha1.AddToScheme(scheme))
 	utilruntime.Must(tkn.AddToScheme(scheme))
 	utilruntime.Must(resourcev1alpha1.AddToScheme(scheme))
-	// +kubebuilder:scaffold:scheme
+	//+kubebuilder:scaffold:scheme
 }
 
 func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
-	flag.StringVar(&metricsAddr, "metrics-bind-address", util.LookupEnvOrString("METRICS_ADDRESS", ":8080"), "The address the metric endpoint binds to.")
-	flag.StringVar(&probeAddr, "health-probe-bind-address", util.LookupEnvOrString("PROBE_ADDRESS", ":8081"), "The address the probe endpoint binds to.")
-	flag.BoolVar(&enableLeaderElection, "leader-elect", util.LookupEnvOrBool("ENABLE_LEADER", false),
+	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
+	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	opts := zap.Options{
@@ -84,6 +84,7 @@ func main() {
 		StacktraceLevel: zapcore.PanicLevel,
 		Encoder:         zapcore.NewConsoleEncoder(util.TextEncoderConfig()),
 	}
+	opts.BindFlags(flag.CommandLine)
 	util.BindFlags(&opts, flag.CommandLine)
 	flag.Parse()
 	seen := make(map[string]bool)
@@ -131,6 +132,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
+
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")
 		os.Exit(1)

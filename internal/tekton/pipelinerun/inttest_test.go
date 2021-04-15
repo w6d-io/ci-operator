@@ -19,9 +19,11 @@ package pipelinerun_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+
 	"github.com/w6d-io/ci-operator/internal"
 	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
+
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 

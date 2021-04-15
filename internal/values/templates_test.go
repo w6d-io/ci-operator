@@ -63,15 +63,6 @@ func TestTemplates_PrintTemplate(t *testing.T) {
 						},
 					},
 					Domain: "mea-test.w6d.io",
-					Dependencies: map[v1alpha1.DependencyType]v1alpha1.Dependency{
-						"mongodb": {
-							Variables: f.Set{
-								"HOST":     "$DB_HOST",
-								"PASSWORD": "$DB_PASSWORD",
-								"USERNAME": "$DB_USERNAME",
-							},
-						},
-					},
 				},
 				map[string]interface{}{
 					"domain": "example.ci",
