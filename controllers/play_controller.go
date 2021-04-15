@@ -49,6 +49,12 @@ type PlayReconciler struct {
 //+kubebuilder:rbac:groups=ci.w6d.io,resources=plays,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=ci.w6d.io,resources=plays/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=ci.w6d.io,resources=plays/finalizers,verbs=update
+//+kubebuilder:rbac:groups=ci.w6d.io,resources=limitcis,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=ci.w6d.io,resources=limitcis/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=ci.w6d.io,resources=limitcis/finalizers,verbs=update
+//+kubebuilder:rbac:groups=ci.w6d.io,resources=steps,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=ci.w6d.io,resources=steps/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=ci.w6d.io,resources=steps/finalizers,verbs=update
 //+kubebuilder:rbac:groups=tekton.dev,resources=pipelineresources,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=tekton.dev,resources=pipelineresources/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=tekton.dev,resources=pipelineruns,verbs=get;list;watch;create;update;patch;delete

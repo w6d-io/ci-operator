@@ -17,13 +17,16 @@ limitations under the License.
 package v1alpha1
 
 import (
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"net/url"
+	"regexp"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
+
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
 // log is for logging in this package.
@@ -60,42 +63,7 @@ func (in *Play) ValidateCreate() error {
 	playlog.Info("validate create", "name", in.Name)
 	var allErrs field.ErrorList
 	allErrs = in.validateTaskType()
-	if in.Spec.ProjectID == 0 {
-		allErrs = append(allErrs,
-			field.Invalid(field.NewPath("spec").Child("project_id"),
-				in.Spec.ProjectID,
-				"cannot be 0"))
-	}
-	if in.Spec.PipelineID == 0 {
-		allErrs = append(allErrs,
-			field.Invalid(field.NewPath("spec").Child("pipeline_id"),
-				in.Spec.PipelineID,
-				"cannot be 0"))
-	}
-	if in.Spec.Environment == "" {
-		allErrs = append(allErrs,
-			field.Invalid(field.NewPath("spec").Child("environment"),
-				in.Spec.PipelineID,
-				"environment cannot be empty"))
-	}
-	if in.Spec.RepoURL == "" {
-		allErrs = append(allErrs,
-			field.Invalid(field.NewPath("spec").Child("repo_url"),
-				in.Spec.PipelineID,
-				"repo_url cannot be empty"))
-	}
-	if in.Spec.Commit.Ref == "" {
-		allErrs = append(allErrs,
-			field.Invalid(field.NewPath("spec").Child("commit").Child("ref"),
-				in.Spec.PipelineID,
-				"cannot be empty"))
-	}
-	if in.Spec.Commit.SHA == "" {
-		allErrs = append(allErrs,
-			field.Invalid(field.NewPath("spec").Child("commit").Child("sha"),
-				in.Spec.PipelineID,
-				"cannot be empty"))
-	}
+	allErrs = append(allErrs, in.commonValidation()...)
 	if len(allErrs) == 0 {
 		return nil
 	}
@@ -110,13 +78,7 @@ func (in *Play) ValidateUpdate(old runtime.Object) error {
 
 	var allErrs field.ErrorList
 	allErrs = in.validateTaskType()
-
-	if in.Spec.Environment == "" {
-		allErrs = append(allErrs,
-			field.Invalid(field.NewPath("spec").Child("environment"),
-				in.Spec.PipelineID,
-				"environment cannot be empty"))
-	}
+	allErrs = append(allErrs, in.commonValidation()...)
 	if old.(*Play).Spec.PipelineID != in.Spec.PipelineID {
 		allErrs = append(allErrs,
 			field.Invalid(field.NewPath("spec").Child("pipelineID"),
@@ -128,24 +90,6 @@ func (in *Play) ValidateUpdate(old runtime.Object) error {
 			field.Invalid(field.NewPath("spec").Child("projectID"),
 				in.Spec.ProjectID,
 				"pipelineID cannot be changed"))
-	}
-	if in.Spec.RepoURL == "" {
-		allErrs = append(allErrs,
-			field.Invalid(field.NewPath("spec").Child("repo_url"),
-				in.Spec.PipelineID,
-				"repo_url cannot be empty"))
-	}
-	if in.Spec.Commit.Ref == "" {
-		allErrs = append(allErrs,
-			field.Invalid(field.NewPath("spec").Child("commit").Child("ref"),
-				in.Spec.PipelineID,
-				"cannot be empty"))
-	}
-	if in.Spec.Commit.SHA == "" {
-		allErrs = append(allErrs,
-			field.Invalid(field.NewPath("spec").Child("commit").Child("sha"),
-				in.Spec.PipelineID,
-				"cannot be empty"))
 	}
 	if len(allErrs) == 0 {
 		return nil
@@ -179,4 +123,68 @@ func (in Play) validateTaskType() field.ErrorList {
 		}
 	}
 	return taskErrs
+}
+
+func (in *Play) commonValidation() field.ErrorList {
+	playlog.Info("validate common", "name", in.Name)
+	var allErrs field.ErrorList
+	if in.Spec.ProjectID == 0 {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("project_id"),
+				in.Spec.ProjectID,
+				"cannot be 0"))
+	}
+	if in.Spec.PipelineID == 0 {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("pipeline_id"),
+				in.Spec.PipelineID,
+				"cannot be 0"))
+	}
+	if in.Spec.Environment == "" {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("environment"),
+				in.Spec.Environment,
+				"environment cannot be empty"))
+	}
+	if in.Spec.RepoURL == "" {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("repo_url"),
+				in.Spec.RepoURL,
+				"repo_url cannot be empty"))
+	}
+	if in.Spec.Commit.Ref == "" {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("commit").Child("ref"),
+				in.Spec.Commit.Ref,
+				"cannot be empty"))
+	} else {
+		if _, err := url.Parse(in.Spec.RepoURL); err != nil {
+			allErrs = append(allErrs,
+				field.Invalid(field.NewPath("spec").Child("repo_url"),
+					in.Spec.RepoURL,
+					err.Error()))
+		}
+	}
+	if in.Spec.Commit.SHA == "" {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("commit").Child("sha"),
+				in.Spec.Commit.SHA,
+				"cannot be empty"))
+	}
+	if in.Spec.Domain != "" {
+		if !validateDomain(in.Spec.Domain) {
+			allErrs = append(allErrs,
+				field.Invalid(field.NewPath("spec").Child("domain"),
+					in.Spec.PipelineID,
+					"domain invalid"))
+		}
+	}
+	return allErrs
+}
+
+func validateDomain(domain string) bool {
+	pattern := `^([a-z0-9]{1}[a-z0-9\-]{0,62}){1}(\.[a-z0-9]{1}[a-z0-9\-]{0,62})*[\._]?$`
+	re := regexp.MustCompile(pattern)
+
+	return re.MatchString(domain)
 }
