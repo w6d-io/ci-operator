@@ -95,7 +95,7 @@ run: manifests generate fmt vet vendor ## Run a controller from your host.
 	go run ./main.go -config config/tests/config.yaml -log-format text -log-level 2
 
 docker-build: test ## Build docker image with the manager.
-	docker build --build-arg=VERSION=$(VERSION) --build-arg=VCS=$(VCS_REF) --build-arg=BUILD_DATE=$(BUILD_DATE) -t ${IMG} .
+	docker build --build-arg=VERSION=$(VERSION) --build-arg=VCS_REF=$(VCS_REF) --build-arg=BUILD_DATE=$(BUILD_DATE) -t ${IMG} .
 
 docker-push: ## Push docker image with the manager.
 	docker push ${IMG}
