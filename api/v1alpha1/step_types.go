@@ -1,5 +1,5 @@
 /*
-Copyright 2020 WILDCARD
+Copyright 2021.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,20 +36,21 @@ type StepStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
 
 // Step is the Schema for the steps API
 type Step struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Step   StepSpec   `json:"step"`
+	Step   StepSpec   `json:"step,omitempty"`
 	Status StepStatus `json:"status,omitempty"`
 }
 
 type Steps []Step
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // StepList contains a list of Step
 type StepList struct {

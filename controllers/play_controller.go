@@ -1,5 +1,5 @@
 /*
-Copyright 2020 WILDCARD
+Copyright 2021.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,24 +18,25 @@ package controllers
 
 import (
 	"context"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/google/uuid"
-	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
-	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
 	"github.com/w6d-io/ci-operator/internal/util"
 	"github.com/w6d-io/ci-operator/pkg/play"
 	"github.com/w6d-io/ci-operator/pkg/webhook"
 	"github.com/w6d-io/hook"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/util/retry"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
+
+	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // PlayReconciler reconciles a Play object
@@ -45,28 +46,42 @@ type PlayReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=ci.w6d.io,resources=plays,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=ci.w6d.io,resources=plays/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=tekton.dev,resources=pipelineresources,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=tekton.dev,resources=pipelineresources/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=tekton.dev,resources=pipelineruns,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=tekton.dev,resources=pipelineruns/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=tekton.dev,resources=pipelines,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=tekton.dev,resources=pipelines/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=tekton.dev,resources=taskruns,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=tekton.dev,resources=taskruns/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=tekton.dev,resources=tasks,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=tekton.dev,resources=tasks/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=ci.w6d.io,resources=plays,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=ci.w6d.io,resources=plays/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=ci.w6d.io,resources=plays/finalizers,verbs=update
+//+kubebuilder:rbac:groups=tekton.dev,resources=pipelineresources,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=tekton.dev,resources=pipelineresources/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=tekton.dev,resources=pipelineruns,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=tekton.dev,resources=pipelineruns/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=tekton.dev,resources=pipelines,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=tekton.dev,resources=pipelines/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=tekton.dev,resources=taskruns,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=tekton.dev,resources=taskruns/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=tekton.dev,resources=tasks,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=tekton.dev,resources=tasks/status,verbs=get;update;patch
 
-func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+// Reconcile is part of the main kubernetes reconciliation loop which aims to
+// move the current state of the cluster closer to the desired state.
+// TODO(user): Modify the Reconcile function to compare the state specified by
+// the Play object against the actual cluster state, and then
+// perform operations to make the cluster state reflect the state specified by
+// the user.
+//
+// For more details, check Reconcile and its Result here:
+// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.7.2/pkg/reconcile
+func (r *PlayReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	correlationID := uuid.New().String()
-	ctx := context.WithValue(context.Background(), "correlation_id", correlationID)
+	ctx = context.WithValue(context.Background(), "correlation_id", correlationID)
 	logger := r.Log.WithValues("play", req.NamespacedName, "correlation_id", correlationID)
 	log := logger.WithName("Reconcile")
 	// get the play resource
 	p := new(ci.Play)
 
 	if err := r.Get(ctx, req.NamespacedName, p); err != nil {
+		if apierrors.IsNotFound(err) {
+			log.Info("Play resource not found. Ignore since object must be deleted")
+			return ctrl.Result{}, nil
+		}
 		log.Error(err, "unable to fetch Play")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -106,12 +121,12 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			p.Status.State = util.Condition(childPr.Status.Conditions)
 			p.Status.Message = util.Message(childPr.Status.Conditions)
 			if err := r.Status().Update(ctx, p); err != nil {
-				log.Error(err, "unable to update Play status")
 				return err
 			}
 			return nil
 		})
 		if err != nil {
+			log.Error(err, "unable to update Play status")
 			return ctrl.Result{Requeue: true}, err
 		}
 		return ctrl.Result{Requeue: false}, nil
@@ -167,7 +182,7 @@ func (r *PlayReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{Requeue: true, RequeueAfter: 5 * time.Second}, nil
 		//return ctrl.Result{}, nil
 	}
-	err = play.CreateCI(ctx, p, logger, r, r.Scheme)
+	err = play.CreateCI(ctx, p, logger, r.Client, r.Scheme)
 	if err != nil {
 		log.Error(err, "Failed to create CI")
 		p.Status.State = ci.Errored

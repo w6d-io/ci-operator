@@ -1078,11 +1078,11 @@ spec:
             required:
             - name
             type: object
-        required:
-        - step
         type: object
     served: true
     storage: true
+    subresources:
+      status: {}
 status:
   acceptedNames:
     kind: ""

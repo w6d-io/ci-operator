@@ -98,19 +98,10 @@ func (s *Step) FilteredSteps(logger logr.Logger, steps ci.Steps, isTest bool) ci
 	log := logger.WithName("FilteredSteps").WithValues("stack", s.PlaySpec.Stack,
 		"ops-namespace", config.GetNamespace())
 	log.V(1).Info("filtering")
-	_, mongoOK := s.PlaySpec.Dependencies[ci.MongoDB]
-	_, postgresOK := s.PlaySpec.Dependencies[ci.Postgresql]
-	_, mariaDBOK := s.PlaySpec.Dependencies[ci.MariaDB]
 	task := s.PlaySpec.Tasks[s.Index][s.TaskType]
 
 	for _, step := range steps {
 		if config.GetNamespace() != "" && step.Namespace != config.GetNamespace() {
-			continue
-		}
-		if (mongoOK || postgresOK || mariaDBOK) && step.Annotations[ci.AnnotationTask] == s.TaskType.String() &&
-			(step.Annotations[ci.AnnotationLanguage] == ci.MongoDB.String() ||
-				step.Annotations[ci.AnnotationLanguage] == ci.Postgresql.String()) {
-			filteredSteps = append(filteredSteps, step)
 			continue
 		}
 		log.WithValues("step_package", step.Annotations[ci.AnnotationPackage],

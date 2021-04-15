@@ -17,10 +17,12 @@ Created on 02/03/2021
 package pipelinerun_test
 
 import (
+	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
+
+	ctrl "sigs.k8s.io/controller-runtime"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var _ = Describe("integration test in pipeline run", func() {

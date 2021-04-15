@@ -1,5 +1,5 @@
 /*
-Copyright 2020 WILDCARD
+Copyright 2021.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ package v1alpha1
 
 import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-
-	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
@@ -37,10 +37,11 @@ func (in *Play) SetupWebhookWithManager(mgr ctrl.Manager) error {
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
-// +kubebuilder:webhook:path=/mutate-ci-w6d-io-v1alpha1-play,mutating=true,failurePolicy=fail,admissionReviewVersions=v1;v1beta1,sideEffects=None,groups=ci.w6d.io,resources=plays,verbs=create;update,versions=v1alpha1,name=mplay.ci.w6d.io
+// +kubebuilder:webhook:path=/mutate-ci-w6d-io-v1alpha1-play,mutating=true,failurePolicy=fail,admissionReviewVersions=v1;v1beta1,sideEffects=None,groups=ci.w6d.io,resources=plays,verbs=create;update,versions=v1alpha1,name=mutate.play.ci.w6d.io
 
 var _ webhook.Defaulter = &Play{}
 
+// Default implements webhook.Defaulter so a webhook will be registered for the type
 func (in *Play) Default() {
 	playlog.Info("default", "name", in.Name)
 
@@ -50,22 +51,57 @@ func (in *Play) Default() {
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-// +kubebuilder:webhook:verbs=create;update;delete,path=/validate-ci-w6d-io-v1alpha1-play,mutating=false,failurePolicy=fail,admissionReviewVersions=v1;v1beta1,sideEffects=None,groups=ci.w6d.io,resources=plays,versions=v1alpha1,name=vplay.ci.w6d.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-ci-w6d-io-v1alpha1-play,mutating=false,failurePolicy=fail,admissionReviewVersions=v1;v1beta1,sideEffects=None,groups=ci.w6d.io,resources=plays,versions=v1alpha1,name=validate.play.ci.w6d.io
 
 var _ webhook.Validator = &Play{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (in *Play) ValidateCreate() error {
 	playlog.Info("validate create", "name", in.Name)
-
-	// TODO(user): fill in your validation logic upon object creation.
 	var allErrs field.ErrorList
 	allErrs = in.validateTaskType()
-	if len(allErrs) > 0 {
-		return apierrors.NewInvalid(
-			PlayGroupKind, in.Name, allErrs)
+	if in.Spec.ProjectID == 0 {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("project_id"),
+				in.Spec.ProjectID,
+				"cannot be 0"))
 	}
-	return nil
+	if in.Spec.PipelineID == 0 {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("pipeline_id"),
+				in.Spec.PipelineID,
+				"cannot be 0"))
+	}
+	if in.Spec.Environment == "" {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("environment"),
+				in.Spec.PipelineID,
+				"environment cannot be empty"))
+	}
+	if in.Spec.RepoURL == "" {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("repo_url"),
+				in.Spec.PipelineID,
+				"repo_url cannot be empty"))
+	}
+	if in.Spec.Commit.Ref == "" {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("commit").Child("ref"),
+				in.Spec.PipelineID,
+				"cannot be empty"))
+	}
+	if in.Spec.Commit.SHA == "" {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("commit").Child("sha"),
+				in.Spec.PipelineID,
+				"cannot be empty"))
+	}
+	if len(allErrs) == 0 {
+		return nil
+	}
+	return apierrors.NewInvalid(
+		schema.GroupKind{Group: "ci.w6d.io", Kind: "Play"},
+		in.Name, allErrs)
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
@@ -75,6 +111,12 @@ func (in *Play) ValidateUpdate(old runtime.Object) error {
 	var allErrs field.ErrorList
 	allErrs = in.validateTaskType()
 
+	if in.Spec.Environment == "" {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("environment"),
+				in.Spec.PipelineID,
+				"environment cannot be empty"))
+	}
 	if old.(*Play).Spec.PipelineID != in.Spec.PipelineID {
 		allErrs = append(allErrs,
 			field.Invalid(field.NewPath("spec").Child("pipelineID"),
@@ -87,11 +129,30 @@ func (in *Play) ValidateUpdate(old runtime.Object) error {
 				in.Spec.ProjectID,
 				"pipelineID cannot be changed"))
 	}
-	if len(allErrs) > 0 {
-		return apierrors.NewInvalid(
-			PlayGroupKind, in.Name, allErrs)
+	if in.Spec.RepoURL == "" {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("repo_url"),
+				in.Spec.PipelineID,
+				"repo_url cannot be empty"))
 	}
-	return nil
+	if in.Spec.Commit.Ref == "" {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("commit").Child("ref"),
+				in.Spec.PipelineID,
+				"cannot be empty"))
+	}
+	if in.Spec.Commit.SHA == "" {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("commit").Child("sha"),
+				in.Spec.PipelineID,
+				"cannot be empty"))
+	}
+	if len(allErrs) == 0 {
+		return nil
+	}
+	return apierrors.NewInvalid(
+		schema.GroupKind{Group: "ci.w6d.io", Kind: "Play"},
+		in.Name, allErrs)
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
@@ -107,14 +168,13 @@ func (in Play) validateTaskType() field.ErrorList {
 	for _, task := range in.Spec.Tasks {
 		for t := range task {
 			switch t {
-			case Build, Sonar, UnitTests, IntegrationTests, Deploy, Clean:
+			case Build, Sonar, UnitTests, IntegrationTests, Deploy, Clean, E2ETests:
 				continue
 			default:
 				taskErrs = append(taskErrs,
 					field.Invalid(field.NewPath("spec").Child("tasks"),
 						t,
 						"not a TaskType"))
-
 			}
 		}
 	}

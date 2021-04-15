@@ -1,5 +1,5 @@
 /*
-Copyright 2020 WILDCARD
+Copyright 2021.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -38,18 +38,19 @@ type LimitCiStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
 
 // LimitCi is the Schema for the limitcis API
 type LimitCi struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   LimitCiSpec   `json:"spec"`
+	Spec   LimitCiSpec   `json:"spec,omitempty"`
 	Status LimitCiStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // LimitCiList contains a list of LimitCi
 type LimitCiList struct {

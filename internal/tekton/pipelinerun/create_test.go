@@ -18,16 +18,17 @@ package pipelinerun_test
 
 import (
 	"context"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+
 	"github.com/w6d-io/ci-operator/internal"
 	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/scheme"
 
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Create", func() {
@@ -153,7 +154,7 @@ var _ = Describe("Create", func() {
 			Expect(err).To(Succeed())
 			p := pipelinerun.PipelineRun{
 				WorkFlowStruct: internal.WorkFlowStruct{
-					Scheme: scheme.Scheme,
+					Scheme: scheme,
 					Play: &ci.Play{
 						ObjectMeta: metav1.ObjectMeta{
 							Name:      "test-create-1",

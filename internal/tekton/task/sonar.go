@@ -73,7 +73,7 @@ func (t *Task) Sonar(ctx context.Context, logger logr.Logger) error {
 func (s *SonarTask) Create(ctx context.Context, r client.Client, log logr.Logger) error {
 	log = log.WithName("Create").WithValues("task", ci.Sonar)
 	log.V(1).Info("create")
-	defaultMode := ci.FileMode0444
+	var defaultMode int32 = 0444
 	namespacedName := util.GetCINamespacedName(ci.Sonar.String(), s.Play)
 
 	// build Tekton Task resource

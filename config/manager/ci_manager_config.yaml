@@ -1,0 +1,54 @@
+apiVersion: controller-runtime.sigs.k8s.io/v1alpha1
+kind: ControllerManagerConfig
+health:
+  healthProbeBindAddress: :8081
+metrics:
+  bindAddress: 127.0.0.1:8080
+webhook:
+  port: 9443
+leaderElection:
+  leaderElect: true
+  resourceName: 2f8df8b9.ci.w6d.io
+domain: "example.ci"
+ingress:
+  class: nginx
+  issuer: letsencrypt-prod
+workspaces:
+  - name: values
+    description: "Values file place holder"
+    mountPath: /helm/values
+  - name: config
+    description: "Helm config folder"
+    mountPath: /root/.config/helm
+  - name: artifacts
+    description: "Values artifacts place holder"
+    mountPath: /artifacts
+  - name: source
+    description: "Values source place holder"
+    mountPath: /source
+volume:
+  name: ws
+  volumeClaimTemplate:
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Gi
+podTemplate:
+  nodeSelector:
+    role: pipeline
+  tolerations:
+    - effect: PreferNoSchedule
+      key: dedicated
+      operator: Equal
+      value: "pipeline"
+cluster_role: bot-cx-role
+hash:
+  salt: wildcard
+  min_length: 16
+minio:
+  host: mino.svc:9000
+  access_key: ACCESSKEYSAMPLE
+  secret_key: secretkeysample
+  bucket: values

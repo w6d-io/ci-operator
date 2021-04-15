@@ -68,28 +68,6 @@ spec:
                     description: SHA contains git commit SHA
                     type: string
                 type: object
-              dependencies:
-                additionalProperties:
-                  description: Dependency struct contains env and service for the
-                    dependencies
-                  properties:
-                    services:
-                      description: Services contain a list of host and port to expose
-                      items:
-                        additionalProperties:
-                          type: string
-                        description: Service struct for dependencies
-                        type: object
-                      type: array
-                    variables:
-                      additionalProperties:
-                        type: string
-                      description: Env is environmental variable for this dependency
-                      type: object
-                  type: object
-                description: 'Dependencies contains a list of Dependency ie: MongoDb
-                  or PostgreSQL'
-                type: object
               docker_url:
                 description: DockerURL contains the registry name and tag where to
                   push docker image
@@ -197,8 +175,6 @@ spec:
                   States Running, Failed, Succeeded, Errored
                 type: string
             type: object
-        required:
-        - spec
         type: object
     served: true
     storage: true

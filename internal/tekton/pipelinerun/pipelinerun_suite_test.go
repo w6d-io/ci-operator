@@ -16,16 +16,25 @@ Created on 12/02/2021
 package pipelinerun_test
 
 import (
+	"context"
 	"path/filepath"
 	"testing"
 
-	"k8s.io/client-go/kubernetes/scheme"
+	"github.com/google/uuid"
+	"go.uber.org/zap/zapcore"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	resourcev1alpha1 "github.com/tektoncd/pipeline/pkg/apis/resource/v1alpha1"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	zapraw "go.uber.org/zap"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -39,8 +48,30 @@ func TestPipelineRun(t *testing.T) {
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
+var ctx context.Context
+var scheme = runtime.NewScheme()
 
 var _ = BeforeSuite(func(done Done) {
+	encoder := zapcore.EncoderConfig{
+		// Keys can be anything except the empty string.
+		TimeKey:        "T",
+		LevelKey:       "L",
+		NameKey:        "N",
+		CallerKey:      "C",
+		MessageKey:     "M",
+		StacktraceKey:  "S",
+		LineEnding:     zapcore.DefaultLineEnding,
+		EncodeLevel:    zapcore.CapitalLevelEncoder,
+		EncodeTime:     zapcore.ISO8601TimeEncoder,
+		EncodeDuration: zapcore.StringDurationEncoder,
+		EncodeCaller:   zapcore.FullCallerEncoder,
+	}
+	opts := zap.Options{
+		Encoder:         zapcore.NewConsoleEncoder(encoder),
+		Development:     true,
+		StacktraceLevel: zapcore.PanicLevel,
+	}
+	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts), zap.RawZapOpts(zapraw.AddCaller(), zapraw.AddCallerSkip(-1))))
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
 		ErrorIfCRDPathMissing: false,
@@ -54,16 +85,17 @@ var _ = BeforeSuite(func(done Done) {
 	cfg, err = testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
 	Expect(cfg).ToNot(BeNil())
-
-	err = tkn.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	err = ci.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+	utilruntime.Must(ci.AddToScheme(scheme))
+	utilruntime.Must(tkn.AddToScheme(scheme))
+	utilruntime.Must(resourcev1alpha1.AddToScheme(scheme))
+	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme})
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
+
+	correlationID := uuid.New().String()
+	ctx = context.Background()
+	ctx = context.WithValue(ctx, "correlation_id", correlationID)
 
 	close(done)
 }, 60)

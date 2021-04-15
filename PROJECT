@@ -18,7 +18,6 @@ resources:
 - api:
     crdVersion: v1
     namespaced: true
-  controller: true
   domain: w6d.io
   group: ci
   kind: LimitCi
@@ -27,10 +26,9 @@ resources:
 - api:
     crdVersion: v1
     namespaced: true
-  controller: true
   domain: w6d.io
   group: ci
   kind: Step
   path: github.com/w6d-io/ci-operator/api/v1alpha1
   version: v1alpha1
-version: "2"
+version: "3"
