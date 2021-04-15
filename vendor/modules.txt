@@ -26,7 +26,6 @@ github.com/Masterminds/sprig
 github.com/PuerkitoBio/purell
 # github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578
 github.com/PuerkitoBio/urlesc
-## explicit
 # github.com/avast/retry-go v3.0.0+incompatible
 github.com/avast/retry-go
 # github.com/beorn7/perks v1.0.1
