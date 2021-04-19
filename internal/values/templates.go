@@ -20,14 +20,16 @@ package values
 import (
 	"bytes"
 	"fmt"
-	"github.com/w6d-io/ci-operator/internal/config"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"strings"
 	"text/template"
 
 	"github.com/Masterminds/sprig"
 	"github.com/speps/go-hashids"
+	"github.com/w6d-io/ci-operator/internal/config"
+	"github.com/w6d-io/ci-operator/internal/vault"
 	"gopkg.in/yaml.v3"
+
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var (
@@ -47,6 +49,21 @@ func (in *Templates) PrintTemplate(out *bytes.Buffer, name string, templ string)
 		return err
 	}
 	return nil
+}
+
+func Vault(token string, path string, key string) (secret string) {
+	log := ValueLog.WithName("Vault")
+	vaultConfig := config.GetVault()
+	if vaultConfig == nil || vaultConfig.GetHost() == "" {
+		return
+	}
+	v := &vault.Config{
+		Address: vaultConfig.GetHost(),
+		Token:   token,
+		Path:    path,
+	}
+	_ = v.GetSecret(key, &secret, log)
+	return
 }
 
 // HashID return hash from pid for the prefix url
@@ -77,5 +94,6 @@ func TxtFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"hashID": HashID,
 		"toYaml": ToYaml,
+		"vault":  Vault,
 	}
 }

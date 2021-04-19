@@ -50,10 +50,6 @@ tasks:
     docker: {}
     variables:
       TEST: test
-dependencies:
-  mongodb:
-    variables:
-      HOST: "$DATABASE_HOST"
 `
 
 var _ = Describe("Values", func() {
@@ -93,12 +89,14 @@ var _ = Describe("Values", func() {
 			ctx := context.WithValue(context.Background(), "correlation_id", "unit-test")
 			err := templ.GetValues(ctx, valueBuf, ctrl.Log)
 			Expect(err).To(Succeed())
+			ctrl.Log.V(1).Info("VALUES", "content", valueBuf.String())
 			Expect(valueBuf.String()).To(Equal(`---
 env:
   - name: TEST
     value: "test"
-
-serviceAccount: sa-1
+serviceAccount:
+  create: true
+  name: sa-1
 
 lifecycle:
   enabled: true
@@ -132,8 +130,9 @@ dockerSecret:
 env:
   - name: TEST
     value: "test"
-
-serviceAccount: sa-1
+serviceAccount:
+  create: true
+  name: sa-1
 
 lifecycle:
   enabled: true

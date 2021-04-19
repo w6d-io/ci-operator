@@ -21,6 +21,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"net/url"
+	"reflect"
 	"regexp"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
@@ -175,7 +176,7 @@ func (in *Play) commonValidation() field.ErrorList {
 		if !validateDomain(in.Spec.Domain) {
 			allErrs = append(allErrs,
 				field.Invalid(field.NewPath("spec").Child("domain"),
-					in.Spec.PipelineID,
+					in.Spec.Domain,
 					"domain invalid"))
 		}
 	}
@@ -187,4 +188,40 @@ func validateDomain(domain string) bool {
 	re := regexp.MustCompile(pattern)
 
 	return re.MatchString(domain)
+}
+
+func (in *Play) validateVault() field.ErrorList {
+	var allErrs field.ErrorList
+
+	if in.Spec.Vault != nil {
+		for secret, _ := range in.Spec.Vault.Secrets {
+			if ok, _ := inArray(secret, SecretKinds); !ok {
+				allErrs = append(allErrs,
+					field.Invalid(field.NewPath("spec").Child("vault").Child("secrets"),
+						secret,
+						"secret kind not supported"))
+			}
+		}
+	}
+	return allErrs
+}
+
+func inArray(val interface{}, array interface{}) (exists bool, index int) {
+	exists = false
+	index = -1
+
+	switch reflect.TypeOf(array).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(array)
+
+		for i := 0; i < s.Len(); i++ {
+			if reflect.DeepEqual(val, s.Index(i).Interface()) == true {
+				index = i
+				exists = true
+				return
+			}
+		}
+	}
+
+	return
 }

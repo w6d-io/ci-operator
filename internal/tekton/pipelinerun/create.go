@@ -71,6 +71,21 @@ func (p *PipelineRun) Parse(log logr.Logger) error {
 			},
 		})
 	}
+	var okVault, okSecret bool
+	if p.Play.Spec.Vault != nil {
+		_, okVault = p.Play.Spec.Vault.Secrets[secrets.KubeConfigKey]
+	}
+	_, okSecret = p.Play.Spec.Secret[secrets.KubeConfigKey]
+	if okVault || okSecret {
+		p.PodTemplate.Volumes = append(p.PodTemplate.Volumes, corev1.Volume{
+			Name: secrets.KubeConfigPrefix,
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: util.GetCINamespacedName(secrets.KubeConfigPrefix, p.Play).Name,
+				},
+			},
+		})
+	}
 	return nil
 }
 

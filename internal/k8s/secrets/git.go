@@ -20,9 +20,6 @@ package secrets
 import (
 	"context"
 	"fmt"
-	"github.com/w6d-io/ci-operator/internal/config"
-	"github.com/w6d-io/ci-operator/internal/k8s/sa"
-	"github.com/w6d-io/ci-operator/internal/util"
 	"net/url"
 	"time"
 
@@ -30,6 +27,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/go-logr/logr"
+	"github.com/w6d-io/ci-operator/internal/config"
+	"github.com/w6d-io/ci-operator/internal/k8s/sa"
+	"github.com/w6d-io/ci-operator/internal/util"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -43,8 +43,8 @@ const (
 )
 
 // GitCreate creates the git credential secret and add it into the service account
-func (s *Secret) GitCreate(ctx context.Context, r client.Client, log logr.Logger) error {
-	log = log.WithName("Create").WithValues("action", GitPrefixSecret)
+func (s *Secret) GitCreate(ctx context.Context, r client.Client, logger logr.Logger) error {
+	log := logger.WithName("Create").WithValues("action", GitPrefixSecret)
 	log.V(1).Info("creating")
 
 	namespacedName := util.GetCINamespacedName(GitPrefixSecret, s.Play)
@@ -61,7 +61,7 @@ func (s *Secret) GitCreate(ctx context.Context, r client.Client, log logr.Logger
 		},
 		StringData: map[string]string{
 			"username": GitUsername,
-			"password": s.Play.Spec.Secret[GitSecretKey],
+			"password": s.GetSecret(GitSecretKey, log),
 		},
 		Type: "kubernetes.io/basic-auth",
 	}

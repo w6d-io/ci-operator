@@ -33,6 +33,9 @@ type Config struct {
 
 	// Token contains the token to use for vault connection
 	Token string
+
+	// Path contains the location of the secret
+	Path string
 }
 
 const (

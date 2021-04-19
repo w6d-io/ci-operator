@@ -233,3 +233,18 @@ func (h *Hash) GetSalt() string {
 func (h *Hash) GetMinLength() int {
 	return h.MinLength
 }
+
+// GetVault return vault
+func GetVault() *Vault {
+	return config.Vault
+}
+
+// GetToken return the vault token
+func (v *Vault) GetToken() string {
+	return v.Token
+}
+
+// GetHost return the vault host
+func (v *Vault) GetHost() string {
+	return v.Host
+}

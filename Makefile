@@ -69,7 +69,7 @@ help: ## Display this help.
 ##@ Development
 
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=ci-operator-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
@@ -89,7 +89,7 @@ test: manifests generate fmt vet ## Run tests.
 ##@ Build
 
 build: generate fmt vet vendor ## Build manager binary.
-	go build -o bin/manager main.go
+	go build -o bin/ci-operator main.go
 
 run: manifests generate fmt vet vendor ## Run a controller from your host.
 	go run ./main.go -config config/tests/config.yaml -log-format text -log-level 2
@@ -162,7 +162,7 @@ bundle-run:
 
 .PHONY: bundle-cleanup ## Build the bundle image.
 bundle-cleanup:
-	operator-sdk cleanup mongodb
+	operator-sdk cleanup ci-operator
 
 # Options for "packagemanifests".
 ifneq ($(origin FROM_VERSION), undefined)

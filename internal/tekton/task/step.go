@@ -20,6 +20,8 @@ package task
 import (
 	"context"
 	"errors"
+	"github.com/w6d-io/ci-operator/internal/k8s/secrets"
+	"path"
 	"sort"
 
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
@@ -30,14 +32,6 @@ import (
 	"github.com/tektoncd/pipeline/pkg/apis/pipeline"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-)
-
-// TODO those are duplicates entries for breaking cycle import find a way to remove it
-const (
-	// filename use with s3cmd
-	MinIOSecretKey = ".s3cfg"
-	// Prefix use for name of resource
-	MinIOPrefixSecret = "minio"
 )
 
 // Step structure for GetStep and FilteredStep
@@ -81,9 +75,22 @@ func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) ([]tkn.Step, er
 		}
 		if config.GetMinio().Host != "" {
 			vol := corev1.VolumeMount{
-				MountPath: pipeline.HomeDir + "/" + MinIOSecretKey,
-				Name:      MinIOPrefixSecret,
-				SubPath:   MinIOSecretKey,
+				MountPath: path.Join(pipeline.HomeDir, secrets.MinIOSecretKey),
+				Name:      secrets.MinIOPrefixSecret,
+				SubPath:   secrets.MinIOSecretKey,
+			}
+			newStep.Container.VolumeMounts = append(newStep.Container.VolumeMounts, vol)
+		}
+		var okVault, okSecret bool
+		if s.PlaySpec.Vault != nil {
+			_, okVault = s.PlaySpec.Vault.Secrets[secrets.KubeConfigKey]
+		}
+		_, okSecret = s.PlaySpec.Secret[secrets.KubeConfigKey]
+		if okVault || okSecret {
+			vol := corev1.VolumeMount{
+				Name:      secrets.KubeConfigPrefix,
+				MountPath: pipeline.HomeDir + "/.kube/config",
+				SubPath:   "config",
 			}
 			newStep.Container.VolumeMounts = append(newStep.Container.VolumeMounts, vol)
 		}
@@ -129,7 +136,7 @@ func (s *Step) FilteredSteps(logger logr.Logger, steps ci.Steps, isTest bool) ci
 	return filteredSteps
 }
 
-// GetGenericStep returns the steps bind with the task type
+// GetGenericSteps returns the steps bind with the task type
 func (s *Step) GetGenericSteps(logger logr.Logger, steps ci.Steps) ci.Steps {
 	log := logger.WithName("GetGenericSteps")
 	data := ci.Steps{}

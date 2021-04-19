@@ -55,7 +55,11 @@ type PlaySpec struct {
 
 	// Expose toggles the creation of the ingress in case of deployment
 	// +optional
-	Expose bool `json:"expose"`
+	Expose bool `json:"expose,omitempty"`
+
+	// External toggles is for using in values templating
+	// +optional
+	External bool `json:"external,omitempty"`
 
 	// Tasks contains the list of task to be created by Play
 	Tasks []map[TaskType]Task `json:"tasks,omitempty"`
@@ -68,8 +72,13 @@ type PlaySpec struct {
 	// - git_token
 	// - .dockerconfigjson
 	// - sonar_token
+	// - kubeconfig
 	// +optional
 	Secret map[string]string `json:"secret,omitempty"`
+
+	// Vault contain a vault information to get secret from
+	// +optional
+	Vault *Vault `json:"vault,omitempty"`
 }
 
 // Commit contains all git information
@@ -139,6 +148,28 @@ type Stack struct {
 // Script type
 type Script []string
 
+type Vault struct {
+	// Token vault
+	// +optional
+	Token string `json:"token,omitempty"`
+
+	// Secrets is a map of the secret
+	// +optional
+	Secrets map[SecretKind]VaultSecret `json:"secrets,omitempty"`
+}
+
+// SecretKind is kinds handle by the secret feature
+type SecretKind string
+
+// VaultSecret contains information for get and put vault secret
+type VaultSecret struct {
+	// VolumePath is the folder where the secret will be put
+	VolumePath string `json:"volumePath,omitempty"`
+
+	// Path is where the secret is in vault
+	Path string `json:"path,omitempty"`
+}
+
 // State type
 type State string
 
@@ -183,7 +214,24 @@ type PlayList struct {
 	Items           []Play `json:"items"`
 }
 
+var (
+	SecretKinds = []SecretKind{
+		DockerConfig,
+		KubeConfig,
+		GitToken,
+	}
+)
+
 const (
+
+	// DockerConfig is the key in map for the docker config.json
+	DockerConfig SecretKind = ".dockerconfigjson"
+
+	// KubeConfig is the key in map for the kubeconfig
+	KubeConfig SecretKind = "kubeconfig"
+
+	// GitToken is the key in map for the git token
+	GitToken SecretKind = "git_token"
 
 	// TaskTypes
 	// E2ETests is the task type for unit tests"

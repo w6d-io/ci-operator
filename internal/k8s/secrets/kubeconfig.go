@@ -1,58 +1,54 @@
 /*
-Copyright 2020 WILDCARD
+Copyright 2020 WILDCARD SA.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
+Licensed under the WILDCARD SA License, Version 1.0 (the "License");
+WILDCARD SA is register in french corporation.
+You may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+    http://www.w6d.io/licenses/LICENSE-1.0
 
 Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-Created on 28/12/2020
+distributed under the License is prohibited.
+Created on 16/04/2021
 */
 
 package secrets
 
 import (
 	"context"
+	"github.com/go-logr/logr"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/k8s/sa"
 	"github.com/w6d-io/ci-operator/internal/util"
-	"time"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/go-logr/logr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"time"
 )
 
 const (
-	DockerPrefixSecret = "reg-cred"
+	KubeConfigKey    = "kubeconfig"
+	KubeConfigPrefix = "kubeconfig"
 )
 
-// DockerCredCreate creates the docker config json secret and add it into the service account
-func (s *Secret) DockerCredCreate(ctx context.Context, r client.Client, log logr.Logger) error {
-	log = log.WithName("Create").WithValues("action", DockerPrefixSecret)
+func (s *Secret) KubeConfigCreate(ctx context.Context, r client.Client, logger logr.Logger) error {
+	log := logger.WithName("Create").WithValues("action", KubeConfigPrefix)
 	log.V(1).Info("creating")
 
-	namespacedName := util.GetCINamespacedName(DockerPrefixSecret, s.Play)
+	namespacedName := util.GetCINamespacedName(KubeConfigPrefix, s.Play)
 	resource := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        namespacedName.Name,
 			Namespace:   namespacedName.Namespace,
-			Annotations: make(map[string]string),
 			Labels:      util.GetCILabels(s.Play),
+			Annotations: make(map[string]string),
 		},
 		StringData: map[string]string{
-			corev1.DockerConfigJsonKey: s.GetSecret(corev1.DockerConfigJsonKey, log),
+			"config": s.GetSecret(KubeConfigKey, log),
 		},
-		Type: corev1.SecretTypeDockerConfigJson,
+		Type: corev1.SecretTypeOpaque,
 	}
 
 	resource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)

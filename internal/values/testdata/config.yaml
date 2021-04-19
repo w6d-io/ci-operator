@@ -38,6 +38,4 @@ minio:
   access_key: AKEXAMPLEEXAMPLE
   secret_key: sEcRetsEcRetsEcRetsEcRetsEcRet
   bucket: values
-vault:
-  host: vault:8200
 webhooks: []
