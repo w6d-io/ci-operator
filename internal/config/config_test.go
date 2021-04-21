@@ -63,20 +63,32 @@ var _ = Describe("Config", func() {
 				Expect(config.GetDeployPrefix()).Should(Equal("test"))
 			})
 			It("GetNamespace function", func() {
-				Expect(config.GetNamespace()).Should(Equal(""))
+				By("set namespace")
+				config.SetNamespace("default")
+
+				Expect(config.GetNamespace()).Should(Equal("default"))
 			})
 			It("GetMinio function", func() {
+				By("minio isn't configured")
 				Expect(config.GetMinio()).To(Equal(&config.Minio{}))
+
+				By("load a config")
 				err := config.New("testdata/file1.yaml")
 				Expect(err).To(Succeed())
+
+				By("minio is configured")
 				Expect(config.GetMinio()).ToNot(BeNil())
 				Expect(config.GetMinio().GetBucket()).To(Equal("values"))
 
 			})
 			It("GetMinioRaw function", func() {
-				err := config.New("testdata/file5.yaml")
-				Expect(err).To(Succeed())
+				By("no minio entry")
+				Expect(config.New("testdata/file5.yaml")).To(Succeed())
 				Expect(len(config.GetMinioRaw())).To(Equal(0))
+
+				By("no minio entry")
+				Expect(config.New("testdata/file1.yaml")).To(Succeed())
+				Expect(len(config.GetMinioRaw())).To(Equal(4))
 				//config.GetMinioRaw()
 			})
 			It("GetRaw function", func() {
@@ -85,11 +97,31 @@ var _ = Describe("Config", func() {
 			It("GetRaw function", func() {
 				Expect(config.GetRaw("{test")).To(BeNil())
 			})
+			It("gets values", func() {
+				Expect(config.GetValues()).ToNot(BeNil())
+			})
+			It("gets hash", func() {
+				By("no hash entry")
+				Expect(config.New("testdata/file5.yaml")).To(Succeed())
+				Expect(config.GetHash()).ToNot(BeNil())
+
+				Expect(config.New("testdata/file1.yaml")).To(Succeed())
+				Expect(config.GetHash()).ToNot(BeNil())
+				Expect(config.GetHash().GetSalt()).To(Equal("wildcard"))
+				Expect(config.GetHash().GetMinLength()).To(Equal(16))
+			})
+			It("gets vault", func() {
+				Expect(config.New("testdata/file1.yaml")).To(Succeed())
+				Expect(config.GetVault()).ToNot(BeNil())
+				Expect(config.GetVault().GetHost()).To(Equal("vault.svc:8200"))
+				Expect(config.GetVault().GetToken()).To(Equal("token"))
+			})
 
 		})
 		Context("Check Minio Method", func() {
 			It("load tiny config ", func() {
-				Expect(config.New("testdata/file5.yaml")).To(BeNil())
+				By("load config")
+				Expect(config.New("testdata/file5.yaml")).To(Succeed())
 			})
 			It("GetHost method", func() {
 				Expect(config.GetMinio().GetHost()).To(Equal(""))
@@ -123,6 +155,15 @@ var _ = Describe("Config", func() {
 			})
 			It("GetWebhooks function", func() {
 				Expect(len(config.GetWebhooks())).To(Equal(1))
+			})
+			It("gets pod template", func() {
+				By("when pod template does not exist")
+				Expect(config.PodTemplate()).ToNot(BeNil())
+
+				By("when pod template does exist")
+				Expect(config.PodTemplate()).ToNot(BeNil())
+			})
+			It(" ", func() {
 			})
 		})
 	})
