@@ -65,6 +65,7 @@ func (in *Play) ValidateCreate() error {
 	var allErrs field.ErrorList
 	allErrs = in.validateTaskType()
 	allErrs = append(allErrs, in.commonValidation()...)
+	allErrs = append(allErrs, in.validateVault()...)
 	if len(allErrs) == 0 {
 		return nil
 	}
@@ -80,6 +81,7 @@ func (in *Play) ValidateUpdate(old runtime.Object) error {
 	var allErrs field.ErrorList
 	allErrs = in.validateTaskType()
 	allErrs = append(allErrs, in.commonValidation()...)
+	allErrs = append(allErrs, in.validateVault()...)
 	if old.(*Play).Spec.PipelineID != in.Spec.PipelineID {
 		allErrs = append(allErrs,
 			field.Invalid(field.NewPath("spec").Child("pipelineID"),
@@ -147,17 +149,17 @@ func (in *Play) commonValidation() field.ErrorList {
 				in.Spec.Environment,
 				"environment cannot be empty"))
 	}
-	if in.Spec.RepoURL == "" {
-		allErrs = append(allErrs,
-			field.Invalid(field.NewPath("spec").Child("repo_url"),
-				in.Spec.RepoURL,
-				"repo_url cannot be empty"))
-	}
 	if in.Spec.Commit.Ref == "" {
 		allErrs = append(allErrs,
 			field.Invalid(field.NewPath("spec").Child("commit").Child("ref"),
 				in.Spec.Commit.Ref,
 				"cannot be empty"))
+	}
+	if in.Spec.RepoURL == "" {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("repo_url"),
+				in.Spec.RepoURL,
+				"repo_url cannot be empty"))
 	} else {
 		if _, err := url.Parse(in.Spec.RepoURL); err != nil {
 			allErrs = append(allErrs,
