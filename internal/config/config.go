@@ -154,7 +154,7 @@ func GetMinio() *Minio {
 	return &Minio{}
 }
 
-// GetMinio returns the Minio structure
+// GetMinioRaw returns the Minio structure
 func GetMinioRaw() map[string]interface{} {
 	if config.Minio != nil {
 		return GetRaw(config.Minio)
@@ -221,7 +221,8 @@ func GetHash() *Hash {
 	if config.Hash != nil {
 		return config.Hash
 	}
-	return &Hash{}
+	config.Hash = &Hash{}
+	return config.Hash
 }
 
 // GetSalt return salt
@@ -229,7 +230,22 @@ func (h *Hash) GetSalt() string {
 	return h.Salt
 }
 
-// GetSalt return salt
+// GetMinLength return min hash length
 func (h *Hash) GetMinLength() int {
 	return h.MinLength
+}
+
+// GetVault return vault
+func GetVault() *Vault {
+	return config.Vault
+}
+
+// GetToken return the vault token
+func (v *Vault) GetToken() string {
+	return v.Token
+}
+
+// GetHost return the vault host
+func (v *Vault) GetHost() string {
+	return v.Host
 }

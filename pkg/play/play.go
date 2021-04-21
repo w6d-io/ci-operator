@@ -66,6 +66,14 @@ func CreateCI(ctx context.Context, p *ci.Play, logger logr.Logger,
 		log.Error(err, "MinioSecret")
 		return err
 	}
+	if err := wf.KubeConfigSecret(p, logger); err != nil {
+		log.Error(err, "kube config")
+		return err
+	}
+	//if err := wf.VaultSecret(p, logger); err != nil {
+	//	log.Error(err, "kube config")
+	//	return err
+	//}
 	if err := wf.SetGitCreate(p, logger); err != nil {
 		log.Error(err, "GIT pipeline resource")
 		return err
@@ -94,17 +102,6 @@ func CreateCI(ctx context.Context, p *ci.Play, logger logr.Logger,
 	}
 	return nil
 }
-
-// TODO Add is ci exists function / method
-
-//// New creates a WFInterface instance
-//func New(client client.Client, scheme *runtime.Scheme) *WFType {
-//	wf := new(WFType)
-//	wf.Creates = []CIFunc{}
-//	wf.Client = client
-//	wf.Scheme = scheme
-//	return wf
-//}
 
 // Run executes Create methods in WFType
 func (wf *WFType) Run(ctx context.Context, r client.Client, log logr.Logger) error {

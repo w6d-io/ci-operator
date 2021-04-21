@@ -50,9 +50,15 @@ type WFInterface interface {
 	// MinIOSecret creates the s3cfg file in a secret resource
 	MinIOSecret(*ci.Play, logr.Logger) error
 
+	// KubeConfigSecret creates the ~/.kube/config file in a secret resource
+	KubeConfigSecret(*ci.Play, logr.Logger) error
+
+	// VaultSecret creates the ~/.kube/config file in a secret resource
+	//VaultSecret(*ci.Play, logr.Logger) error
+
 	// SetGitCreate creates the git pipeline resource type
 	SetGitCreate(*ci.Play, logr.Logger) error
-	// SetGitCreate creates the image pipeline resource type
+	// SetImageCreate creates the image pipeline resource type
 	SetImageCreate(*ci.Play, logr.Logger) error
 
 	// SetTask executes the Task according the TaskType

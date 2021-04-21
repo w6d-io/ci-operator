@@ -46,6 +46,9 @@ type Config struct {
 
 	// WebHooks contains a list of WebHook where payload will be send
 	Webhooks []webhook.Webhook `json:"webhooks" yaml:"webhooks"`
+
+	// Vault address
+	Vault *Vault `json:"vault,omitempty"`
 }
 
 type Values struct {
@@ -70,6 +73,11 @@ type Ingress struct {
 type Hash struct {
 	Salt      string `json:"salt" yaml:"salt"`
 	MinLength int    `json:"min_length" yaml:"min_length"`
+}
+
+type Vault struct {
+	Host  string `json:"host" yaml:"host"`
+	Token string `json:"token" yaml:"token"`
 }
 
 // config implements Config struct

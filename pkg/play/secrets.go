@@ -65,3 +65,35 @@ func (wf *WFType) MinIOSecret(p *ci.Play, logger logr.Logger) error {
 	}
 	return nil
 }
+
+// KubeConfigSecret create the secret
+func (wf *WFType) KubeConfigSecret(p *ci.Play, logger logr.Logger) error {
+	log := logger.WithName("KubeConfigSecret")
+	log.V(1).Info("build kube config secret")
+	secret := &secrets.Secret{
+		WorkFlowStruct: internal.WorkFlowStruct{
+			Scheme: wf.Scheme,
+			Play:   p}}
+	if err := wf.Add(secret.KubeConfigCreate); err != nil {
+		return err
+	}
+	return nil
+}
+
+//// VaultSecret create the secret
+//func (wf *WFType) VaultSecret(p *ci.Play, logger logr.Logger) error {
+//	log := logger.WithName("VaultSecret")
+//	if p.Spec.Vault == nil {
+//		log.V(1).Info("nothing to build in vault secret")
+//		return nil
+//	}
+//	log.V(1).Info("build vault secret")
+//	secret := &secrets.Secret{
+//		WorkFlowStruct: internal.WorkFlowStruct{
+//			Scheme: wf.Scheme,
+//			Play:   p}}
+//	if err := wf.Add(secret.VaultCreate); err != nil {
+//		return err
+//	}
+//	return nil
+//}

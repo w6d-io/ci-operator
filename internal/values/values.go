@@ -58,7 +58,11 @@ env:
 {{- end -}}
 {{- end }}
 
-serviceAccount: {{ printf "sa-%v" .Values.project_id }}
+{{- if not .Values.external }}
+serviceAccount:
+  create: true
+  name: {{ printf "sa-%v" .Values.project_id }}
+{{- end }}
 
 lifecycle:
   enabled: true
@@ -90,14 +94,14 @@ dockerSecret:
 {{- end }}
 {{- end }}
 
-{{- if .Values.Dependencies }}
-secrets:
-{{- range $db := .Values.Dependencies }}
-{{- range $name, $value := $db.Variables }}
-  - name: {{ $name }}
-    value: {{ $value | quote }}
-    key: {{ $name | lower }}
-	kind: env
+{{- if and .Values.vault .Values.vault.token }}
+{{- range $key, $value := .Values.vault.secrets }}
+{{- if eq $key ".dockerconfigjson" }}
+{{ $secret := vault .Values.vault.token $value.path $key }}
+{{- if $secret }}
+dockerSecret:
+  config: {{ $secret | squote }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

@@ -18,6 +18,8 @@ Created on 28/12/2020
 package secrets
 
 import (
+	"github.com/go-logr/logr"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal"
 )
 
@@ -25,4 +27,24 @@ type Secret struct {
 	internal.WorkFlowStruct
 
 	Value string
+}
+
+// GetSecret return the secret from vault if defined else the play secret as default
+func (s *Secret) GetSecret(key string, logger logr.Logger) string {
+	logger.V(1).Info("get secret")
+	var secret string
+	if s.Play.Spec.Vault != nil {
+		vaultSecret, ok := s.Play.Spec.Vault.Secrets[ci.SecretKind(key)]
+		if !ok {
+			logger.V(1).Info("return play secret")
+			return s.Play.Spec.Secret[key]
+		}
+		secret = s.GetVaultSecret(key, vaultSecret, logger)
+	}
+	if secret == "" {
+		logger.V(1).Info("return play secret")
+		return s.Play.Spec.Secret[key]
+	}
+	logger.V(1).Info("return vault secret")
+	return secret
 }
