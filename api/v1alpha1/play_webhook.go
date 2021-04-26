@@ -112,6 +112,12 @@ func (in *Play) ValidateDelete() error {
 
 func (in Play) validateTaskType() field.ErrorList {
 	var taskErrs field.ErrorList
+	if len(in.Spec.Tasks) == 0 {
+		taskErrs = append(taskErrs,
+			field.Invalid(field.NewPath("spec").Child("tasks"),
+				in.Spec.Tasks,
+				"tasks cannot be empty"))
+	}
 	for _, task := range in.Spec.Tasks {
 		for t := range task {
 			switch t {
