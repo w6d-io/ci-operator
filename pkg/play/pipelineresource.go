@@ -42,7 +42,7 @@ func (wf *WFType) SetGitCreate(p *ci.Play, logger logr.Logger) error {
 		NamespacedName: util.GetCINamespacedName("pr-git", p),
 		URL:            URL,
 		Labels:         util.GetCILabels(p),
-		Revision:       p.Spec.Commit.Ref,
+		Revision:       p.Spec.Commit.SHA,
 		Play:           p,
 		Scheme:         wf.Scheme,
 	}

@@ -19,11 +19,13 @@ package pipelinerun
 
 import (
 	"fmt"
+
 	"github.com/go-logr/logr"
-	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
-	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/util"
+
+	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 )
 
 // SetDeploy builds the params adn add the minio volume for the tekton pipelineRun resource
@@ -66,7 +68,7 @@ func (p *PipelineRun) SetDeploy(pos int, log logr.Logger) error {
 		Value: tkn.ArrayOrString{
 			Type: tkn.ParamTypeString,
 			// TODO put the prefix in config
-			StringVal: util.GetDeployNamespacedName("cx", p.Play).Namespace,
+			StringVal: p.GetNamespace(task),
 		},
 	}, tkn.Param{
 		Name: "deploy_release_name",
@@ -77,4 +79,11 @@ func (p *PipelineRun) SetDeploy(pos int, log logr.Logger) error {
 	})
 
 	return nil
+}
+
+func (p *PipelineRun) GetNamespace(task ci.Task) string {
+	if task.Namespace != "" {
+		return task.Namespace
+	}
+	return util.GetDeployNamespacedName("cx", p.Play).Namespace
 }

@@ -97,6 +97,7 @@ type Task struct {
 	// Image to use for this task
 	// +optional
 	Image string `json:"image,omitempty"`
+
 	// Script is a list of command to execute in the task
 	// +optional
 	Script Script `json:"script,omitempty"`
@@ -104,6 +105,10 @@ type Task struct {
 	// Env is the map of environment variable for the task
 	// +optional
 	Variables fields.Set `json:"variables,omitempty"`
+
+	// Namespace where to deploy application. used only in deploy task
+	// +optional
+	Namespace string `json:"namespace,omitempty"`
 
 	// Docker contains information for docker build
 	// +optional
