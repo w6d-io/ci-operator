@@ -20,12 +20,38 @@ package values_test
 import (
 	"bytes"
 	"fmt"
-	"github.com/w6d-io/ci-operator/internal/values"
-	f "k8s.io/apimachinery/pkg/fields"
+	"github.com/w6d-io/ci-operator/internal/config"
 	"testing"
 
 	"github.com/w6d-io/ci-operator/api/v1alpha1"
+	"github.com/w6d-io/ci-operator/internal/values"
+
+	f "k8s.io/apimachinery/pkg/fields"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
+
+var _ = Describe("Templates", func() {
+	Context("", func() {
+		BeforeEach(func() {
+		})
+		AfterEach(func() {
+		})
+		It("returns empty because vault config isn't set", func() {
+			var err error
+			err = config.New("testdata/config1.yaml")
+			Expect(err).To(Succeed())
+			Expect(values.Vault("token", "path", "key")).To(Equal(""))
+		})
+		It("return empty because vault is unreachable", func() {
+			var err error
+			err = config.New("testdata/config.yaml")
+			Expect(err).To(Succeed())
+			Expect(values.Vault("token", "path", "key")).To(Equal(""))
+		})
+	})
+})
 
 func TestTemplates_PrintTemplate(t *testing.T) {
 	type fields struct {

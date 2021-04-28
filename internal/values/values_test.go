@@ -18,6 +18,7 @@ package values_test
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"github.com/ghodss/yaml"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -50,6 +51,57 @@ tasks:
     docker: {}
     variables:
       TEST: test
+    annotations:
+      kubernetes.io/ingress.class: nginx
+`
+var playSpecExpose = `
+commit:
+  message: no message
+  ref: main
+  sha: 3d5531613d5531613d5531613d5531613d553161
+environment: staging
+name: test
+pipeline_id: 1
+project_id: 1
+expose: true
+repo_url: https://example.com/group/repo
+scope: {}
+secret:
+  .dockerconfigjson: '{"auths":{"reg.example.com":{"auth":"dGVzdDp0ZXN0Cg=="}}}'
+  git_token: 3d5531613d5531613d5531613d5531613d553161
+tasks:
+- deploy:
+    docker: {}
+    variables:
+      TEST: test
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+`
+var playSpecExposeExternal = `
+commit:
+  message: no message
+  ref: main
+  sha: 3d5531613d5531613d5531613d5531613d553161
+environment: staging
+name: test
+pipeline_id: 1
+project_id: 1
+external: true
+expose: true
+repo_url: https://example.com/group/repo
+scope: {}
+secret:
+  .dockerconfigjson: '{"auths":{"reg.example.com":{"auth":"dGVzdDp0ZXN0Cg=="}}}'
+  git_token: 3d5531613d5531613d5531613d5531613d553161
+tasks:
+- deploy:
+    docker: {}
+    variables:
+      TEST: test
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
 `
 
 var _ = Describe("Values", func() {
@@ -110,6 +162,107 @@ service:
 
 podLabels:
   application: test
+dockerSecret:
+  config: '{"auths":{"reg.example.com":{"auth":"dGVzdDp0ZXN0Cg=="}}}'
+
+`))
+		})
+		It("get a exposed values.yaml", func() {
+			var err error
+			spec := ci.PlaySpec{}
+			err = yaml.Unmarshal([]byte(playSpecExpose), &spec)
+			Expect(err).To(Succeed())
+			p = &ci.Play{
+				Spec: spec,
+			}
+			templ := values.Templates{
+				Client:   k8sClient,
+				Values:   config.GetRaw(p.Spec),
+				Internal: config.GetConfigRaw(),
+			}
+			valueBuf := new(bytes.Buffer)
+			ctx := context.WithValue(context.Background(), "correlation_id", "unit-test")
+			err = templ.GetValues(ctx, valueBuf, ctrl.Log)
+			Expect(err).To(Succeed())
+			ctrl.Log.V(1).Info("VALUES", "content", valueBuf.String())
+			fmt.Print(valueBuf.String())
+			Expect(valueBuf.String()).To(Equal(`---
+env:
+  - name: TEST
+    value: "test"
+serviceAccount:
+  create: true
+  name: sa-1
+
+lifecycle:
+  enabled: true
+
+image:
+  repository: reg-ext.w6d.io/cxcm/1/test
+  tag: 3d553161-main
+
+service:
+  name: test-app
+
+podLabels:
+  application: test
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    
+  class: nginx
+  issuer: "letsencrypt-prod"
+  host: x40gmlovdky3vvrr.example.ci
+dockerSecret:
+  config: '{"auths":{"reg.example.com":{"auth":"dGVzdDp0ZXN0Cg=="}}}'
+
+`))
+		})
+		It("get a exposed external values.yaml", func() {
+			var err error
+			spec := ci.PlaySpec{}
+			err = yaml.Unmarshal([]byte(playSpecExposeExternal), &spec)
+			Expect(err).To(Succeed())
+			p = &ci.Play{
+				Spec: spec,
+			}
+			templ := values.Templates{
+				Client:   k8sClient,
+				Values:   config.GetRaw(p.Spec),
+				Internal: config.GetConfigRaw(),
+			}
+			valueBuf := new(bytes.Buffer)
+			ctx := context.WithValue(context.Background(), "correlation_id", "unit-test")
+			err = templ.GetValues(ctx, valueBuf, ctrl.Log)
+			Expect(err).To(Succeed())
+			ctrl.Log.V(1).Info("VALUES", "content", valueBuf.String())
+			fmt.Print(valueBuf.String())
+			Expect(valueBuf.String()).To(Equal(`---
+env:
+  - name: TEST
+    value: "test"
+
+lifecycle:
+  enabled: true
+
+image:
+  repository: reg-ext.w6d.io/cxcm/1/test
+  tag: 3d553161-main
+
+service:
+  name: test-app
+
+podLabels:
+  application: test
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    
+  host: x40gmlovdky3vvrr.example.ci
 dockerSecret:
   config: '{"auths":{"reg.example.com":{"auth":"dGVzdDp0ZXN0Cg=="}}}'
 

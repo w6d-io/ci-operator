@@ -110,6 +110,10 @@ type Task struct {
 	// +optional
 	Namespace string `json:"namespace,omitempty"`
 
+	// Annotations is use for ingress annotations
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
+
 	// Docker contains information for docker build
 	// +optional
 	Docker Docker `json:"docker,omitempty"`

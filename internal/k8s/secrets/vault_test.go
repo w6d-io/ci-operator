@@ -70,17 +70,17 @@ var _ = Describe("Vault secret", func() {
 			}
 			By("gets empty string by empty config")
 			sec := ci.VaultSecret{}
-			Expect(s.GetVaultSecret(corev1.DockerConfigJsonKey, sec , ctrl.Log)).To(Equal(""))
+			Expect(s.GetVaultSecret(corev1.DockerConfigJsonKey, sec, ctrl.Log)).To(Equal(""))
 
 			By("set vault config")
 			Expect(config.New("testdata/file1.yaml")).To(Succeed())
 
 			By("gets empty string by empty path")
-			Expect(s.GetVaultSecret(corev1.DockerConfigJsonKey, sec , ctrl.Log)).To(Equal(""))
+			Expect(s.GetVaultSecret(corev1.DockerConfigJsonKey, sec, ctrl.Log)).To(Equal(""))
 
 			By("gets empty string due to vault server absent")
 			sec.Path = "test/test"
-			Expect(s.GetVaultSecret(corev1.DockerConfigJsonKey, sec , ctrl.Log)).To(Equal(""))
+			Expect(s.GetVaultSecret(corev1.DockerConfigJsonKey, sec, ctrl.Log)).To(Equal(""))
 		})
 		It("Get Secret", func() {
 			s := &secrets.Secret{
