@@ -80,7 +80,7 @@ var _ = Describe("Docker secret", func() {
 			By("create sa")
 			sa := &corev1.ServiceAccount{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "sa-10-2",
+					Name:      "sa-10-2",
 					Namespace: "p6e-cx-10",
 				},
 			}

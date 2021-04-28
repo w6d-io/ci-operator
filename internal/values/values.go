@@ -41,6 +41,7 @@ var HelmValuesTemplate = `---
 {{- $defaultDomain := printf "%v.%s" (.Values.project_id | hashID) .Internal.domain }}
 {{- $repository := (printf "reg-ext.w6d.io/cxcm/%v/%v" .Values.project_id .Values.name) }}
 {{- $tag := printf "%v-%v" (substr 0 8 .Values.commit.sha) .Values.commit.ref }}
+{{- $annotations := "" }}
 {{- if .Values.docker_url }}
 {{- $part := split ":" .Values.docker_url }}
 {{- $repository = $part._0 }}
@@ -49,6 +50,9 @@ var HelmValuesTemplate = `---
 {{- range $task := .Values.tasks }}
 {{- range $key, $var := $task }}
 {{- if and (eq $key "deploy") $var.variables }}
+{{- if $var.annotations }}
+{{- $annotations = $var.annotations }}
+{{- end }}
 env:
 {{- range $name, $value := $var.variables }}
   - name: {{ $name }}
@@ -80,9 +84,15 @@ podLabels:
 {{- if .Values.expose }}
 ingress:
   enabled: true
+  {{- if $annotations }}
+  annotations:
+  {{- toYaml $annotations | nindent 4 }}
+  {{- end }} 
+  {{- if not .Values.external }}
   class: {{ .Internal.ingress.class }}
-  host: {{ default $defaultDomain .Values.domain }}
   issuer: {{ .Internal.ingress.issuer | quote }}
+  {{- end }}
+  host: {{ default $defaultDomain .Values.domain }}
 {{- end }}
 
 {{- if .Values.secret }}

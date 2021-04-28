@@ -3,6 +3,7 @@ domain: "example.ci"
 ingress:
   class: nginx
   issuer: letsencrypt-prod
+deploy_prefix: "test"
 workspaces:
   - name: values
     description: "Values file place holder"
@@ -16,7 +17,7 @@ workspaces:
   - name: source
     description: "Values source place holder"
     mountPath: /source
-volume:
+Volume:
   name: ws
   volumeClaimTemplate:
     spec:
@@ -25,20 +26,18 @@ volume:
       resources:
         requests:
           storage: 2Gi
-values:
-  deploy:
-    name: unit-test
-    key: values.yaml
 cluster_role: bot-cx-role
 hash:
   salt: wildcard
   min_length: 16
 minio:
-  host: minio:9000
-  access_key: AKEXAMPLEEXAMPLE
-  secret_key: sEcRetsEcRetsEcRetsEcRetsEcRet
+  host: mino.svc:9000
+  access_key: ACCESSKEYSAMPLE
+  secret_key: secretkeysample
   bucket: values
 vault:
   host: vault.svc:8200
   token: token
-webhooks: []
+webhooks:
+  - name: pipeline-status
+    url: http://pipeline-status:8080/webhook

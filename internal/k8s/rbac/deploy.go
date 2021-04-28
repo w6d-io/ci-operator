@@ -36,7 +36,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// CI structure for build Rbac k8s resource
+// Deploy structure for build Rbac k8s resource
 type Deploy struct {
 	internal.WorkFlowStruct
 }

@@ -39,7 +39,7 @@ var _ = Describe("Git secret", func() {
 				WorkFlowStruct: internal.WorkFlowStruct{
 					Play: &ci.Play{
 						Spec: ci.PlaySpec{
-							ProjectID: 11,
+							ProjectID:  11,
 							PipelineID: 1,
 							Secret: map[string]string{
 								secrets.GitSecretKey: "token git",
@@ -85,7 +85,7 @@ var _ = Describe("Git secret", func() {
 			By("create sa")
 			sa := &corev1.ServiceAccount{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "sa-11-2",
+					Name:      "sa-11-2",
 					Namespace: "p6e-cx-11",
 				},
 			}
