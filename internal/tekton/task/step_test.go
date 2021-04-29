@@ -18,7 +18,10 @@ package task_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	"github.com/w6d-io/ci-operator/internal/config"
+	"github.com/w6d-io/ci-operator/internal/k8s/secrets"
+	corev1 "k8s.io/api/core/v1"
 
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -95,6 +98,149 @@ var _ = Describe("Task", func() {
 			}
 			gets := s.GetGenericSteps(logger, steps)
 			Expect(len(gets)).To(Equal(1))
+		})
+	})
+	Context("Step methods", func() {
+		It("deal with FilteredSteps", func() {
+			By("set namespace")
+			config.SetNamespace("default")
+
+			By("set task step")
+			s := &task.Step{
+				Index: 0,
+				PlaySpec: ci.PlaySpec{
+					Stack: ci.Stack{
+						Language: "bash",
+						Package:  "test",
+					},
+					Tasks: []map[ci.TaskType]ci.Task{
+						{
+							ci.UnitTests: ci.Task{
+								Script: ci.Script{
+									"echo", "toto",
+								},
+							},
+						},
+					},
+				},
+				TaskType: ci.E2ETests,
+			}
+
+			By("set ci step  with unmatched namespace")
+			steps := ci.Steps{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "p6e-cx-20",
+						Annotations: map[string]string{
+							ci.AnnotationPackage: "null",
+						},
+					},
+				},
+			}
+			Expect(len(s.FilteredSteps(ctrl.Log, steps, false))).To(Equal(0))
+
+			By("set namespace")
+			config.SetNamespace("p6e-cx-20")
+
+			By("package not match")
+			Expect(len(s.FilteredSteps(ctrl.Log, steps, true))).To(Equal(0))
+
+			By("package match")
+			s.TaskType = ci.UnitTests
+			Expect(len(s.FilteredSteps(ctrl.Log, steps, true))).To(Equal(0))
+
+			By("task unmatched")
+			s.TaskType = ci.Build
+			Expect(len(s.FilteredSteps(ctrl.Log, steps, false))).To(Equal(0))
+
+			By("language unmatched")
+			s.TaskType = ci.UnitTests
+			steps[0].Annotations = map[string]string{
+				ci.AnnotationTask:     ci.UnitTests.String(),
+				ci.AnnotationPackage:  "test",
+				ci.AnnotationLanguage: "none",
+			}
+			Expect(len(s.FilteredSteps(ctrl.Log, steps, false))).To(Equal(0))
+
+			By("return a step")
+			By("language unmatched")
+			s.TaskType = ci.UnitTests
+			steps[0].Annotations = map[string]string{
+				ci.AnnotationTask:     ci.UnitTests.String(),
+				ci.AnnotationPackage:  "test",
+				ci.AnnotationLanguage: "bash",
+			}
+			Expect(len(s.FilteredSteps(ctrl.Log, steps, false))).To(Equal(1))
+		})
+		It("deals with GetSteps", func() {
+			var err error
+			By("build step")
+			s := &task.Step{
+				Index: 0,
+				PlaySpec: ci.PlaySpec{
+					Stack: ci.Stack{
+						Language: "bash",
+						Package:  "test",
+					},
+					Tasks: []map[ci.TaskType]ci.Task{
+						{
+							ci.Build: ci.Task{
+								Script: ci.Script{
+									"echo", "toto",
+								},
+							},
+						},
+					},
+					Vault: &ci.Vault{
+						Secrets: map[ci.SecretKind]ci.VaultSecret{
+							secrets.KubeConfigKey: {},
+						},
+					},
+				},
+				TaskType: ci.E2ETests,
+				Client:   k8sClient,
+			}
+
+			By("Create namespace")
+			ns := &corev1.Namespace{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "p6e-cx-21",
+				},
+			}
+			Expect(k8sClient.Create(ctx, ns)).To(Succeed())
+
+			By("Create step")
+			step := &ci.Step{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "step-unit-test-1",
+					Namespace: "p6e-cx-21",
+					Annotations: map[string]string{
+						ci.AnnotationPackage:  "test",
+						ci.AnnotationLanguage: "bash",
+						ci.AnnotationTask:     ci.Build.String(),
+						ci.AnnotationOrder:    "0",
+					},
+				},
+				Step: ci.StepSpec{
+					Step: tkn.Step{
+						Script: "echo test",
+					},
+				},
+			}
+			Expect(k8sClient.Create(ctx, step)).To(Succeed())
+
+			By("set task type")
+			s.TaskType = ci.Build
+
+			By("Set config")
+			Expect(config.New("testdata/config.yaml")).To(Succeed())
+
+			By("Set namespace")
+			config.SetNamespace("p6e-cx-21")
+
+			_, err = s.GetSteps(ctx, ctrl.Log)
+			Expect(err).To(Succeed())
+
 		})
 	})
 })
