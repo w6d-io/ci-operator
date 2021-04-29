@@ -1,19 +1,18 @@
 /*
 Copyright 2020 WILDCARD SA.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
+Licensed under the WILDCARD SA License, Version 1.0 (the "License");
+WILDCARD SA is register in french corporation.
+You may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+    http://www.w6d.io/licenses/LICENSE-1.0
 
 Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-Created on 01/03/2021
+distributed under the License is prohibited.
+Created on 29/04/2021
 */
+
 package task_test
 
 import (
@@ -32,8 +31,8 @@ import (
 )
 
 var _ = Describe("Task", func() {
-	Context("E2ETests", func() {
-		It("execute E2ETests", func() {
+	Context("IntTests", func() {
+		It("execute IntTests", func() {
 			var err error
 			By("Create task")
 			t := &task.Task{
@@ -47,7 +46,7 @@ var _ = Describe("Task", func() {
 						},
 						Tasks: []map[ci.TaskType]ci.Task{
 							{
-								ci.E2ETests: ci.Task{
+								ci.IntegrationTests: ci.Task{
 									Script: ci.Script{
 										"echo", "toto",
 									},
@@ -67,29 +66,29 @@ var _ = Describe("Task", func() {
 			Expect(config.New("testdata/config.yaml")).To(Succeed())
 
 			By("Set namespace")
-			config.SetNamespace("p6e-cx-34")
+			config.SetNamespace("p6e-cx-32")
 
 			By("Create namespace")
 			ns := &corev1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "p6e-cx-34",
+					Name: "p6e-cx-32",
 				},
 			}
 			Expect(k8sClient.Create(ctx, ns)).To(Succeed())
 
 			By("failed by no step")
-			err = t.E2ETest(ctx, ctrl.Log)
+			err = t.IntTest(ctx, ctrl.Log)
 			Expect(err).ToNot(Succeed())
 
 			By("Create step")
 			step := &ci.Step{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "step-unit-test-1",
-					Namespace: "p6e-cx-34",
+					Namespace: "p6e-cx-32",
 					Annotations: map[string]string{
 						ci.AnnotationPackage:  "custom",
 						ci.AnnotationLanguage: "bash",
-						ci.AnnotationTask:     ci.E2ETests.String(),
+						ci.AnnotationTask:     ci.IntegrationTests.String(),
 						ci.AnnotationOrder:    "0",
 					},
 				},
@@ -101,12 +100,12 @@ var _ = Describe("Task", func() {
 			}
 			Expect(k8sClient.Create(ctx, step)).To(Succeed())
 
-			Expect(t.E2ETest(ctx, ctrl.Log)).To(Succeed())
+			Expect(t.IntTest(ctx, ctrl.Log)).To(Succeed())
 		})
 		It("Execute Create", func() {
 			var err error
-			By("build E2ETestsTask")
-			u := &task.E2ETestTask{
+			By("build IntTestsTask")
+			u := &task.IntTestTask{
 				Meta: task.Meta{
 					Steps: []tkn.Step{
 						{
@@ -115,9 +114,9 @@ var _ = Describe("Task", func() {
 					},
 					Play: &ci.Play{
 						ObjectMeta: metav1.ObjectMeta{
-							Name:      "play-test-35-1",
-							Namespace: "p6e-cx-35",
-							UID:       "cf3e4135-6b00-410e-9d3d-774352a57bce",
+							Name:      "play-test-33-1",
+							Namespace: "p6e-cx-33",
+							UID:       "cf3e4133-6b00-410e-9d3d-774332a57bce",
 						},
 						Spec: ci.PlaySpec{
 							Stack: ci.Stack{
@@ -126,7 +125,7 @@ var _ = Describe("Task", func() {
 							},
 							Tasks: []map[ci.TaskType]ci.Task{
 								{
-									ci.E2ETests: ci.Task{
+									ci.IntegrationTests: ci.Task{
 										Script: ci.Script{
 											"echo", "toto",
 										},
@@ -154,15 +153,15 @@ var _ = Describe("Task", func() {
 
 			By("set the right namespace")
 			u.Play.Spec.PipelineID = 1
-			u.Play.Spec.ProjectID = 35
+			u.Play.Spec.ProjectID = 33
 			err = u.Create(ctx, k8sClient, ctrl.Log)
 			Expect(err).ToNot(Succeed())
-			Expect(err.Error()).To(Equal(`namespaces "p6e-cx-35" not found`))
+			Expect(err.Error()).To(Equal(`namespaces "p6e-cx-33" not found`))
 
 			By("create namespace")
 			ns := &corev1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "p6e-cx-35",
+					Name: "p6e-cx-33",
 				},
 			}
 			Expect(k8sClient.Create(ctx, ns)).To(Succeed())

@@ -54,7 +54,7 @@ func (t *Task) Sonar(ctx context.Context, logger logr.Logger) error {
 		return err
 	}
 	if len(steps) == 0 {
-		return fmt.Errorf("no step found for %s", ci.IntegrationTests)
+		return fmt.Errorf("no step found for %s", ci.Sonar)
 	}
 	sonar := &SonarTask{
 		Meta: Meta{
