@@ -17,6 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"errors"
+	"fmt"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -24,6 +26,7 @@ import (
 	"reflect"
 	"regexp"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"strings"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -149,11 +152,22 @@ func (in *Play) commonValidation() field.ErrorList {
 				in.Spec.PipelineID,
 				"cannot be 0"))
 	}
-	if in.Spec.Environment == "" {
+	if in.Spec.Environment == "" && !in.Spec.External {
 		allErrs = append(allErrs,
 			field.Invalid(field.NewPath("spec").Child("environment"),
 				in.Spec.Environment,
 				"environment cannot be empty"))
+	}
+	_, okSecret := in.Spec.Secret[KubeConfig]
+	okVault := false
+	if in.Spec.Vault != nil {
+		_, okVault = in.Spec.Vault.Secrets[KubeConfig]
+	}
+	if in.Spec.External && !okSecret && !okVault {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("external"),
+				false,
+				"kubeconfig has to be set either in spec.vault.secrets or spec.secret"))
 	}
 	if in.Spec.Commit.Ref == "" {
 		allErrs = append(allErrs,
@@ -188,6 +202,14 @@ func (in *Play) commonValidation() field.ErrorList {
 					"domain invalid"))
 		}
 	}
+	if in.Spec.DockerURL != "" {
+		if err := in.validateDocker(); err != nil {
+			allErrs = append(allErrs,
+				field.Invalid(field.NewPath("spec").Child("docker_url"),
+					in.Spec.DockerURL,
+					err.Error()))
+		}
+	}
 	return allErrs
 }
 
@@ -196,6 +218,20 @@ func validateDomain(domain string) bool {
 	re := regexp.MustCompile(pattern)
 
 	return re.MatchString(domain)
+}
+
+func (in *Play) validateDocker() error {
+	address, _, tag, err := in.GetDockerImageTagRaw()
+	if err != nil {
+		return err
+	}
+	if address == "" || !validateDomain(address) {
+		return errors.New("invalid address")
+	}
+	if !CheckDockerTag(tag) {
+		return errors.New("invalid tag")
+	}
+	return nil
 }
 
 func (in *Play) validateVault() field.ErrorList {
@@ -232,4 +268,76 @@ func inArray(val interface{}, array interface{}) (exists bool, index int) {
 	}
 
 	return
+}
+
+// GetDockerImageTagRaw return the Docker repository
+func (in *Play) GetDockerImageTagRaw() (address string, uri string, tag string, err error) {
+	var URL *url.URL
+	rep := fmt.Sprintf("https://reg-ext.w6d.io/cxcm/%v/%v:%v-%v",
+		in.Spec.ProjectID, in.Spec.Name, in.Spec.Commit.SHA[:8], in.Spec.Commit.Ref)
+	URL, err = ParseHostURL(rep)
+	if err != nil {
+		return
+	}
+	if in.Spec.DockerURL != "" {
+		if !strings.HasPrefix(in.Spec.DockerURL, "http") && !strings.Contains(in.Spec.DockerURL, "://") {
+			in.Spec.DockerURL = "https://" + in.Spec.DockerURL
+		}
+		URL, err = ParseHostURL(in.Spec.DockerURL)
+		if err != nil {
+			return
+		}
+	}
+	partURI := strings.SplitN(URL.Path, ":", 2)
+	ctrl.Log.V(1).Info("address", "url", *URL)
+	ctrl.Log.V(1).Info("address", "part", partURI)
+	address = URL.Host
+	uri = partURI[0]
+	tag = "latest"
+	if len(partURI) > 1 && partURI[1] == "" {
+		tag = partURI[1]
+	}
+	return
+}
+
+// ParseHostURL parses a url string, validates the string is a host url, and
+// returns the parsed URL
+func ParseHostURL(host string) (*url.URL, error) {
+	protoAddrParts := strings.SplitN(host, "://", 2)
+	log := ctrl.Log.WithName("ParseHostURL")
+	log.V(1).Info("proto", "host", host, "protoPart", protoAddrParts)
+	if len(protoAddrParts) == 1 {
+		return nil, fmt.Errorf("unable to parse docker host `%s`", host)
+	}
+
+	var basePath string
+	proto, addr := protoAddrParts[0], protoAddrParts[1]
+	if proto == "tcp" {
+		parsed, err := url.Parse("tcp://" + addr)
+		if err != nil {
+			return nil, err
+		}
+		addr = parsed.Host
+		basePath = parsed.Path
+	} else {
+		parsed, err := url.Parse("http://" + addr)
+		if err != nil {
+			return nil, err
+		}
+		addr = parsed.Host
+		basePath = parsed.Path
+	}
+	return &url.URL{
+		Scheme: proto,
+		Host:   addr,
+		Path:   basePath,
+	}, nil
+}
+
+// CheckDockerTag is for checking the tag of the docker image
+func CheckDockerTag(tag string) bool {
+	pattern := `^[\w][\w.-]{0,127}$`
+	re := regexp.MustCompile(pattern)
+
+	return re.MatchString(tag)
 }

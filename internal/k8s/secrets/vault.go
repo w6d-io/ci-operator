@@ -62,7 +62,7 @@ import (
 //}
 
 // GetVaultSecret return the secret from vault
-func (s *Secret) GetVaultSecret(key string, sec ci.VaultSecret, logger logr.Logger) (secret string) {
+func (s *Secret) GetVaultSecret(key ci.SecretKind, sec ci.VaultSecret, logger logr.Logger) (secret string) {
 	log := logger.WithName("GetVaultSecret").WithValues("path", sec.Path)
 	log.V(1).Info("look at")
 	vaultConfig := config.GetVault()

@@ -37,8 +37,8 @@ var _ = Describe("", func() {
 						Spec: ci.PlaySpec{
 							ProjectID:  13,
 							PipelineID: 1,
-							Secret: map[string]string{
-								corev1.DockerConfigJsonKey: "{}",
+							Secret: map[ci.SecretKind]string{
+								ci.DockerConfig: "{}",
 							},
 						},
 					},

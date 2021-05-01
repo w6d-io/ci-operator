@@ -16,12 +16,10 @@ Created on 21/04/2021
 package secrets_test
 
 import (
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/k8s/secrets"
-	corev1 "k8s.io/api/core/v1"
-
-	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	. "github.com/onsi/ginkgo"
@@ -70,17 +68,17 @@ var _ = Describe("Vault secret", func() {
 			}
 			By("gets empty string by empty config")
 			sec := ci.VaultSecret{}
-			Expect(s.GetVaultSecret(corev1.DockerConfigJsonKey, sec, ctrl.Log)).To(Equal(""))
+			Expect(s.GetVaultSecret(ci.DockerConfig, sec, ctrl.Log)).To(Equal(""))
 
 			By("set vault config")
 			Expect(config.New("testdata/file1.yaml")).To(Succeed())
 
 			By("gets empty string by empty path")
-			Expect(s.GetVaultSecret(corev1.DockerConfigJsonKey, sec, ctrl.Log)).To(Equal(""))
+			Expect(s.GetVaultSecret(ci.DockerConfig, sec, ctrl.Log)).To(Equal(""))
 
 			By("gets empty string due to vault server absent")
 			sec.Path = "test/test"
-			Expect(s.GetVaultSecret(corev1.DockerConfigJsonKey, sec, ctrl.Log)).To(Equal(""))
+			Expect(s.GetVaultSecret(ci.DockerConfig, sec, ctrl.Log)).To(Equal(""))
 		})
 		It("Get Secret", func() {
 			s := &secrets.Secret{
@@ -88,29 +86,29 @@ var _ = Describe("Vault secret", func() {
 					Play: &ci.Play{
 						Spec: ci.PlaySpec{
 							Vault: nil,
-							Secret: map[string]string{
-								corev1.DockerConfigJsonKey: "{}",
+							Secret: map[ci.SecretKind]string{
+								ci.DockerConfig: "{}",
 							},
 						},
 					},
 				},
 			}
 			By("gets the play secret")
-			Expect(s.GetSecret(corev1.DockerConfigJsonKey, ctrl.Log)).To(Equal("{}"))
+			Expect(s.GetSecret(ci.DockerConfig, ctrl.Log)).To(Equal("{}"))
 
 			By("gets the play secret because vault does not have the key")
 			s.Play.Spec.Vault = &ci.Vault{
 				Token: "play token",
 				Secrets: map[ci.SecretKind]ci.VaultSecret{
 					"key": {Path: "test/test"}}}
-			Expect(s.GetSecret(corev1.DockerConfigJsonKey, ctrl.Log)).To(Equal("{}"))
+			Expect(s.GetSecret(ci.DockerConfig, ctrl.Log)).To(Equal("{}"))
 
 			s.Play.Spec.Vault = &ci.Vault{
 				Token: "play token",
 				Secrets: map[ci.SecretKind]ci.VaultSecret{
-					corev1.DockerConfigJsonKey: {Path: "test/test"}}}
+					ci.DockerConfig: {Path: "test/test"}}}
 			By("gets the play secret due to vault failed")
-			Expect(s.GetSecret(corev1.DockerConfigJsonKey, ctrl.Log)).To(Equal("{}"))
+			Expect(s.GetSecret(ci.DockerConfig, ctrl.Log)).To(Equal("{}"))
 		})
 	})
 })

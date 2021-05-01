@@ -20,6 +20,7 @@ package secrets
 import (
 	"context"
 	"fmt"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"net/url"
 	"time"
 
@@ -35,10 +36,10 @@ import (
 )
 
 const (
+	// GitTektonAnnotation
 	// TODO use an increment in order to be able to manage several repository git
 	GitTektonAnnotation = "tekton.dev/git-0"
 	GitPrefixSecret     = "secret-git"
-	GitSecretKey        = "git_token"
 	GitUsername         = "oauth2"
 )
 
@@ -61,7 +62,7 @@ func (s *Secret) GitCreate(ctx context.Context, r client.Client, logger logr.Log
 		},
 		StringData: map[string]string{
 			"username": GitUsername,
-			"password": s.GetSecret(GitSecretKey, log),
+			"password": s.GetSecret(ci.GitToken, log),
 		},
 		Type: "kubernetes.io/basic-auth",
 	}

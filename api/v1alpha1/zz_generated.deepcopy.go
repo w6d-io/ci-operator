@@ -224,7 +224,7 @@ func (in *PlaySpec) DeepCopyInto(out *PlaySpec) {
 	}
 	if in.Secret != nil {
 		in, out := &in.Secret, &out.Secret
-		*out = make(map[string]string, len(*in))
+		*out = make(map[SecretKind]string, len(*in))
 		for key, val := range *in {
 			(*out)[key] = val
 		}

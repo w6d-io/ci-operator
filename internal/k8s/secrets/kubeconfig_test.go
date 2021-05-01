@@ -43,8 +43,8 @@ var _ = Describe("Kube config secret", func() {
 						Spec: ci.PlaySpec{
 							ProjectID:  12,
 							PipelineID: 1,
-							Secret: map[string]string{
-								corev1.DockerConfigJsonKey: "{}",
+							Secret: map[ci.SecretKind]string{
+								ci.DockerConfig: "{}",
 							},
 						},
 					},

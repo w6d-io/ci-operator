@@ -20,23 +20,24 @@ package pipelinerun
 import (
 	"github.com/go-logr/logr"
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
-	"github.com/w6d-io/ci-operator/internal/util"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 )
 
-func (p *PipelineRun) SetClean(_ int, log logr.Logger) error {
+func (p *PipelineRun) SetClean(pos int, log logr.Logger) error {
 	log = log.WithName("SetClean").WithValues("action", "pipeline-run")
 	log.V(1).Info("set clean pipeline run params")
+	task := p.Play.Spec.Tasks[pos][ci.Clean]
 	p.Params = append(p.Params, tkn.Param{
 		Name: "clean_namespace",
 		Value: tkn.ArrayOrString{
 			Type:      tkn.ParamTypeString,
-			StringVal: util.GetDeployNamespacedName("cx", p.Play).Namespace,
+			StringVal: p.GetNamespace(task),
 		},
 	}, tkn.Param{
 		Name: "clean_release_name",
 		Value: tkn.ArrayOrString{
 			Type:      tkn.ParamTypeString,
-			StringVal: util.GetDeployNamespacedName("cx", p.Play).Namespace,
+			StringVal: p.GetNamespace(task),
 		},
 	})
 	return nil

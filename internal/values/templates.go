@@ -20,6 +20,7 @@ package values
 import (
 	"bytes"
 	"fmt"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"strings"
 	"text/template"
 
@@ -62,7 +63,7 @@ func Vault(token string, path string, key string) (secret string) {
 		Token:   token,
 		Path:    path,
 	}
-	_ = v.GetSecret(key, &secret, log)
+	_ = v.GetSecret(ci.SecretKind(key), &secret, log)
 	return
 }
 
