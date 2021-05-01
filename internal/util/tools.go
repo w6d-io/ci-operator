@@ -92,7 +92,7 @@ func GetCINamespacedName(prefix string, play *ci.Play) types.NamespacedName {
 	}
 }
 
-// GetCINamespacedName return CI namespacedName
+// GetCINamespacedName2 return CI namespacedName
 func GetCINamespacedName2(prefix string, play *ci.Play) types.NamespacedName {
 	return types.NamespacedName{
 		Name:      fmt.Sprintf("%s-%v", prefix, play.Spec.ProjectID),
@@ -100,7 +100,7 @@ func GetCINamespacedName2(prefix string, play *ci.Play) types.NamespacedName {
 	}
 }
 
-// GetCINamespacedName return CI namespacedName
+// GetDeployNamespacedName return CI namespacedName
 func GetDeployNamespacedName(prefix string, play *ci.Play) types.NamespacedName {
 	return types.NamespacedName{
 		Name:      fmt.Sprintf("%s-%v", prefix, play.Spec.ProjectID),
@@ -119,7 +119,7 @@ func GetCILabels(p *ci.Play) map[string]string {
 
 // GetDockerImageTag return the URL of the Docker repository
 func GetDockerImageTag(play *ci.Play) (*url.URL, error) {
-	// TODO find a way to set this in config
+	// TODO to remove. DockerURL ahs to be set
 	rawURL := fmt.Sprintf("reg-ext.w6d.io/cxcm/%v/%v:%v-%v",
 		play.Spec.ProjectID, play.Spec.Name, play.Spec.Commit.SHA[:8], play.Spec.Commit.Ref)
 	if play.Spec.DockerURL != "" {
@@ -133,16 +133,17 @@ func GetDockerImageTag(play *ci.Play) (*url.URL, error) {
 }
 
 // GetDockerImageTagRaw return the Docker repository
-func GetDockerImageTagRaw(play *ci.Play) (address string, tag string, err error) {
-
+func GetDockerImageTagRaw(play *ci.Play) (address string, uri string, tag string, err error) {
+	var URL *url.URL
+	// TODO to remove. DockerURL ahs to be set
 	rep := fmt.Sprintf("https://reg-ext.w6d.io/cxcm/%v/%v:%v-%v",
 		play.Spec.ProjectID, play.Spec.Name, play.Spec.Commit.SHA[:8], play.Spec.Commit.Ref)
-	URL, err := ParseHostURL(rep)
+	URL, err = ParseHostURL(rep)
 	if err != nil {
-		return "", "", err
+		return
 	}
 	if play.Spec.DockerURL != "" {
-		if !strings.HasPrefix(play.Spec.DockerURL, "http") {
+		if !strings.HasPrefix(play.Spec.DockerURL, "http") && !strings.Contains(play.Spec.DockerURL, "://") {
 			play.Spec.DockerURL = "https://" + play.Spec.DockerURL
 		}
 		URL, err = ParseHostURL(play.Spec.DockerURL)
@@ -150,18 +151,18 @@ func GetDockerImageTagRaw(play *ci.Play) (address string, tag string, err error)
 			return
 		}
 	}
-
-	partAddress := strings.SplitN(URL.Path, ":", 2)
-	address = partAddress[0]
-	tag = partAddress[1]
-	if partAddress[1] == "" {
-		tag = "latest"
+	partURI := strings.SplitN(URL.Path, ":", 2)
+	address = URL.Host
+	uri = partURI[0]
+	tag = "latest"
+	if len(partURI) > 1 && partURI[1] == "" {
+		tag = partURI[1]
 	}
 	return
 }
 
-// IgnoreNotFound returns nil on NotFound errors.
-// All other values that are not NotFound errors or nil are returned unmodified.
+// IgnoreNotExists returns nil on NotExist errors.
+// All other values that are not NotExist errors or nil are returned unmodified.
 func IgnoreNotExists(err error) error {
 	if err == nil ||
 		(strings.HasPrefix(err.Error(), "Index with name field:") &&
@@ -181,7 +182,7 @@ func GetObjectContain(obj runtime.Object) string {
 	return buf.String()
 }
 
-// GetStage build the tasks
+// IsBuildStage check whether the stage is build or not
 func IsBuildStage(play *ci.Play) bool {
 	if strings.ToLower(play.Spec.Stack.Language) == "android" ||
 		strings.ToLower(play.Spec.Stack.Language) == "ios" {
@@ -214,6 +215,13 @@ func ParseHostURL(host string) (*url.URL, error) {
 		}
 		addr = parsed.Host
 		basePath = parsed.Path
+	} else {
+		parsed, err := url.Parse("http://" + addr)
+		if err != nil {
+			return nil, err
+		}
+		addr = parsed.Host
+		basePath = parsed.Path
 	}
 	return &url.URL{
 		Scheme: proto,
@@ -221,3 +229,4 @@ func ParseHostURL(host string) (*url.URL, error) {
 		Path:   basePath,
 	}, nil
 }
+

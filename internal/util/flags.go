@@ -66,24 +66,24 @@ func TextEncoderConfig() zapcore.EncoderConfig {
 	}
 }
 
-// outputFormatFlag contains structure for managing zap encoding
-type outputFormatFlag struct {
-	zapOptions *zap.Options
+// OutputFormatFlag contains structure for managing zap encoding
+type OutputFormatFlag struct {
+	ZapOptions *zap.Options
 	value      string
 }
 
-func (o *outputFormatFlag) String() string {
+func (o *OutputFormatFlag) String() string {
 	return o.value
 }
 
-func (o *outputFormatFlag) Set(flagValue string) error {
+func (o *OutputFormatFlag) Set(flagValue string) error {
 	flagValue = LookupEnvOrString("LOG_FORMAT", flagValue)
 	val := strings.ToLower(flagValue)
 	switch val {
 	case "json":
-		o.zapOptions.Encoder = zapcore.NewJSONEncoder(JsonEncoderConfig())
+		o.ZapOptions.Encoder = zapcore.NewJSONEncoder(JsonEncoderConfig())
 	case "text":
-		o.zapOptions.Encoder = zapcore.NewConsoleEncoder(TextEncoderConfig())
+		o.ZapOptions.Encoder = zapcore.NewConsoleEncoder(TextEncoderConfig())
 	default:
 		return fmt.Errorf(`invalid "%s"`, flagValue)
 	}
@@ -98,17 +98,17 @@ var levelStrings = map[string]zapcore.Level{
 	"error": zapcore.ErrorLevel,
 }
 
-// levelFlag contains structure for managing zap level
-type levelFlag struct {
-	zapOptions *zap.Options
+// LevelFlag contains structure for managing zap level
+type LevelFlag struct {
+	ZapOptions *zap.Options
 	value      string
 }
 
-func (l levelFlag) String() string {
+func (l LevelFlag) String() string {
 	return l.value
 }
 
-func (l levelFlag) Set(flagValue string) error {
+func (l LevelFlag) Set(flagValue string) error {
 	flagValue = LookupEnvOrString("LOG_LEVEL", flagValue)
 	level, validLevel := levelStrings[strings.ToLower(flagValue)]
 	if !validLevel {
@@ -118,26 +118,26 @@ func (l levelFlag) Set(flagValue string) error {
 		}
 		if logLevel > 0 {
 			intLevel := -1 * logLevel
-			l.zapOptions.Level = zapcore.Level(int8(intLevel))
+			l.ZapOptions.Level = zapcore.Level(int8(intLevel))
 		} else {
 			return fmt.Errorf("invalid log level \"%s\"", flagValue)
 		}
 	} else {
-		l.zapOptions.Level = level
+		l.ZapOptions.Level = level
 	}
 	l.value = flagValue
 	return nil
 }
 
-type configFlag struct {
+type ConfigFlag struct {
 	value string
 }
 
-func (f configFlag) String() string {
+func (f ConfigFlag) String() string {
 	return f.value
 }
 
-func (f configFlag) Set(flagValue string) error {
+func (f ConfigFlag) Set(flagValue string) error {
 	if flagValue == "" {
 		return errors.New("config cannot be empty")
 	}
@@ -161,16 +161,16 @@ func (f configFlag) Set(flagValue string) error {
 // BindFlags custom flags
 func BindFlags(o *zap.Options, fs *flag.FlagSet) {
 
-	var outputFormat outputFormatFlag
-	outputFormat.zapOptions = o
+	var outputFormat OutputFormatFlag
+	outputFormat.ZapOptions = o
 	fs.Var(&outputFormat, "log-format", "log encoding ( 'json' or 'text')")
 
-	var level levelFlag
-	level.zapOptions = o
+	var level LevelFlag
+	level.ZapOptions = o
 	fs.Var(&level, "log-level", "log level verbosity. Can be 'debug', 'info', 'error', "+
 		"or any integer value > 0 which corresponds to custom debug levels of increasing verbosity")
 
-	var c configFlag
+	var c ConfigFlag
 	fs.Var(&c, "config", "config file")
 }
 

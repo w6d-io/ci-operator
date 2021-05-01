@@ -45,6 +45,10 @@ func (in *Deploy) Create(ctx context.Context, r client.Client, logger logr.Logge
 	log := logger.WithName("Deploy").WithName("Create").WithValues("action", Prefix)
 	log.V(1).Info("creating")
 
+	if in.Play.Spec.External {
+		log.V(1).Info("skip")
+		return nil
+	}
 	namespacedNamed := util.GetCINamespacedName2(Prefix, in.Play)
 	deployNamespacedNamed := util.GetDeployNamespacedName(config.GetDeployPrefix(), in.Play)
 

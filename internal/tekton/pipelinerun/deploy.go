@@ -74,7 +74,7 @@ func (p *PipelineRun) SetDeploy(pos int, log logr.Logger) error {
 		Name: "deploy_release_name",
 		Value: tkn.ArrayOrString{
 			Type:      tkn.ParamTypeString,
-			StringVal: util.GetDeployNamespacedName("cx", p.Play).Namespace,
+			StringVal: p.GetNamespace(task),
 		},
 	})
 

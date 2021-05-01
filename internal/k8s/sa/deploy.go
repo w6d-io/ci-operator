@@ -41,6 +41,10 @@ func (s *Deploy) Create(ctx context.Context, r client.Client, log logr.Logger) e
 	log = log.WithName("Create").WithValues("action", Prefix)
 	log.V(1).Info("creating")
 
+	if s.Play.Spec.External {
+		log.V(1).Info("skip")
+		return nil
+	}
 	namespacedName := util.GetDeployNamespacedName(Prefix, s.Play)
 	log.V(1).WithValues("namespaced", namespacedName).Info("debug")
 	resource := &corev1.ServiceAccount{

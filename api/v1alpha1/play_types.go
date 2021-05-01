@@ -74,7 +74,7 @@ type PlaySpec struct {
 	// - sonar_token
 	// - kubeconfig
 	// +optional
-	Secret map[string]string `json:"secret,omitempty"`
+	Secret map[SecretKind]string `json:"secret,omitempty"`
 
 	// Vault contain a vault information to get secret from
 	// +optional
