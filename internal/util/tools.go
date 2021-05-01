@@ -229,4 +229,3 @@ func ParseHostURL(host string) (*url.URL, error) {
 		Path:   basePath,
 	}, nil
 }
-

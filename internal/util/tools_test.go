@@ -65,7 +65,7 @@ var _ = Describe("Util", func() {
 			By("Condition cancel")
 			c = v1beta1.Conditions{
 				{
-					Status:  corev1.ConditionUnknown,
+					Status: corev1.ConditionUnknown,
 					Reason: "PipelineRunCancelled",
 				},
 			}
@@ -107,7 +107,7 @@ var _ = Describe("Util", func() {
 			By("build play")
 			play := &ci.Play{
 				Spec: ci.PlaySpec{
-					ProjectID:  1,
+					ProjectID: 1,
 				},
 			}
 			Expect(util.InNamespace(play)).To(Equal(client.InNamespace("p6e-cx-1")))
@@ -126,7 +126,7 @@ var _ = Describe("Util", func() {
 			By("build play")
 			play := &ci.Play{
 				Spec: ci.PlaySpec{
-					ProjectID:  1,
+					ProjectID: 1,
 				},
 			}
 			Expect(util.GetCINamespacedName2("test", play).String()).To(Equal("p6e-cx-1/test-1"))
@@ -152,7 +152,6 @@ var _ = Describe("Util", func() {
 			Expect(util.GetCILabels(play)).To(Equal(map[string]string{
 				"projectid":  strconv.Itoa(int(play.Spec.ProjectID)),
 				"pipelineid": strconv.Itoa(int(play.Spec.PipelineID)),
-
 			}))
 		})
 		It("GetDockerImageTag", func() {
@@ -162,7 +161,7 @@ var _ = Describe("Util", func() {
 				Spec: ci.PlaySpec{
 					Name:      "test",
 					ProjectID: 1,
-					Commit:    ci.Commit{
+					Commit: ci.Commit{
 						SHA: "f2c2ab7eb8afb44ad94d3001b777f0d1dd35de33",
 						Ref: "main",
 					},
@@ -191,7 +190,7 @@ var _ = Describe("Util", func() {
 				Spec: ci.PlaySpec{
 					Name:      "test",
 					ProjectID: 1,
-					Commit:    ci.Commit{
+					Commit: ci.Commit{
 						SHA: "f2c2ab7eb8afb44ad94d3001b777f0d1dd35de33",
 						Ref: "main",
 					},
@@ -236,7 +235,7 @@ var _ = Describe("Util", func() {
 				Spec: ci.PlaySpec{
 					Name:      "test",
 					ProjectID: 1,
-					Commit:    ci.Commit{
+					Commit: ci.Commit{
 						SHA: "f2c2ab7eb8afb44ad94d3001b777f0d1dd35de33",
 						Ref: "main",
 					},
@@ -248,7 +247,7 @@ var _ = Describe("Util", func() {
 			By("build resource")
 			play := &ci.Play{
 				Spec: ci.PlaySpec{
-					Stack:     ci.Stack{
+					Stack: ci.Stack{
 						Language: "",
 					},
 					Tasks: []map[ci.TaskType]ci.Task{

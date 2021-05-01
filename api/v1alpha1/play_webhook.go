@@ -270,7 +270,6 @@ func inArray(val interface{}, array interface{}) (exists bool, index int) {
 	return
 }
 
-
 // GetDockerImageTagRaw return the Docker repository
 func (in *Play) GetDockerImageTagRaw() (address string, uri string, tag string, err error) {
 	var URL *url.URL
@@ -300,7 +299,6 @@ func (in *Play) GetDockerImageTagRaw() (address string, uri string, tag string, 
 	}
 	return
 }
-
 
 // ParseHostURL parses a url string, validates the string is a host url, and
 // returns the parsed URL

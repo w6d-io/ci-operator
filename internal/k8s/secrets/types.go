@@ -30,11 +30,11 @@ type Secret struct {
 }
 
 // GetSecret return the secret from vault if defined else the play secret as default
-func (s *Secret) GetSecret(key string, logger logr.Logger) string {
+func (s *Secret) GetSecret(key ci.SecretKind, logger logr.Logger) string {
 	logger.V(1).Info("get secret")
 	var secret string
 	if s.Play.Spec.Vault != nil {
-		vaultSecret, ok := s.Play.Spec.Vault.Secrets[ci.SecretKind(key)]
+		vaultSecret, ok := s.Play.Spec.Vault.Secrets[key]
 		if !ok {
 			logger.V(1).Info("return play secret")
 			return s.Play.Spec.Secret[key]

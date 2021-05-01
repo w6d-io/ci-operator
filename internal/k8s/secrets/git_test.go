@@ -41,8 +41,8 @@ var _ = Describe("Git secret", func() {
 						Spec: ci.PlaySpec{
 							ProjectID:  11,
 							PipelineID: 1,
-							Secret: map[string]string{
-								secrets.GitSecretKey: "token git",
+							Secret: map[ci.SecretKind]string{
+								ci.GitToken: "token git",
 							},
 						},
 					},

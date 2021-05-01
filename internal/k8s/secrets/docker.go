@@ -19,6 +19,7 @@ package secrets
 
 import (
 	"context"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/k8s/sa"
 	"github.com/w6d-io/ci-operator/internal/util"
@@ -50,7 +51,7 @@ func (s *Secret) DockerCredCreate(ctx context.Context, r client.Client, log logr
 			Labels:      util.GetCILabels(s.Play),
 		},
 		StringData: map[string]string{
-			corev1.DockerConfigJsonKey: s.GetSecret(corev1.DockerConfigJsonKey, log),
+			corev1.DockerConfigJsonKey: s.GetSecret(ci.DockerConfig, log),
 		},
 		Type: corev1.SecretTypeDockerConfigJson,
 	}

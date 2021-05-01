@@ -22,10 +22,11 @@ import (
 	"errors"
 	"github.com/go-logr/logr"
 	"github.com/hashicorp/vault/api"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 )
 
 // GetSecret returns the secret data from vault
-func (c *Config) GetSecret(key string, rec interface{}, log logr.Logger) error {
+func (c *Config) GetSecret(key ci.SecretKind, rec interface{}, log logr.Logger) error {
 	log = log.WithName("GetSecret")
 	log.V(1).Info("get vault secret")
 
@@ -45,7 +46,7 @@ func (c *Config) GetSecret(key string, rec interface{}, log logr.Logger) error {
 		log.Error(nil, "data from vault is empty")
 		return errors.New("data from vault is empty")
 	}
-	sec, ok := data.Data[key]
+	sec, ok := data.Data[string(key)]
 	if !ok {
 		log.Error(nil, "data from vault not contains the key")
 		return errors.New("data from vault not contains the key")

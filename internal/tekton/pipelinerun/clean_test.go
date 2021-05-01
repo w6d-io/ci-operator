@@ -36,6 +36,11 @@ var _ = Describe("clean in pipeline run", func() {
 						Spec: ci.PlaySpec{
 							ProjectID:  1,
 							PipelineID: 1,
+							Tasks: []map[ci.TaskType]ci.Task{
+								{
+									ci.Clean: ci.Task{},
+								},
+							},
 						},
 					},
 				},

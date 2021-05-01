@@ -18,6 +18,7 @@ package secrets
 import (
 	"context"
 	"github.com/go-logr/logr"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/k8s/sa"
 	"github.com/w6d-io/ci-operator/internal/util"
@@ -46,7 +47,7 @@ func (s *Secret) KubeConfigCreate(ctx context.Context, r client.Client, logger l
 			Annotations: make(map[string]string),
 		},
 		StringData: map[string]string{
-			"config": s.GetSecret(KubeConfigKey, log),
+			"config": s.GetSecret(ci.KubeConfig, log),
 		},
 		Type: corev1.SecretTypeOpaque,
 	}
