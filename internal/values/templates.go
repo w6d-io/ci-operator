@@ -19,6 +19,7 @@ package values
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"strings"
@@ -38,8 +39,12 @@ var (
 	Alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 )
 
-func (in *Templates) PrintTemplate(out *bytes.Buffer, name string, templ string) error {
+func (in *Templates) PrintTemplate(ctx context.Context, out *bytes.Buffer, name string, templ string) error {
 	log := ValueLog.WithName("PrintTemplate")
+	correlationID := ctx.Value("correlation_id")
+	if correlationID != nil {
+		log = log.WithValues("correlation_id", correlationID)
+	}
 	log.V(1).Info("templating")
 	funcMap := sprig.TxtFuncMap()
 	valuesMap := TxtFuncMap()

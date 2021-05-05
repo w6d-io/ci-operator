@@ -165,7 +165,7 @@ func (in *Templates) GetValues(ctx context.Context, out *bytes.Buffer, logger lo
 		logger = logger.WithValues("correlation_id", correlationID)
 	}
 	tpl := LookupOrDefaultValues(ctx, in.Client, "deploy", HelmValuesTemplate)
-	if err := in.PrintTemplate(out, FileNameValues, tpl); err != nil {
+	if err := in.PrintTemplate(ctx, out, FileNameValues, tpl); err != nil {
 		logger.Error(err, "Templating failed")
 		return err
 	}
