@@ -19,6 +19,7 @@ package values_test
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"testing"
@@ -114,7 +115,7 @@ func TestTemplates_PrintTemplate(t *testing.T) {
 				Spec:     tt.fields.Spec,
 				Internal: tt.fields.Internal,
 			}
-			if err := in.PrintTemplate(tt.args.out, tt.args.name, tt.args.templ); (err != nil) != tt.wantErr {
+			if err := in.PrintTemplate(context.TODO(), tt.args.out, tt.args.name, tt.args.templ); (err != nil) != tt.wantErr {
 				fmt.Printf("out = %s\n", tt.args.out.String())
 				t.Errorf("PrintTemplate() error = %v, wantErr %v", err, tt.wantErr)
 			}

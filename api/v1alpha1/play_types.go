@@ -243,6 +243,7 @@ const (
 	GitToken SecretKind = "git_token"
 
 	// TaskTypes
+
 	// E2ETests is the task type for unit tests"
 	E2ETests TaskType = "e2e-tests"
 
@@ -265,6 +266,7 @@ const (
 	Clean TaskType = "clean"
 
 	// States
+
 	// Creating means that tekton resource creation is in progress
 	Creating State = "Creating"
 
@@ -287,9 +289,10 @@ const (
 	Errored State = "Errored"
 
 	// Unknown means that the controller just begun to run
-	Unknown State = "Unknown"
+	//Unknown State = "Unknown"
 
 	// Annotations
+
 	AnnotationOrder    string = "ci.w6d.io/order"
 	AnnotationTask     string = "ci.w6d.io/task"
 	AnnotationKind     string = "ci.w6d.io/kind"
@@ -297,6 +300,7 @@ const (
 	AnnotationPackage  string = "ci.w6d.io/package"
 
 	// ResourceNames
+
 	ResourceGit   string = "source"
 	ResourceImage string = "builddocker"
 )

@@ -34,16 +34,20 @@ func (wf *WFType) ServiceAccount(p *ci.Play, logger logr.Logger) error {
 		},
 	}
 	if err := wf.Add(cisa.Create); err != nil {
-		log.V(1).Info("Build service account for deploy")
+		log.V(1).Info("Build service account for ci")
 		return err
 	}
+
+	// Comment due to this serviceaccount should be created by helm during the deployment
 	deploy := &sa.Deploy{
 		WorkFlowStruct: internal.WorkFlowStruct{
 			Play:   p,
 			Scheme: wf.Scheme,
 		},
 	}
+	log.V(1).Info("Build service account for Deploy")
 	if err := wf.Add(deploy.Create); err != nil {
+		log.V(1).Info("Build service account for deploy")
 		return err
 	}
 	return nil

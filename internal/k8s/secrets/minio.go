@@ -32,11 +32,11 @@ import (
 )
 
 const (
-	// filename use with s3cmd
+	// MinIOSecretKey filename use with s3cmd
 	MinIOSecretKey string = ".s3cfg"
-	// Prefix use for name of resource
+	// MinIOPrefixSecret Prefix use for name of resource
 	MinIOPrefixSecret string = "minio"
-	// s3cfg config template
+	// MinIOSecretTemplate s3cfg config template
 	MinIOSecretTemplate string = `
 [default]
 access_key = {{ .Values.access_key }}
@@ -70,7 +70,7 @@ func (s *Secret) MinIOCreate(ctx context.Context, r client.Client, log logr.Logg
 	tpl := values.Templates{
 		Values: config.GetMinioRaw(),
 	}
-	if err := tpl.PrintTemplate(buf, MinIOSecretKey, MinIOSecretTemplate); err != nil {
+	if err := tpl.PrintTemplate(ctx, buf, MinIOSecretKey, MinIOSecretTemplate); err != nil {
 		return err
 	}
 	namespacedName := util.GetCINamespacedName(MinIOPrefixSecret, s.Play)
