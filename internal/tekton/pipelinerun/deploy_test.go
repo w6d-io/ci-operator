@@ -60,5 +60,16 @@ var _ = Describe("deploy in pipeline run", func() {
 			err = p.SetDeploy(0, ctrl.Log)
 			Expect(err).To(Succeed())
 		})
+		It("Get Namespace", func() {
+			By("set PipelineRun")
+			p := &pipelinerun.PipelineRun{}
+
+			By("Set task")
+			task := ci.Task{
+				Namespace: "test",
+			}
+
+			Expect(p.GetNamespace(task)).To(Equal("test"))
+		})
 	})
 })

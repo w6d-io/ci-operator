@@ -38,12 +38,12 @@ var _ = Describe("Create", func() {
 				WorkFlowStruct: internal.WorkFlowStruct{
 					Play: &ci.Play{
 						Spec: ci.PlaySpec{
-							Name:       "test",
-							ProjectID:  1,
-							PipelineID: 1,
+							Name: "test",
 							Stack: ci.Stack{
 								Language: "test",
 							},
+							ProjectID:  1,
+							PipelineID: 1,
 							Commit: ci.Commit{
 								SHA: "test_test_test",
 								Ref: "test",
@@ -95,6 +95,13 @@ var _ = Describe("Create", func() {
 									},
 								},
 							},
+							Vault: &ci.Vault{
+								Secrets: map[ci.SecretKind]ci.VaultSecret{
+									ci.KubeConfig: {
+										Path: "/secrets",
+									},
+								},
+							},
 						},
 					},
 				},
@@ -105,6 +112,7 @@ var _ = Describe("Create", func() {
 		It("failed creation", func() {
 			p := pipelinerun.PipelineRun{
 				WorkFlowStruct: internal.WorkFlowStruct{
+					Scheme: scheme,
 					Play: &ci.Play{
 						ObjectMeta: metav1.ObjectMeta{
 							Name:      "test-create-1",
@@ -143,6 +151,13 @@ var _ = Describe("Create", func() {
 			err := p.Create(context.TODO(), k8sClient, ctrl.Log)
 			Expect(err).ToNot(Succeed())
 			Expect(err.Error()).To(ContainSubstring("cross-namespace owner references"))
+
+			By("Create in nonexist namespace")
+			p.Play.Namespace = "p6e-cx-30"
+			p.Play.Spec.ProjectID = 30
+			err = p.Create(context.TODO(), k8sClient, ctrl.Log)
+			Expect(err).ToNot(Succeed())
+			Expect(err.Error()).To(ContainSubstring(`namespaces "p6e-cx-30" not found`))
 		})
 		It("create", func() {
 			ns := &corev1.Namespace{
