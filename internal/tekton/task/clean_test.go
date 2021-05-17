@@ -101,6 +101,12 @@ var _ = Describe("Task", func() {
 			Expect(k8sClient.Create(ctx, step)).To(Succeed())
 
 			Expect(t.Clean(ctx, ctrl.Log)).To(Succeed())
+
+			By("set index overflow")
+			t.Index = 3
+			err = t.Clean(ctx, ctrl.Log)
+			Expect(err).ToNot(Succeed())
+			Expect(err.Error()).To(Equal("no such task"))
 		})
 		It("Execute Create", func() {
 			var err error

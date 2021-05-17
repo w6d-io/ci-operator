@@ -23,6 +23,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/util"
+	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"time"
 
@@ -56,7 +57,18 @@ func (t *Task) UnitTest(ctx context.Context, logger logr.Logger) error {
 		return err
 	}
 	if len(steps) == 0 {
-		return fmt.Errorf("no step found for %s", ci.UnitTests)
+		return fmt.Errorf("no step found for %s", s.TaskType)
+	}
+	task := t.Play.Spec.Tasks[t.Index][s.TaskType]
+	if len(task.Variables) != 0 {
+		for i := range steps {
+			for key, val := range task.Variables {
+				steps[i].Env = append(steps[i].Env, corev1.EnvVar{
+					Name: key,
+					Value: val,
+				})
+			}
+		}
 	}
 	unittest := &UnitTestTask{
 		Meta: Meta{
@@ -67,11 +79,7 @@ func (t *Task) UnitTest(ctx context.Context, logger logr.Logger) error {
 	}
 
 	log.V(1).Info("add create in workflow")
-	if err := t.Add(unittest.Create); err != nil {
-		log.Error(err, "add function failed")
-		return err
-	}
-	return nil
+	return t.Add(unittest.Create)
 }
 
 func (u *UnitTestTask) Create(ctx context.Context, r client.Client, log logr.Logger) error {

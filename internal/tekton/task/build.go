@@ -66,11 +66,7 @@ func (t *Task) Build(ctx context.Context, logger logr.Logger) error {
 		BuildDocker: util.IsBuildStage(t.Play),
 	}
 	log.V(1).Info("add create in workflow")
-	if err := t.Add(build.Create); err != nil {
-		log.Error(err, "add function failed")
-		return err
-	}
-	return nil
+	return t.Add(build.Create)
 }
 
 func (b *BuildTask) Create(ctx context.Context, r client.Client, log logr.Logger) error {

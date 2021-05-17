@@ -19,6 +19,7 @@ import (
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/k8s/secrets"
 	"github.com/w6d-io/ci-operator/internal/tekton/task"
+	"k8s.io/apimachinery/pkg/fields"
 
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
@@ -47,6 +48,9 @@ var _ = Describe("Task", func() {
 						Tasks: []map[ci.TaskType]ci.Task{
 							{
 								ci.UnitTests: ci.Task{
+									Variables: fields.Set{
+										"TEST": "OK",
+									},
 									Script: ci.Script{
 										"echo", "toto",
 									},
@@ -101,6 +105,12 @@ var _ = Describe("Task", func() {
 			Expect(k8sClient.Create(ctx, step)).To(Succeed())
 
 			Expect(t.UnitTest(ctx, ctrl.Log)).To(Succeed())
+
+			By("set index overflow")
+			t.Index = 3
+			err = t.UnitTest(ctx, ctrl.Log)
+			Expect(err).ToNot(Succeed())
+			Expect(err.Error()).To(Equal("no such task"))
 		})
 		It("Execute Create", func() {
 			var err error

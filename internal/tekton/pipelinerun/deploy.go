@@ -77,7 +77,6 @@ func (p *PipelineRun) SetDeploy(pos int, log logr.Logger) error {
 			StringVal: p.GetNamespace(task),
 		},
 	})
-
 	return nil
 }
 

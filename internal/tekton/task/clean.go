@@ -65,10 +65,7 @@ func (t *Task) Clean(ctx context.Context, logger logr.Logger) error {
 	}
 
 	log.V(1).Info("add create in workflow")
-	if err := t.Add(clean.Create); err != nil {
-		return err
-	}
-	return nil
+	return t.Add(clean.Create)
 }
 
 func (u *CleanTask) Create(ctx context.Context, r client.Client, log logr.Logger) error {
