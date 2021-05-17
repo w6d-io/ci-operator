@@ -5,7 +5,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged && startsWith(github.head_ref, 'release/')
+    if: github.event.pull_request.merged && ( startsWith(github.head_ref, 'release/') || startsWith(github.head_ref, 'feature/') )
     steps:
       - uses: actions/checkout@master
       - name: Tag and prepare release
@@ -61,3 +61,4 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+

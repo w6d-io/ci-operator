@@ -20,6 +20,7 @@ package task
 import (
 	"context"
 	"fmt"
+	corev1 "k8s.io/api/core/v1"
 	"time"
 
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
@@ -56,7 +57,18 @@ func (t *Task) IntTest(ctx context.Context, logger logr.Logger) error {
 		return err
 	}
 	if len(steps) == 0 {
-		return fmt.Errorf("no step found for %s", ci.IntegrationTests)
+		return fmt.Errorf("no step found for %s", s.TaskType)
+	}
+	task := t.Play.Spec.Tasks[t.Index][s.TaskType]
+	if len(task.Variables) != 0 {
+		for i := range steps {
+			for key, val := range task.Variables {
+				steps[i].Env = append(steps[i].Env, corev1.EnvVar{
+					Name: key,
+					Value: val,
+				})
+			}
+		}
 	}
 	inttest := &IntTestTask{
 		Meta: Meta{
@@ -67,10 +79,7 @@ func (t *Task) IntTest(ctx context.Context, logger logr.Logger) error {
 	}
 
 	log.V(1).Info("add create in workflow")
-	if err := t.Add(inttest.Create); err != nil {
-		return err
-	}
-	return nil
+	return t.Add(inttest.Create)
 }
 
 func (u *IntTestTask) Create(ctx context.Context, r client.Client, log logr.Logger) error {

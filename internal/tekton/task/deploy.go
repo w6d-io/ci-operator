@@ -66,10 +66,7 @@ func (t *Task) Deploy(ctx context.Context, logger logr.Logger) error {
 	}
 
 	log.V(1).Info("add create in workflow")
-	if err := t.Add(deploy.Create); err != nil {
-		return err
-	}
-	return nil
+	return t.Add(deploy.Create)
 }
 
 func (d *DeployTask) Create(ctx context.Context, r client.Client, log logr.Logger) error {

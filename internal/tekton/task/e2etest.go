@@ -64,10 +64,7 @@ func (t *Task) E2ETest(ctx context.Context, logger logr.Logger) error {
 		},
 	}
 	log.V(1).Info("add create in workflow")
-	if err := t.Add(task.Create); err != nil {
-		return err
-	}
-	return nil
+	return t.Add(task.Create)
 }
 
 func (e *E2ETestTask) Create(ctx context.Context, r client.Client, log logr.Logger) error {
