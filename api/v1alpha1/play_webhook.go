@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"net/url"
 	"reflect"
@@ -97,6 +98,12 @@ func (in *Play) ValidateUpdate(old runtime.Object) error {
 				in.Spec.ProjectID,
 				"pipelineID cannot be changed"))
 	}
+	if old.(*Play).Spec.Environment != in.Spec.Environment {
+		allErrs = append(allErrs,
+			field.Invalid(field.NewPath("spec").Child("environment"),
+				in.Spec.Environment,
+				"environment cannot be changed"))
+	}
 	if len(allErrs) == 0 {
 		return nil
 	}
@@ -123,15 +130,21 @@ func (in Play) validateTaskType() field.ErrorList {
 	}
 	for _, task := range in.Spec.Tasks {
 		for t := range task {
-			switch t {
-			case Build, RPMBuild, GitLeaks, DASTScan, ImageScan, CVEScan, CodeCov, Sonar, UnitTests, IntegrationTests, Deploy, Clean, E2ETests:
-				continue
-			default:
+			if errs := validation.IsDNS1123Subdomain(string(t)); len(errs) != 0 {
 				taskErrs = append(taskErrs,
 					field.Invalid(field.NewPath("spec").Child("tasks"),
 						t,
-						"not a TaskType"))
+						strings.Join(errs, ", ")))
 			}
+			//switch t {
+			//case Build, RPMBuild, GitLeaks, DASTScan, ImageScan, CVEScan, CodeCov, Sonar, UnitTests, IntegrationTests, Deploy, Clean, E2ETests:
+			//	continue
+			//default:
+			//	taskErrs = append(taskErrs,
+			//		field.Invalid(field.NewPath("spec").Child("tasks"),
+			//			t,
+			//			"not a TaskType"))
+			//}
 		}
 	}
 	return taskErrs
@@ -228,6 +241,7 @@ func (in *Play) validateDocker() error {
 	if address == "" || !validateDomain(address) {
 		return errors.New("invalid address")
 	}
+	playlog.V(1).Info("docker", "tag", tag)
 	if !CheckDockerTag(tag) {
 		return errors.New("invalid tag")
 	}
@@ -273,6 +287,9 @@ func inArray(val interface{}, array interface{}) (exists bool, index int) {
 // GetDockerImageTagRaw return the Docker repository
 func (in *Play) GetDockerImageTagRaw() (address string, uri string, tag string, err error) {
 	var URL *url.URL
+	if len(in.Spec.Commit.SHA) < 8 {
+		return "", "", "", errors.New("commit sha bad format")
+	}
 	rep := fmt.Sprintf("https://reg-ext.w6d.io/cxcm/%v/%v:%v-%v",
 		in.Spec.ProjectID, in.Spec.Name, in.Spec.Commit.SHA[:8], in.Spec.Commit.Ref)
 	URL, err = ParseHostURL(rep)
@@ -294,7 +311,7 @@ func (in *Play) GetDockerImageTagRaw() (address string, uri string, tag string, 
 	address = URL.Host
 	uri = partURI[0]
 	tag = "latest"
-	if len(partURI) > 1 && partURI[1] == "" {
+	if len(partURI) > 1 && partURI[1] != "" {
 		tag = partURI[1]
 	}
 	return

@@ -57,6 +57,8 @@ func (p *PipelineRun) Parse(log logr.Logger) error {
 				_ = p.SetClean(pos, log)
 			case ci.E2ETests:
 				_ = p.SetE2ETest(pos, log)
+			default:
+				_ = p.SetGeneric(pos, name, log)
 			}
 		}
 	}

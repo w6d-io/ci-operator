@@ -50,18 +50,11 @@ func (p *Pipeline) SetPipelineGeneric(taskType ci.TaskType, logger logr.Logger) 
 				ArrayVal: flags,
 			},
 		},
-		{
-			Name: "s3DockerfilePath",
-			Value: tkn.ArrayOrString{
-				Type:      tkn.ParamTypeString,
-				StringVal: "$(params.build_s3DockerfilePath)",
-			},
-		},
 	}
 
 	task := tkn.PipelineTask{
 		Name:       taskType.String(),
-		Resources:  getPipelineTaskResources(util.IsBuildStage(p.Play)),
+		Resources:  getPipelineTaskResources(false),
 		Workspaces: wks,
 		Params:     params,
 		RunAfter:   p.RunAfter,
