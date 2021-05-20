@@ -10,7 +10,7 @@ You may obtain a copy of the License at
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is prohibited.
-Created on 29/04/2021
+Created on 17/05/2021
 */
 
 package task_test
@@ -19,6 +19,7 @@ import (
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/k8s/secrets"
 	"github.com/w6d-io/ci-operator/internal/tekton/task"
+	"k8s.io/apimachinery/pkg/fields"
 
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
@@ -31,8 +32,8 @@ import (
 )
 
 var _ = Describe("Task", func() {
-	Context("Sonar", func() {
-		It("execute Sonar", func() {
+	Context("Git leaks", func() {
+		It("execute GitLeaks", func() {
 			var err error
 			By("Create task")
 			t := &task.Task{
@@ -46,12 +47,12 @@ var _ = Describe("Task", func() {
 						},
 						Tasks: []map[ci.TaskType]ci.Task{
 							{
-								ci.Sonar: ci.Task{
+								ci.GitLeaks: ci.Task{
+									Variables: fields.Set{
+										"TEST": "OK",
+									},
 									Script: ci.Script{
 										"echo", "toto",
-									},
-									Variables: map[string]string{
-										"TEST": "test",
 									},
 								},
 							},
@@ -69,29 +70,29 @@ var _ = Describe("Task", func() {
 			Expect(config.New("testdata/config.yaml")).To(Succeed())
 
 			By("Set namespace")
-			config.SetNamespace("p6e-cx-28")
+			config.SetNamespace("p6e-cx-36")
 
 			By("Create namespace")
 			ns := &corev1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "p6e-cx-28",
+					Name: "p6e-cx-36",
 				},
 			}
 			Expect(k8sClient.Create(ctx, ns)).To(Succeed())
 
 			By("failed by no step")
-			err = t.Sonar(ctx, ctrl.Log)
+			err = t.GitLeaks(ctx, ctrl.Log)
 			Expect(err).ToNot(Succeed())
 
 			By("Create step")
 			step := &ci.Step{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "step-unit-test-1",
-					Namespace: "p6e-cx-28",
+					Namespace: "p6e-cx-36",
 					Annotations: map[string]string{
-						ci.AnnotationPackage:  "test",
+						ci.AnnotationPackage:  "custom",
 						ci.AnnotationLanguage: "bash",
-						ci.AnnotationTask:     ci.Sonar.String(),
+						ci.AnnotationTask:     ci.GitLeaks.String(),
 						ci.AnnotationOrder:    "0",
 					},
 				},
@@ -102,19 +103,19 @@ var _ = Describe("Task", func() {
 				},
 			}
 			Expect(k8sClient.Create(ctx, step)).To(Succeed())
-
-			Expect(t.Sonar(ctx, ctrl.Log)).To(Succeed())
+			Expect(t.GitLeaks(ctx, ctrl.Log)).To(Succeed())
 
 			By("set index overflow")
 			t.Index = 3
-			err = t.Sonar(ctx, ctrl.Log)
+			err = t.GitLeaks(ctx, ctrl.Log)
 			Expect(err).ToNot(Succeed())
 			Expect(err.Error()).To(Equal("no such task"))
+
 		})
 		It("Execute Create", func() {
 			var err error
-			By("build SonarTask")
-			u := &task.SonarTask{
+			By("build GitLeaksTask")
+			u := &task.GitLeaksTask{
 				Meta: task.Meta{
 					Steps: []tkn.Step{
 						{
@@ -123,9 +124,9 @@ var _ = Describe("Task", func() {
 					},
 					Play: &ci.Play{
 						ObjectMeta: metav1.ObjectMeta{
-							Name:      "play-test-29-1",
-							Namespace: "p6e-cx-29",
-							UID:       "cf3e4129-6b00-410e-9d3d-774292a57bce",
+							Name:      "play-test-37-1",
+							Namespace: "p6e-cx-37",
+							UID:       "cf3e4133-6b00-410e-9d3d-774332a57bce",
 						},
 						Spec: ci.PlaySpec{
 							Stack: ci.Stack{
@@ -134,7 +135,7 @@ var _ = Describe("Task", func() {
 							},
 							Tasks: []map[ci.TaskType]ci.Task{
 								{
-									ci.Sonar: ci.Task{
+									ci.GitLeaks: ci.Task{
 										Script: ci.Script{
 											"echo", "toto",
 										},
@@ -162,15 +163,15 @@ var _ = Describe("Task", func() {
 
 			By("set the right namespace")
 			u.Play.Spec.PipelineID = 1
-			u.Play.Spec.ProjectID = 29
+			u.Play.Spec.ProjectID = 37
 			err = u.Create(ctx, k8sClient, ctrl.Log)
 			Expect(err).ToNot(Succeed())
-			Expect(err.Error()).To(Equal(`namespaces "p6e-cx-29" not found`))
+			Expect(err.Error()).To(Equal(`namespaces "p6e-cx-37" not found`))
 
 			By("create namespace")
 			ns := &corev1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "p6e-cx-29",
+					Name: "p6e-cx-37",
 				},
 			}
 			Expect(k8sClient.Create(ctx, ns)).To(Succeed())

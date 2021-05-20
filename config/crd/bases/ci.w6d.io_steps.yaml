@@ -33,6 +33,40 @@ spec:
             type: string
           metadata:
             type: object
+          params:
+            description: Parameters declares parameters passed to this task.
+            items:
+              description: Param declares an ArrayOrString to use for the parameter
+                called name.
+              properties:
+                name:
+                  type: string
+                value:
+                  description: ArrayOrString is a type that can hold a single string
+                    or string array. Used in JSON unmarshalling so that a single JSON
+                    field can accept either an individual string or an array of strings.
+                  properties:
+                    arrayVal:
+                      items:
+                        type: string
+                      type: array
+                    stringVal:
+                      type: string
+                    type:
+                      description: ParamType indicates the type of an input parameter;
+                        Used to distinguish between a single string and an array of
+                        strings.
+                      type: string
+                  required:
+                  - arrayVal
+                  - stringVal
+                  - type
+                  type: object
+              required:
+              - name
+              - value
+              type: object
+            type: array
           status:
             description: StepStatus defines the observed state of Step
             type: object

@@ -20,11 +20,11 @@ package task
 import (
 	"context"
 	"fmt"
-	corev1 "k8s.io/api/core/v1"
 	"time"
 
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/go-logr/logr"
@@ -44,7 +44,6 @@ func (t *Task) IntTest(ctx context.Context, logger logr.Logger) error {
 	log := logger.WithName("IntTest").WithValues("task", ci.IntegrationTests)
 	// get the task
 	log.V(1).Info("get task")
-	// TODO get task from index in WFType
 	s := &Step{
 		Index:    t.Index,
 		PlaySpec: t.Play.Spec,
@@ -64,7 +63,7 @@ func (t *Task) IntTest(ctx context.Context, logger logr.Logger) error {
 		for i := range steps {
 			for key, val := range task.Variables {
 				steps[i].Env = append(steps[i].Env, corev1.EnvVar{
-					Name: key,
+					Name:  key,
 					Value: val,
 				})
 			}

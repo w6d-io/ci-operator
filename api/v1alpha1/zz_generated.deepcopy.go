@@ -21,6 +21,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -315,6 +316,13 @@ func (in *Step) DeepCopyInto(out *Step) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
 	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
+	if in.Params != nil {
+		in, out := &in.Params, &out.Params
+		*out = make([]v1beta1.Param, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
 	in.Step.DeepCopyInto(&out.Step)
 	out.Status = in.Status
 }
@@ -427,6 +435,11 @@ func (in *Task) DeepCopyInto(out *Task) {
 	if in.Script != nil {
 		in, out := &in.Script, &out.Script
 		*out = make(Script, len(*in))
+		copy(*out, *in)
+	}
+	if in.Arguments != nil {
+		in, out := &in.Arguments, &out.Arguments
+		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
 	if in.Variables != nil {

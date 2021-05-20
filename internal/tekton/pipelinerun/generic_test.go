@@ -18,7 +18,6 @@ package pipelinerun_test
 
 import (
 	"github.com/w6d-io/ci-operator/internal"
-	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
 
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
@@ -28,20 +27,26 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("deploy in pipeline run", func() {
+var _ = Describe("generic in pipeline run", func() {
 	Context("setting", func() {
 		It("does", func() {
-			err := config.New("testdata/config.yaml")
-			Expect(err).To(Succeed())
 			p := pipelinerun.PipelineRun{
 				WorkFlowStruct: internal.WorkFlowStruct{
 					Play: &ci.Play{
 						Spec: ci.PlaySpec{
+							Name:       "test",
 							ProjectID:  1,
 							PipelineID: 1,
+							Stack: ci.Stack{
+								Language: "test",
+							},
+							Commit: ci.Commit{
+								SHA: "test_test_test",
+								Ref: "test",
+							},
 							Tasks: []map[ci.TaskType]ci.Task{
 								{
-									ci.Deploy: ci.Task{
+									"test": ci.Task{
 										Arguments: []string{
 											"TEST", "Test",
 										},
@@ -57,19 +62,8 @@ var _ = Describe("deploy in pipeline run", func() {
 					},
 				},
 			}
-			err = p.SetDeploy(0, ctrl.Log)
+			err := p.SetGeneric(0, "test", ctrl.Log)
 			Expect(err).To(Succeed())
-		})
-		It("Get Namespace", func() {
-			By("set PipelineRun")
-			p := &pipelinerun.PipelineRun{}
-
-			By("Set task")
-			task := ci.Task{
-				Namespace: "test",
-			}
-
-			Expect(p.GetNamespace(task)).To(Equal("test"))
 		})
 	})
 })

@@ -18,13 +18,13 @@ package pipeline_test
 
 import (
 	"context"
+
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/tekton/pipeline"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/scheme"
 
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	. "github.com/onsi/ginkgo"
@@ -69,6 +69,9 @@ var _ = Describe("Create", func() {
 							},
 							{
 								ci.E2ETests: ci.Task{},
+							},
+							{
+								"test": ci.Task{},
 							},
 						},
 					},
@@ -123,6 +126,18 @@ var _ = Describe("Create", func() {
 			err := p.Create(context.TODO(), k8sClient, ctrl.Log)
 			Expect(err).ToNot(Succeed())
 			Expect(err.Error()).To(ContainSubstring("cross-namespace"))
+
+			By("set a nonexistent namespace")
+			config.SetNamespace("p6e-cx-1")
+			By("set project id")
+			p.Play.Spec.ProjectID = 1
+			By("set pipeline id")
+			p.Play.Spec.PipelineID = 1
+			p.Scheme = scheme
+
+			err = p.Create(ctx, k8sClient, ctrl.Log)
+			Expect(err).ToNot(Succeed())
+			Expect(err.Error()).To(ContainSubstring(`namespaces "p6e-cx-1" not found`))
 		})
 		It("succeed create", func() {
 			err := config.New("testdata/config.yaml")
@@ -135,7 +150,7 @@ var _ = Describe("Create", func() {
 			err = k8sClient.Create(context.TODO(), ns)
 			Expect(err).To(Succeed())
 			p := pipeline.Pipeline{
-				Scheme: scheme.Scheme,
+				Scheme: scheme,
 				Play: &ci.Play{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "test-create-1",

@@ -14,4 +14,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: docker.io/w6dio/ci-operator
-  newTag: fix-webhook
+  newTag: improve-step

@@ -64,7 +64,7 @@ func (t *Task) UnitTest(ctx context.Context, logger logr.Logger) error {
 		for i := range steps {
 			for key, val := range task.Variables {
 				steps[i].Env = append(steps[i].Env, corev1.EnvVar{
-					Name: key,
+					Name:  key,
 					Value: val,
 				})
 			}

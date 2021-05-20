@@ -18,6 +18,7 @@ package pipelinerun_test
 
 import (
 	"context"
+	"github.com/w6d-io/ci-operator/internal/config"
 
 	"github.com/w6d-io/ci-operator/internal"
 	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
@@ -34,6 +35,9 @@ import (
 var _ = Describe("Create", func() {
 	Context("test all methods", func() {
 		It("parses", func() {
+			By("load config")
+			Expect(config.New("testdata/config.yaml")).To(Succeed())
+
 			p := pipelinerun.PipelineRun{
 				WorkFlowStruct: internal.WorkFlowStruct{
 					Play: &ci.Play{

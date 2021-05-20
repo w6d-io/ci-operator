@@ -139,6 +139,11 @@ spec:
                           type: string
                         description: Annotations is use for ingress annotations
                         type: object
+                      arguments:
+                        description: Arguments is used for flags in task
+                        items:
+                          type: string
+                        type: array
                       docker:
                         description: Docker contains information for docker build
                         properties:
@@ -165,8 +170,8 @@ spec:
                       variables:
                         additionalProperties:
                           type: string
-                        description: Env is the map of environment variable for the
-                          task
+                        description: Variables is the map of environment variable
+                          for the task
                         type: object
                     type: object
                   type: object

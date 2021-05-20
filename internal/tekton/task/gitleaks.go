@@ -1,18 +1,16 @@
 /*
-Copyright 2020 WILDCARD
+Copyright 2020 WILDCARD SA.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
+Licensed under the WILDCARD SA License, Version 1.0 (the "License");
+WILDCARD SA is register in french corporation.
+You may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+    http://www.w6d.io/licenses/LICENSE-1.0
 
 Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-Created on 29/11/2020
+distributed under the License is prohibited.
+Created on 17/05/2021
 */
 
 package task
@@ -22,33 +20,32 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-logr/logr"
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/go-logr/logr"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/util"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-// SonarTask task struct for CI
-type SonarTask struct {
+// GitLeaksTask task struct for CI
+type GitLeaksTask struct {
 	Meta
 }
 
-// Sonar create the sonar Tekton Task resource
-func (t *Task) Sonar(ctx context.Context, logger logr.Logger) error {
-	log := logger.WithName("Sonar").WithValues("task", ci.Sonar)
-	// get the task
-	log.V(1).Info("get task")
+// GitLeaks create git leaks tekton Task resource
+func (t *Task) GitLeaks(ctx context.Context, logger logr.Logger) error {
+	log := logger.WithName("GitLeaks").WithValues("task", ci.GitLeaks)
+	// get the steps
+	log.V(1).Info("build task")
 	s := &Step{
 		Index:    t.Index,
 		PlaySpec: t.Play.Spec,
 		Client:   t.Client,
-		TaskType: ci.Sonar,
+		TaskType: ci.GitLeaks,
 	}
 	steps, err := s.GetSteps(ctx, logger)
 	if err != nil {
@@ -56,7 +53,7 @@ func (t *Task) Sonar(ctx context.Context, logger logr.Logger) error {
 		return err
 	}
 	if len(steps) == 0 {
-		return fmt.Errorf("no step found for %s", ci.Sonar)
+		return fmt.Errorf("no step found for %s", s.TaskType)
 	}
 	task := t.Play.Spec.Tasks[t.Index][s.TaskType]
 	if len(task.Variables) != 0 {
@@ -69,33 +66,31 @@ func (t *Task) Sonar(ctx context.Context, logger logr.Logger) error {
 			}
 		}
 	}
-	sonar := &SonarTask{
-		Meta: Meta{
+	gitLeaks := &GitLeaksTask{
+		Meta{
 			Steps:  steps,
 			Play:   t.Play,
 			Scheme: t.Scheme,
 		},
 	}
+
 	log.V(1).Info("add create in workflow")
-	return t.Add(sonar.Create)
+	return t.Add(gitLeaks.Create)
 }
 
-func (s *SonarTask) Create(ctx context.Context, r client.Client, log logr.Logger) error {
-	log = log.WithName("Create").WithValues("task", ci.Sonar)
-	log.V(1).Info("create")
-	var defaultMode int32 = 0444
-	namespacedName := util.GetCINamespacedName(ci.Sonar.String(), s.Play)
-
+func (g *GitLeaksTask) Create(ctx context.Context, r client.Client, logger logr.Logger) error {
+	log := logger.WithName("Create").WithValues("task", ci.GitLeaks)
+	log.V(1).Info("creating")
+	namespacedName := util.GetCINamespacedName(ci.GitLeaks.String(), g.Play)
 	// build Tekton Task resource
 	resource := &tkn.Task{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        namespacedName.Name,
 			Namespace:   namespacedName.Namespace,
 			Annotations: make(map[string]string),
-			Labels:      util.GetCILabels(s.Play),
+			Labels:      util.GetCILabels(g.Play),
 		},
 		Spec: tkn.TaskSpec{
-			Workspaces: config.Workspaces(),
 			Resources: &tkn.TaskResources{
 				Inputs: []tkn.TaskResource{
 					{
@@ -106,31 +101,26 @@ func (s *SonarTask) Create(ctx context.Context, r client.Client, log logr.Logger
 					},
 				},
 			},
-			Volumes: []corev1.Volume{
+			Params: []tkn.ParamSpec{
 				{
-					Name: "sqtoken",
-					VolumeSource: corev1.VolumeSource{
-						Secret: &corev1.SecretVolumeSource{
-							SecretName:  namespacedName.Name,
-							DefaultMode: &defaultMode,
-						},
-					},
+					Name: "flags",
+					Type: tkn.ParamTypeArray,
 				},
 			},
+			Steps:      g.Steps,
+			Workspaces: config.Workspaces(),
 		},
 	}
 
-	// set the current time in the resource annotations
+	// set the current time in the annotations
 	resource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
-	if err := controllerutil.SetControllerReference(s.Play, resource, s.Scheme); err != nil {
+	if err := controllerutil.SetControllerReference(g.Play, resource, g.Scheme); err != nil {
 		return err
 	}
 	log.V(1).Info(resource.Kind, "content", fmt.Sprintf("%v",
 		util.GetObjectContain(resource)))
-
 	if err := r.Create(ctx, resource); err != nil {
 		return err
 	}
-	// All went well
 	return nil
 }

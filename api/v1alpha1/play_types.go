@@ -102,7 +102,11 @@ type Task struct {
 	// +optional
 	Script Script `json:"script,omitempty"`
 
-	// Env is the map of environment variable for the task
+	// Arguments is used for flags in task
+	// +optional
+	Arguments []string `json:"arguments,omitempty"`
+
+	// Variables is the map of environment variable for the task
 	// +optional
 	Variables fields.Set `json:"variables,omitempty"`
 
@@ -243,6 +247,24 @@ const (
 	GitToken SecretKind = "git_token"
 
 	// TaskTypes
+
+	// RPMBuild is the task type for rpm build jobs"
+	RPMBuild TaskType = "rpm-build"
+
+	// GitLeaks is the task type for git leaks jobs"
+	GitLeaks TaskType = "git-leaks"
+
+	// DASTScan is the task type for DAST scanning jobs"
+	DASTScan TaskType = "dast-scan"
+
+	// ImageScan is the task type for Image Docker scanning jobs"
+	ImageScan TaskType = "image-scan"
+
+	// CVEScan is the task type for CVE scanning jobs"
+	CVEScan TaskType = "cve-scan"
+
+	// CodeCov is the task type for Code Coverage jobs"
+	CodeCov TaskType = "codecov"
 
 	// E2ETests is the task type for unit tests"
 	E2ETests TaskType = "e2e-tests"

@@ -124,7 +124,7 @@ func (in Play) validateTaskType() field.ErrorList {
 	for _, task := range in.Spec.Tasks {
 		for t := range task {
 			switch t {
-			case Build, Sonar, UnitTests, IntegrationTests, Deploy, Clean, E2ETests:
+			case Build, RPMBuild, GitLeaks, DASTScan, ImageScan, CVEScan, CodeCov, Sonar, UnitTests, IntegrationTests, Deploy, Clean, E2ETests:
 				continue
 			default:
 				taskErrs = append(taskErrs,
