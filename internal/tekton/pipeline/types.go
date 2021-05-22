@@ -37,6 +37,7 @@ type Pipeline struct {
 	Resources      []tkn.PipelineDeclaredResource
 	Play           *ci.Play
 	Scheme         *runtime.Scheme
+	GenericParams  map[string][]ci.ParamSpec
 }
 
 type Interface interface {

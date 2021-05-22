@@ -22,7 +22,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"sort"
+	"strings"
 
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -69,6 +71,9 @@ func New(filename string) error {
 				return err
 			}
 		}
+	}
+	if config.EnvPrefix == "" {
+		config.EnvPrefix = "W6D"
 	}
 	return nil
 }
@@ -248,4 +253,33 @@ func (v *Vault) GetToken() string {
 // GetHost return the vault host
 func (v *Vault) GetHost() string {
 	return v.Host
+}
+
+// SetEnvPrefix record the prefix for environment variable
+func SetEnvPrefix(prefix string) {
+	config.EnvPrefix = prefix
+}
+
+// GetEnvPrefix return the prefix for variable environment
+func GetEnvPrefix(elements ...string) string {
+	toAdd := strings.Join(elements, "_")
+	if toAdd != "" {
+		//if toAdd[0] != '_' {
+		//	toAdd = "_" + toAdd
+		//}
+		if toAdd[len(toAdd)-1] != '_' {
+			toAdd += "_"
+		}
+	}
+	return ToSnakeUpperCase(config.EnvPrefix + toAdd)
+}
+
+var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+
+func ToSnakeUpperCase(str string) string {
+	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
+	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
+	snake = strings.ReplaceAll(snake, "-", "_")
+	return strings.ToUpper(snake)
 }

@@ -103,7 +103,7 @@ var _ = Describe("Webhook", func() {
 					Commit: v1alpha1.Commit{
 						Ref: "test",
 					},
-					Domain:   "ee_@",
+					Domain: "ee_@",
 					Tasks: []map[v1alpha1.TaskType]v1alpha1.Task{
 						{
 							"test": v1alpha1.Task{},
@@ -187,7 +187,6 @@ var _ = Describe("Webhook", func() {
 			err = p.ValidateCreate()
 			Expect(err).ToNot(Succeed())
 			Expect(err.Error()).To(ContainSubstring(`tasks cannot be empty`))
-
 
 		})
 	})
@@ -305,8 +304,8 @@ var _ = Describe("Webhook", func() {
 						Name: "",
 					},
 					Environment: "before",
-					RepoURL: "https://test.fr",
-					Domain:  "test.fr",
+					RepoURL:     "https://test.fr",
+					Domain:      "test.fr",
 					Tasks: []map[v1alpha1.TaskType]v1alpha1.Task{
 						{
 							v1alpha1.Deploy: v1alpha1.Task{},

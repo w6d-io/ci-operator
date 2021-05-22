@@ -35,6 +35,7 @@ import (
 type GenericTask struct {
 	Meta
 	TaskType ci.TaskType
+	Params   []ci.ParamSpec
 }
 
 // Generic create git leaks tekton Task resource
@@ -48,11 +49,12 @@ func (t *Task) Generic(ctx context.Context, taskType ci.TaskType, logger logr.Lo
 		Client:   t.Client,
 		TaskType: taskType,
 	}
-	steps, err := s.GetSteps(ctx, logger)
+	steps, params, err := s.GetSteps(ctx, logger)
 	if err != nil {
 		log.Error(err, "get steps failed")
 		return err
 	}
+	t.Params[string(taskType)] = params
 	if len(steps) == 0 {
 		return fmt.Errorf("no step found for %s", taskType)
 	}
@@ -74,6 +76,7 @@ func (t *Task) Generic(ctx context.Context, taskType ci.TaskType, logger logr.Lo
 			Scheme: t.Scheme,
 		},
 		taskType,
+		params,
 	}
 
 	log.V(1).Info("add create in workflow")
@@ -113,7 +116,12 @@ func (g *GenericTask) Create(ctx context.Context, r client.Client, logger logr.L
 			Workspaces: config.Workspaces(),
 		},
 	}
-
+	for _, param := range g.Params {
+		resource.Spec.Params = append(resource.Spec.Params, tkn.ParamSpec{
+			Name: param.Name,
+			Type: param.Type,
+		})
+	}
 	// set the current time in the annotations
 	resource.Annotations[config.ScheduledTimeAnnotation] = time.Now().Format(time.RFC3339)
 	if err := controllerutil.SetControllerReference(g.Play, resource, g.Scheme); err != nil {

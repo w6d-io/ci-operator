@@ -29,6 +29,8 @@ import (
 func (t *Task) Parse(ctx context.Context, logger logr.Logger) error {
 	log := logger.WithName("Parse")
 
+	// pre build map to increase processing
+	t.Params = make(map[string][]ci.ParamSpec, len(t.Play.Spec.Tasks))
 	for pos, m := range t.Play.Spec.Tasks {
 		for name := range m {
 			switch name {

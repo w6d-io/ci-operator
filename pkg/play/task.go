@@ -43,6 +43,9 @@ func (wf *WFType) SetTask(ctx context.Context, p *ci.Play, logger logr.Logger) e
 	if err := t.Parse(ctx, logger); err != nil {
 		return err
 	}
+	for key := range t.Params {
+		wf.Params[key] = t.Params[key]
+	}
 	for _, create := range t.Creates {
 		if err := wf.Add(create); err != nil {
 			return err

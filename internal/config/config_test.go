@@ -37,9 +37,12 @@ var _ = Describe("Config", func() {
 				Expect(config.Validate()).ToNot(BeNil())
 			})
 			It("load tiny config ", func() {
-				Expect(config.New("testdata/file5.yaml")).To(BeNil())
+				Expect(config.New("testdata/file5.yaml")).To(Succeed())
 			})
 			It("GetConfig function", func() {
+				By("load config #5")
+				Expect(config.New("testdata/file5.yaml")).To(Succeed())
+
 				Expect(config.GetConfig()).To(Equal(&config.Config{
 					DefaultDomain: "example.ci",
 					Ingress: config.Ingress{
@@ -51,10 +54,11 @@ var _ = Describe("Config", func() {
 						EmptyDir: &corev1.EmptyDirVolumeSource{},
 					},
 					DeployPrefix: "test",
+					EnvPrefix:    "W6D",
 				}))
 			})
 			It("GetConfigRaw function", func() {
-				Expect(len(config.GetConfigRaw())).Should(Equal(11))
+				Expect(len(config.GetConfigRaw())).Should(Equal(12))
 			})
 			It("GetClusterRole function", func() {
 				Expect(config.GetClusterRole()).Should(Equal(""))
@@ -163,7 +167,15 @@ var _ = Describe("Config", func() {
 				By("when pod template does exist")
 				Expect(config.PodTemplate()).ToNot(BeNil())
 			})
-			It(" ", func() {
+			It("checks GetEnvPrefix", func() {
+				By("set prefix")
+				config.SetEnvPrefix("TEST_")
+
+				By("get prefix without argument")
+				Expect(config.GetEnvPrefix()).To(Equal("TEST_"))
+
+				By("get prefix with arguments")
+				Expect(config.GetEnvPrefix("git-leaks", "build")).To(Equal("TEST_GIT_LEAKS_BUILD_"))
 			})
 		})
 	})

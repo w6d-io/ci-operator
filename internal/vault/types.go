@@ -37,7 +37,3 @@ type Config struct {
 	// Path contains the location of the secret
 	Path string
 }
-
-const (
-	Engine string = "ciops"
-)

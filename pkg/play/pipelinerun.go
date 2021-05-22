@@ -35,6 +35,7 @@ func (wf *WFType) SetPipelineRun(play *ci.Play, log logr.Logger) error {
 			Scheme: wf.Scheme,
 			Play:   play,
 		},
+		GenericParams: wf.Params,
 	}
 
 	if err := pipelineRun.Parse(log); err != nil {

@@ -93,6 +93,7 @@ type WFType struct {
 	Creates []CIFunc
 	Client  client.Client
 	Scheme  *runtime.Scheme
+	Params  map[string][]ci.ParamSpec
 }
 
 // CIInterface implements the CI method to create tekton resource

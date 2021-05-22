@@ -17,8 +17,14 @@ limitations under the License.
 package v1alpha1
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"encoding/json"
+	"github.com/tidwall/gjson"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"strings"
+
 	"k8s.io/apimachinery/pkg/fields"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // PlaySpec defines the desired state of Play
@@ -248,23 +254,8 @@ const (
 
 	// TaskTypes
 
-	// RPMBuild is the task type for rpm build jobs"
-	RPMBuild TaskType = "rpm-build"
-
 	// GitLeaks is the task type for git leaks jobs"
 	GitLeaks TaskType = "git-leaks"
-
-	// DASTScan is the task type for DAST scanning jobs"
-	DASTScan TaskType = "dast-scan"
-
-	// ImageScan is the task type for Image Docker scanning jobs"
-	ImageScan TaskType = "image-scan"
-
-	// CVEScan is the task type for CVE scanning jobs"
-	CVEScan TaskType = "cve-scan"
-
-	// CodeCov is the task type for Code Coverage jobs"
-	CodeCov TaskType = "codecov"
 
 	// E2ETests is the task type for unit tests"
 	E2ETests TaskType = "e2e-tests"
@@ -337,4 +328,50 @@ func (in Stack) String() string {
 
 func (t TaskType) String() string {
 	return string(t)
+}
+
+func (in *Play) Get(key string) string {
+	key = strings.ToLower(key)
+	path := strings.Split(key, ".")
+
+	return in.search(path)
+
+}
+
+func (in *Play) search(path []string) string {
+	if len(path) == 0 || path[0] != "play" {
+		return strings.Join(path, ".")
+	}
+	val := in.Spec.get(path[1:])
+	if val == "" {
+		return strings.Join(path, ".")
+	}
+	return val
+}
+
+func (in *PlaySpec) get(path []string) string {
+	log := ctrl.Log.WithName("PlaySpec").WithName("Get")
+	if len(path) == 0 || path[0] == "secret" || path[0] == "vault" {
+		return ""
+	}
+	if path[0] == "tasks" {
+		path = append(path, "")
+		copy(path[2:], path[1:])
+		path[1] = "#"
+	}
+	data, err := json.Marshal(in)
+	if err != nil {
+		return ""
+	}
+	key := strings.Join(path, ".")
+	if path[0] == "tasks" {
+		key += "|0"
+	}
+	result := gjson.GetBytes(data, key)
+	log.V(1).Info("debug", "key", key, "result", result)
+	var s []string
+	for _, name := range result.Array() {
+		s = append(s, name.String())
+	}
+	return strings.Join(s, "\n")
 }

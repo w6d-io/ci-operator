@@ -50,7 +50,7 @@ func (t *Task) IntTest(ctx context.Context, logger logr.Logger) error {
 		Client:   t.Client,
 		TaskType: ci.IntegrationTests,
 	}
-	steps, err := s.GetSteps(ctx, logger)
+	steps, _, err := s.GetSteps(ctx, logger)
 	if err != nil {
 		log.Error(err, "get steps failed")
 		return err

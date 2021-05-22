@@ -42,6 +42,14 @@ func (p *PipelineRun) SetGeneric(pos int, taskType ci.TaskType, log logr.Logger)
 			ArrayVal: flags,
 		},
 	})
-
+	for _, gp := range p.GenericParams[string(taskType)] {
+		p.Params = append(p.Params, tkn.Param{
+			Name: string(taskType) + "_" + gp.Name,
+			Value: tkn.ArrayOrString{
+				Type:      tkn.ParamTypeString,
+				StringVal: p.Play.Get(gp.Value),
+			},
+		})
+	}
 	return nil
 }

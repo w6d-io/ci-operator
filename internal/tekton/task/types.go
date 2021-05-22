@@ -35,6 +35,7 @@ type Task struct {
 	Client  client.Client
 	Play    *ci.Play
 	Scheme  *runtime.Scheme
+	Params  map[string][]ci.ParamSpec
 }
 
 // Meta is the base struct for all struct with create method

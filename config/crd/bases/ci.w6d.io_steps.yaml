@@ -36,15 +36,15 @@ spec:
           params:
             description: Parameters declares parameters passed to this task.
             items:
-              description: Param declares an ArrayOrString to use for the parameter
-                called name.
+              description: ParamSpec defines arbitrary parameters needed beyond typed
+                inputs (such as resources). Parameter values are provided by users
+                as inputs on a TaskRun or PipelineRun. It contains also the values
+                template of the params
               properties:
-                name:
-                  type: string
-                value:
-                  description: ArrayOrString is a type that can hold a single string
-                    or string array. Used in JSON unmarshalling so that a single JSON
-                    field can accept either an individual string or an array of strings.
+                default:
+                  description: Default is the value a parameter takes if no input
+                    value is supplied. If default is set, a Task may be executed without
+                    a supplied value for the parameter.
                   properties:
                     arrayVal:
                       items:
@@ -62,9 +62,22 @@ spec:
                   - stringVal
                   - type
                   type: object
+                description:
+                  description: Description is a user-facing description of the parameter
+                    that may be used to populate a UI.
+                  type: string
+                name:
+                  description: Name declares the name by which a parameter is referenced.
+                  type: string
+                type:
+                  description: Type is the user-specified type of the parameter. The
+                    possible types are currently "string" and "array", and "string"
+                    is the default.
+                  type: string
+                value:
+                  type: string
               required:
               - name
-              - value
               type: object
             type: array
           status:

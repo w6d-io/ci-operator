@@ -252,7 +252,7 @@ func (in *Play) validateVault() field.ErrorList {
 	var allErrs field.ErrorList
 
 	if in.Spec.Vault != nil {
-		for secret, _ := range in.Spec.Vault.Secrets {
+		for secret := range in.Spec.Vault.Secrets {
 			if ok, _ := inArray(secret, SecretKinds); !ok {
 				allErrs = append(allErrs,
 					field.Invalid(field.NewPath("spec").Child("vault").Child("secrets"),
