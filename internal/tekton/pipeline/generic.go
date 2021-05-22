@@ -77,9 +77,9 @@ func (p *Pipeline) BuildParams(taskType ci.TaskType) (params []tkn.Param) {
 		})
 
 		params = append(params, tkn.Param{
-			Name:  gp.Name,
+			Name: gp.Name,
 			Value: tkn.ArrayOrString{
-				Type: gp.Type,
+				Type:      gp.Type,
 				StringVal: "$(params." + string(taskType) + "_" + gp.Name + ")",
 			},
 		})
