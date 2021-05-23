@@ -59,8 +59,8 @@ func (t *Task) Generic(ctx context.Context, taskType ci.TaskType, logger logr.Lo
 		return fmt.Errorf("no step found for %s", taskType)
 	}
 	task := t.Play.Spec.Tasks[t.Index][taskType]
-	if len(task.Variables) != 0 {
-		for i := range steps {
+	for i := range steps {
+		if len(task.Variables) != 0 {
 			for key, val := range task.Variables {
 				steps[i].Env = append(steps[i].Env, corev1.EnvVar{
 					Name:  key,
@@ -68,6 +68,7 @@ func (t *Task) Generic(ctx context.Context, taskType ci.TaskType, logger logr.Lo
 				})
 			}
 		}
+		steps[i].Env = append(steps[i].Env, BuildAndGetPredefinedEnv(t.Play)...)
 	}
 	g := &GenericTask{
 		Meta{

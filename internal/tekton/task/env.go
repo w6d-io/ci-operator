@@ -17,15 +17,16 @@ package task
 
 import (
 	"fmt"
-	"github.com/w6d-io/ci-operator/api/v1alpha1"
-	"github.com/w6d-io/ci-operator/internal/config"
 	"strconv"
 
+	"github.com/w6d-io/ci-operator/internal/config"
+
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 )
 
 // BuildAndGetPredefinedEnv build the variables environment for all steps
-func BuildAndGetPredefinedEnv(play v1alpha1.Play) (envVars []corev1.EnvVar) {
+func BuildAndGetPredefinedEnv(play *ci.Play) (envVars []corev1.EnvVar) {
 	envVars = append(envVars, BuildCommonPredefinedEnv(play)...)
 	envVars = append(envVars, BuildTaskPredefinedEnv(play.Spec.Tasks)...)
 	envVars = append(envVars, BuildConfigPredefinedEnv()...)
@@ -33,7 +34,7 @@ func BuildAndGetPredefinedEnv(play v1alpha1.Play) (envVars []corev1.EnvVar) {
 }
 
 // BuildCommonPredefinedEnv return the basics commons environment variable
-func BuildCommonPredefinedEnv(play v1alpha1.Play) (envVars []corev1.EnvVar) {
+func BuildCommonPredefinedEnv(play *ci.Play) (envVars []corev1.EnvVar) {
 	envVars = append(envVars, corev1.EnvVar{
 		Name:  config.GetEnvPrefix("project") + "NAME",
 		Value: play.Spec.Name,
@@ -97,7 +98,7 @@ func BuildCommonPredefinedEnv(play v1alpha1.Play) (envVars []corev1.EnvVar) {
 }
 
 // BuildTaskPredefinedEnv build and return the environment variables from tasks
-func BuildTaskPredefinedEnv(tasks []map[v1alpha1.TaskType]v1alpha1.Task) (envVars []corev1.EnvVar) {
+func BuildTaskPredefinedEnv(tasks []map[ci.TaskType]ci.Task) (envVars []corev1.EnvVar) {
 
 	for pos := range tasks {
 		for name, task := range tasks[pos] {

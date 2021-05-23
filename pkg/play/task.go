@@ -40,6 +40,7 @@ func (wf *WFType) SetTask(ctx context.Context, p *ci.Play, logger logr.Logger) e
 		Play:   p,
 		Scheme: wf.Scheme,
 	}
+	t.Params = make(map[string][]ci.ParamSpec, len(p.Spec.Tasks))
 	if err := t.Parse(ctx, logger); err != nil {
 		return err
 	}
