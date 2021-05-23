@@ -91,8 +91,14 @@ type PlaySpec struct {
 type Commit struct {
 	// SHA contains git commit SHA
 	SHA string `json:"sha,omitempty"`
+
+	// BeforeSHA contains the commit before sha
+	// +optional
+	BeforeSHA string `json:"before_sha,omitempty"`
+
 	// Ref contains git commit reference
 	Ref string `json:"ref,omitempty"`
+
 	// Message contains commit message
 	// +optional
 	Message string `json:"message,omitempty"`

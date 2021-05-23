@@ -58,6 +58,9 @@ spec:
               commit:
                 description: Commit contains all git information
                 properties:
+                  before_sha:
+                    description: BeforeSHA contains the commit before sha
+                    type: string
                   message:
                     description: Message contains commit message
                     type: string
