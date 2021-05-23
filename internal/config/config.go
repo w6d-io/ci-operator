@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"regexp"
 	"sort"
 	"strings"
 
@@ -274,12 +273,12 @@ func GetEnvPrefix(elements ...string) string {
 	return ToSnakeUpperCase(config.EnvPrefix + toAdd)
 }
 
-var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
-var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+//var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+//var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
 
 func ToSnakeUpperCase(str string) string {
-	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
-	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
-	snake = strings.ReplaceAll(snake, "-", "_")
+	//snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
+	//snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
+	snake := strings.ReplaceAll(str, "-", "_")
 	return strings.ToUpper(snake)
 }
