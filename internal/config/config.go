@@ -270,7 +270,7 @@ func GetEnvPrefix(elements ...string) string {
 			toAdd += "_"
 		}
 	}
-	return ToSnakeUpperCase(config.EnvPrefix + toAdd)
+	return ToSnakeUpperCase(config.EnvPrefix + "_" + toAdd)
 }
 
 //var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")

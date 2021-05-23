@@ -1,10 +1,18 @@
-# Predefined environment variables
+# Variables
+
+Following variable is available into all step 
+
+- `$(resources.inputs.source.path)` path where the repository is cloned
+- `$(workspaces.artifacts.path)` path where to put or get artifacts
+- `$(params.flags[*])` param of array type :warning: not available in script part
+
+## Predefined environment
 
 Alongside your environment variables defined into the `play` resource the following variable is available in each step
 
 With `W6D` as prefix
 
-## common from `play` resource
+### common from `play` resource
 
 ```shell
 ~ > env
@@ -24,7 +32,7 @@ W6D_EXTERNAL="false"
 W6D_DOCKER_URL="w6dio/nodejs-sample:latest"
 ```
 
-## from config
+### from config
 
 ```shell
 W6D_CONFIG_DEFAULT_DOMAIN="wildcard.sh"
@@ -33,7 +41,7 @@ W6D_CONFIG_INGRESS_CLASS="nginx"
 W6D_CONFIG_NAMESPACE="ci-system"
 ```
 
-## from task
+### from task
 
 Variable name will contain the task name from `play` resource.
 

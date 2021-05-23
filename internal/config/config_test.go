@@ -169,7 +169,7 @@ var _ = Describe("Config", func() {
 			})
 			It("checks GetEnvPrefix", func() {
 				By("set prefix")
-				config.SetEnvPrefix("TEST_")
+				config.SetEnvPrefix("TEST")
 
 				By("get prefix without argument")
 				Expect(config.GetEnvPrefix()).To(Equal("TEST_"))

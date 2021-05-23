@@ -18,6 +18,7 @@ package task
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -68,7 +69,11 @@ func (t *Task) Generic(ctx context.Context, taskType ci.TaskType, logger logr.Lo
 				})
 			}
 		}
+
 		steps[i].Env = append(steps[i].Env, BuildAndGetPredefinedEnv(t.Play)...)
+		if string(taskType) == steps[i].Name && len(task.Script) > 0 {
+			steps[i].Script = strings.Join(task.Script, "\n")
+		}
 	}
 	g := &GenericTask{
 		Meta{
