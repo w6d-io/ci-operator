@@ -39,7 +39,10 @@ func CreateCI(ctx context.Context, p *ci.Play, logger logr.Logger,
 		Client:  r,
 		Scheme:  scheme,
 		Creates: []CIFunc{},
+		Params:  make(map[string][]ci.ParamSpec, len(p.Spec.Tasks)),
 	}
+	// init genericParam map
+
 	//	wf = New(r, scheme)
 
 	if err := wf.CreateValues(ctx, p, logger); err != nil {

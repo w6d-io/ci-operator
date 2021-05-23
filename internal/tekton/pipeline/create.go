@@ -57,13 +57,15 @@ func (p *Pipeline) Parse(logger logr.Logger) error {
 				_ = p.SetPipelineClean(logger)
 			case ci.E2ETests:
 				_ = p.SetPipelineE2ETest(logger)
+			default:
+				_ = p.SetPipelineGeneric(name, logger)
 			}
 		}
 	}
 	return nil
 }
 
-// Create
+// Create build the pipeline tekton resource
 func (p *Pipeline) Create(ctx context.Context, r client.Client, log logr.Logger) error {
 	log = log.WithName("Create").WithValues("action", Prefix)
 	log.V(1).Info("creating")

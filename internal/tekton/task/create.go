@@ -29,6 +29,7 @@ import (
 func (t *Task) Parse(ctx context.Context, logger logr.Logger) error {
 	log := logger.WithName("Parse")
 
+	// pre build map to increase processing
 	for pos, m := range t.Play.Spec.Tasks {
 		for name := range m {
 			switch name {
@@ -78,6 +79,12 @@ func (t *Task) Parse(ctx context.Context, logger logr.Logger) error {
 				log.WithValues("task", ci.E2ETests).V(1).Info("launch")
 				t.Index = pos
 				if err := t.E2ETest(ctx, logger); err != nil {
+					return err
+				}
+			default:
+				log.WithValues("task", name).V(1).Info("launch")
+				t.Index = pos
+				if err := t.Generic(ctx, name, logger); err != nil {
 					return err
 				}
 			}

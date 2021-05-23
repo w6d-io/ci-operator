@@ -252,6 +252,13 @@ github.com/tektoncd/pipeline/pkg/apis/validate
 github.com/tektoncd/pipeline/pkg/list
 github.com/tektoncd/pipeline/pkg/reconciler/pipeline/dag
 github.com/tektoncd/pipeline/pkg/substitution
+# github.com/tidwall/gjson v1.8.0
+## explicit
+github.com/tidwall/gjson
+# github.com/tidwall/match v1.0.3
+github.com/tidwall/match
+# github.com/tidwall/pretty v1.1.0
+github.com/tidwall/pretty
 # github.com/w6d-io/hook v0.1.2
 ## explicit
 github.com/w6d-io/hook

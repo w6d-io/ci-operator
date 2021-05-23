@@ -36,10 +36,9 @@ func (p *PipelineRun) SetDeploy(pos int, log logr.Logger) error {
 
 	task := p.Play.Spec.Tasks[pos][ci.Deploy]
 	var flags []string
-	if len(task.Variables) != 0 {
-		for key, val := range task.Variables {
-			flags = append(flags, "--set")
-			flags = append(flags, key+"="+val)
+	if len(task.Arguments) != 0 {
+		for _, val := range task.Arguments {
+			flags = append(flags, val)
 		}
 	}
 	p.Params = append(p.Params, tkn.Param{

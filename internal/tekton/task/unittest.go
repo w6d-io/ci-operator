@@ -51,7 +51,7 @@ func (t *Task) UnitTest(ctx context.Context, logger logr.Logger) error {
 		Client:   t.Client,
 		TaskType: ci.UnitTests,
 	}
-	steps, err := s.GetSteps(ctx, logger)
+	steps, _, err := s.GetSteps(ctx, logger)
 	if err != nil {
 		log.Error(err, "get steps failed")
 		return err
@@ -64,7 +64,7 @@ func (t *Task) UnitTest(ctx context.Context, logger logr.Logger) error {
 		for i := range steps {
 			for key, val := range task.Variables {
 				steps[i].Env = append(steps[i].Env, corev1.EnvVar{
-					Name: key,
+					Name:  key,
 					Value: val,
 				})
 			}

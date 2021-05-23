@@ -19,6 +19,7 @@ package pipelinerun
 
 import (
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal"
 )
 
@@ -33,6 +34,8 @@ type PipelineRun struct {
 	// - nodeSelector
 	// - tolerations
 	PodTemplate *tkn.PodTemplate
+
+	GenericParams map[string][]ci.ParamSpec
 }
 
 const (

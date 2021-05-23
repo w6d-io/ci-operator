@@ -43,36 +43,38 @@ type Step struct {
 }
 
 // GetSteps return the list of step according the task
-func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) ([]tkn.Step, error) {
+func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) (steps []tkn.Step, params []ci.ParamSpec, err error) {
 	logger = logger.WithValues("task", s.TaskType)
 	log := logger.WithName("GetSteps")
 	// get Step by annotation
 	var steplist ci.StepList
 	//var opts []client.ListOption
 
-	err := s.Client.List(ctx, &steplist)
+	err = s.Client.List(ctx, &steplist)
 	if err != nil {
-		return nil, err
+		return
 	}
 	log.WithValues("nbr", len(steplist.Items)).V(1).Info("List return")
 	if len(s.PlaySpec.Tasks) < s.Index+1 {
-		return nil, errors.New("no such task")
+		err = errors.New("no such task")
+		return
 	}
 	sortedSteps := s.FilteredSteps(logger, steplist.Items, s.TaskType == ci.UnitTests ||
 		s.TaskType == ci.IntegrationTests || s.TaskType == ci.E2ETests)
 	log.WithValues("nbr", len(sortedSteps)).V(1).Info("Filtered list return")
 	if len(sortedSteps) == 0 {
 		log.Error(errors.New("get steps error"), "list empty")
-		return []tkn.Step{}, nil
+		return
 	}
 	sort.Sort(&sortedSteps)
-	var steps []tkn.Step
 	for _, step := range sortedSteps {
 		newStep := tkn.Step{
 			Container: step.Step.Container,
 			Script:    step.Step.Script,
 			Timeout:   step.Step.Timeout,
 		}
+		params = append(params, step.Params...)
+
 		if config.GetMinio().Host != "" {
 			vol := corev1.VolumeMount{
 				MountPath: path.Join(pipeline.HomeDir, secrets.MinIOSecretKey),
@@ -96,7 +98,20 @@ func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) ([]tkn.Step, er
 		}
 		steps = append(steps, newStep)
 	}
-	return steps, nil
+	return
+}
+
+// GetParams return the params from Step
+func (s *Step) GetParams(params []ci.ParamSpec) (r []tkn.ParamSpec) {
+	for i := range params {
+		r = append(r, tkn.ParamSpec{
+			Name:        params[i].Name,
+			Type:        params[i].Type,
+			Description: params[i].Description,
+			Default:     params[i].Default,
+		})
+	}
+	return
 }
 
 // FilteredSteps return a ci.Steps filtered by annotation

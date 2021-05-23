@@ -22,7 +22,7 @@ import (
 	"github.com/w6d-io/ci-operator/internal/config"
 )
 
-//
+// Minio contains the instance and the configuration
 type Minio struct {
 	Client *minio.Client
 	Config *config.Minio

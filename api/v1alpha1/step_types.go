@@ -36,6 +36,15 @@ type StepStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 }
 
+// ParamSpec defines arbitrary parameters needed beyond typed inputs (such as
+// resources). Parameter values are provided by users as inputs on a TaskRun
+// or PipelineRun. It contains also the values template of the params
+type ParamSpec struct {
+	tkn.ParamSpec `json:",inline"`
+
+	Value string `json:"value,omitempty"`
+}
+
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
@@ -43,6 +52,10 @@ type StepStatus struct {
 type Step struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	// Parameters declares parameters passed to this task.
+	// +optional
+	Params []ParamSpec `json:"params,omitempty"`
 
 	Step   StepSpec   `json:"step,omitempty"`
 	Status StepStatus `json:"status,omitempty"`

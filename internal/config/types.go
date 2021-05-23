@@ -49,6 +49,8 @@ type Config struct {
 
 	// Vault address
 	Vault *Vault `json:"vault,omitempty"`
+
+	EnvPrefix string `json:"envPrefix,omitempty" yaml:"envPrefix,omitempty"`
 }
 
 type Values struct {

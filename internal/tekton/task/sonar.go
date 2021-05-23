@@ -20,16 +20,18 @@ package task
 import (
 	"context"
 	"fmt"
-	"github.com/go-logr/logr"
+	"time"
+
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
-	"github.com/w6d-io/ci-operator/internal/config"
-	"github.com/w6d-io/ci-operator/internal/util"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/go-logr/logr"
+	"github.com/w6d-io/ci-operator/internal/config"
+	"github.com/w6d-io/ci-operator/internal/util"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"time"
 )
 
 // SonarTask task struct for CI
@@ -48,13 +50,24 @@ func (t *Task) Sonar(ctx context.Context, logger logr.Logger) error {
 		Client:   t.Client,
 		TaskType: ci.Sonar,
 	}
-	steps, err := s.GetSteps(ctx, logger)
+	steps, _, err := s.GetSteps(ctx, logger)
 	if err != nil {
 		log.Error(err, "get steps failed")
 		return err
 	}
 	if len(steps) == 0 {
 		return fmt.Errorf("no step found for %s", ci.Sonar)
+	}
+	task := t.Play.Spec.Tasks[t.Index][s.TaskType]
+	if len(task.Variables) != 0 {
+		for i := range steps {
+			for key, val := range task.Variables {
+				steps[i].Env = append(steps[i].Env, corev1.EnvVar{
+					Name:  key,
+					Value: val,
+				})
+			}
+		}
 	}
 	sonar := &SonarTask{
 		Meta: Meta{

@@ -29,8 +29,9 @@ func (wf *WFType) SetPipeline(p *ci.Play, logger logr.Logger) error {
 	log := logger.WithName("SetPipeline")
 	log.Info("Build pipeline")
 	pipeline := &intpipeline.Pipeline{
-		Play:   p,
-		Scheme: wf.Scheme,
+		Play:          p,
+		Scheme:        wf.Scheme,
+		GenericParams: wf.Params,
 	}
 	if err := pipeline.Parse(log); err != nil {
 		return err

@@ -73,3 +73,7 @@ vault: # vault can be used for keep dockerconfigjson, git_token and / or kubecon
 
 The `domain` and `ingress` part are mandatory
 
+## Environment variables
+
+[Predefined environment variables](variables.md) are fixed for all step
+

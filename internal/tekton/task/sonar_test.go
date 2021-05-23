@@ -50,6 +50,9 @@ var _ = Describe("Task", func() {
 									Script: ci.Script{
 										"echo", "toto",
 									},
+									Variables: map[string]string{
+										"TEST": "test",
+									},
 								},
 							},
 						},

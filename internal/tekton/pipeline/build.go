@@ -24,7 +24,7 @@ import (
 	"github.com/w6d-io/ci-operator/internal/util"
 )
 
-// SetBuild adds build tasks elements in pipeline
+// SetPipelineBuild adds build tasks elements in pipeline
 func (p *Pipeline) SetPipelineBuild(logger logr.Logger) error {
 
 	log := logger.WithName("SetPipelineBuild")

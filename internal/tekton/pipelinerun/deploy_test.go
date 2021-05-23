@@ -42,8 +42,8 @@ var _ = Describe("deploy in pipeline run", func() {
 							Tasks: []map[ci.TaskType]ci.Task{
 								{
 									ci.Deploy: ci.Task{
-										Variables: map[string]string{
-											"TEST": "Test",
+										Arguments: []string{
+											"TEST", "Test",
 										},
 										Image: "test/test:test",
 										Script: []string{

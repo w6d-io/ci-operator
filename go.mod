@@ -16,6 +16,7 @@ require (
 	github.com/onsi/gomega v1.10.5
 	github.com/speps/go-hashids v2.0.0+incompatible
 	github.com/tektoncd/pipeline v0.23.0
+	github.com/tidwall/gjson v1.8.0
 	github.com/w6d-io/hook v0.1.2
 	go.uber.org/zap v1.16.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
