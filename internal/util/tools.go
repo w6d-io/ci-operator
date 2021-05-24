@@ -19,6 +19,7 @@ package util
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -80,8 +81,33 @@ func IsPipelineRunning(pr tkn.PipelineRun) bool {
 	return true
 }
 
+// InNamespace return a client.InNamespace with pipeline namespace
 func InNamespace(play *ci.Play) client.InNamespace {
 	return client.InNamespace(fmt.Sprintf("p6e-cx-%v", play.Spec.ProjectID))
+}
+
+// MatchingLabels return a client.MatchingLabels with pipeline labels
+func MatchingLabels(play *ci.Play) client.MatchingLabels {
+	return client.MatchingLabels{
+		"pipelineid": fmt.Sprintf("%d", play.Spec.PipelineID),
+		"projectid":  fmt.Sprintf("%d", play.Spec.ProjectID),
+	}
+}
+
+// IsPodExist gets a list of pods from namespace and labels and return if there is pod
+func IsPodExist(ctx context.Context, r client.Client, play *ci.Play) (bool, error) {
+	podList := &corev1.PodList{}
+
+	var opts []client.ListOption
+	opts = append(opts, InNamespace(play))
+	opts = append(opts, MatchingLabels(play))
+	if err := r.List(ctx, podList, opts...); err != nil {
+		return false, err
+	}
+	if len(podList.Items) > 0 {
+		return true, nil
+	}
+	return false, nil
 }
 
 // GetCINamespacedName return CI namespacedName

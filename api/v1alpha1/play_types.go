@@ -212,6 +212,9 @@ type PlayStatus struct {
 	// Message contains the pipeline message
 	// +optional
 	Message string `json:"message,omitempty"`
+
+	// Conditions represents the latest available observations of play
+	Conditions []metav1.Condition `json:"conditions"`
 }
 
 //+kubebuilder:object:root=true
