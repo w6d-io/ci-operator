@@ -67,6 +67,7 @@ func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) (steps []tkn.St
 		return
 	}
 	sort.Sort(&sortedSteps)
+	var sidecars []tkn.Sidecar
 	for _, step := range sortedSteps {
 		newStep := tkn.Step{
 			Container: step.Step.Container,
@@ -74,7 +75,7 @@ func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) (steps []tkn.St
 			Timeout:   step.Step.Timeout,
 		}
 		params = append(params, step.Params...)
-
+		sidecars = append(sidecars, step.Sidecar...)
 		if config.GetMinio().Host != "" {
 			vol := corev1.VolumeMount{
 				MountPath: path.Join(pipeline.HomeDir, secrets.MinIOSecretKey),

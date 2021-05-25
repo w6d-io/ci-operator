@@ -30,11 +30,6 @@ type StepSpec struct {
 	tkn.Step `json:",inline"`
 }
 
-// SidecarSpec define the sidecar for the task
-type SidecarSpec struct {
-	tkn.Sidecar `json:",inline"`
-}
-
 // StepStatus defines the observed state of Step
 type StepStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
@@ -55,16 +50,16 @@ type ParamSpec struct {
 
 // Step is the Schema for the steps API
 type Step struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta       `json:",inline"`
+	metav1.ObjectMeta     `json:"metadata,omitempty"`
 
 	// Parameters declares parameters passed to this task.
 	// +optional
-	Params []ParamSpec `json:"params,omitempty"`
+	Params []ParamSpec    `json:"params,omitempty"`
 
-	Sidecar SidecarSpec `json:"sidecar,omitempty"`
-	Step    StepSpec    `json:"step,omitempty"`
-	Status  StepStatus  `json:"status,omitempty"`
+	Sidecar []tkn.Sidecar `json:"sidecar,omitempty"`
+	Step    StepSpec      `json:"step,omitempty"`
+	Status  StepStatus    `json:"status,omitempty"`
 }
 
 type Steps []Step

@@ -119,6 +119,7 @@ func (g *GenericTask) Create(ctx context.Context, r client.Client, logger logr.L
 				},
 			},
 			Steps:      g.Steps,
+			Sidecars:   nil,
 			Workspaces: config.Workspaces(),
 		},
 	}
