@@ -50,7 +50,7 @@ func (t *Task) Generic(ctx context.Context, taskType ci.TaskType, logger logr.Lo
 		Client:   t.Client,
 		TaskType: taskType,
 	}
-	steps, params, err := s.GetSteps(ctx, logger)
+	steps, params, sidecars, err := s.GetSteps(ctx, logger)
 	if err != nil {
 		log.Error(err, "get steps failed")
 		return err
@@ -77,14 +77,14 @@ func (t *Task) Generic(ctx context.Context, taskType ci.TaskType, logger logr.Lo
 	}
 	g := &GenericTask{
 		Meta{
-			Steps:  steps,
-			Play:   t.Play,
-			Scheme: t.Scheme,
+			Steps:    steps,
+			Sidecars: sidecars,
+			Play:     t.Play,
+			Scheme:   t.Scheme,
 		},
 		taskType,
 		params,
 	}
-
 	log.V(1).Info("add create in workflow")
 	return t.Add(g.Create)
 }
@@ -119,7 +119,7 @@ func (g *GenericTask) Create(ctx context.Context, r client.Client, logger logr.L
 				},
 			},
 			Steps:      g.Steps,
-			Sidecars:   nil,
+			Sidecars:   g.Sidecars,
 			Workspaces: config.Workspaces(),
 		},
 	}

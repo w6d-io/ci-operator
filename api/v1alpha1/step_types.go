@@ -53,10 +53,11 @@ type Step struct {
 	metav1.TypeMeta       `json:",inline"`
 	metav1.ObjectMeta     `json:"metadata,omitempty"`
 
-	// Parameters declares parameters passed to this task.
+	// Params declares parameters passed to this task.
 	// +optional
 	Params []ParamSpec    `json:"params,omitempty"`
 
+	// Sidecar container
 	Sidecar []tkn.Sidecar `json:"sidecar,omitempty"`
 	Step    StepSpec      `json:"step,omitempty"`
 	Status  StepStatus    `json:"status,omitempty"`

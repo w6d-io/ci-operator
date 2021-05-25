@@ -34,7 +34,7 @@ spec:
           metadata:
             type: object
           params:
-            description: Parameters declares parameters passed to this task.
+            description: Params declares parameters passed to this task.
             items:
               description: ParamSpec defines arbitrary parameters needed beyond typed
                 inputs (such as resources). Parameter values are provided by users
@@ -81,6 +81,7 @@ spec:
               type: object
             type: array
           sidecar:
+            description: Sidecar container
             items:
               description: Sidecar has nearly the same data structure as Step, consisting
                 of a Container and an optional Script, but does not have the ability

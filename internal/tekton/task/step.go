@@ -43,7 +43,7 @@ type Step struct {
 }
 
 // GetSteps return the list of step according the task
-func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) (steps []tkn.Step, params []ci.ParamSpec, err error) {
+func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) (steps []tkn.Step, params []ci.ParamSpec, sidecars []tkn.Sidecar, err error) {
 	logger = logger.WithValues("task", s.TaskType)
 	log := logger.WithName("GetSteps")
 	// get Step by annotation
@@ -67,7 +67,6 @@ func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) (steps []tkn.St
 		return
 	}
 	sort.Sort(&sortedSteps)
-	var sidecars []tkn.Sidecar
 	for _, step := range sortedSteps {
 		newStep := tkn.Step{
 			Container: step.Step.Container,

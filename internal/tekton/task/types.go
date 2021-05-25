@@ -40,8 +40,8 @@ type Task struct {
 
 // Meta is the base struct for all struct with create method
 type Meta struct {
-	Steps   []tkn.Step
-	Sidecar []tkn.Sidecar
-	Play    *ci.Play
-	Scheme  *runtime.Scheme
+	Steps    []tkn.Step
+	Sidecars []tkn.Sidecar
+	Play     *ci.Play
+	Scheme   *runtime.Scheme
 }
