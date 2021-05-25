@@ -158,7 +158,7 @@ func (p *PipelineRun) getPipelineResourceBinding(play *ci.Play) []tkn.PipelineRe
 
 func (p *PipelineRun) delay(ctx context.Context, r client.Client, logger logr.Logger) error {
 	return retry.Do(func() error {
-		logger.V(1).Info("delaying")
+		logger.V(1).Info("delaying", "projectid", p.Play.Spec.ProjectID, "pipelineid", p.Play.Spec.PipelineID)
 		ok, err := util.IsPodExist(ctx, r, p.Play)
 		if client.IgnoreNotFound(err) != nil {
 			return err

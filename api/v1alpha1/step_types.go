@@ -30,6 +30,11 @@ type StepSpec struct {
 	tkn.Step `json:",inline"`
 }
 
+// SidecarSpec define the sidecar for the task
+type SidecarSpec struct {
+	tkn.Sidecar `json:",inline"`
+}
+
 // StepStatus defines the observed state of Step
 type StepStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
@@ -57,8 +62,9 @@ type Step struct {
 	// +optional
 	Params []ParamSpec `json:"params,omitempty"`
 
-	Step   StepSpec   `json:"step,omitempty"`
-	Status StepStatus `json:"status,omitempty"`
+	Sidecar SidecarSpec `json:"sidecar,omitempty"`
+	Step    StepSpec    `json:"step,omitempty"`
+	Status  StepStatus  `json:"status,omitempty"`
 }
 
 type Steps []Step

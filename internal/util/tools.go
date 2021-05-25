@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"strconv"
 	"strings"
 
@@ -101,9 +102,12 @@ func IsPodExist(ctx context.Context, r client.Client, play *ci.Play) (bool, erro
 	var opts []client.ListOption
 	opts = append(opts, InNamespace(play))
 	opts = append(opts, MatchingLabels(play))
+	ctrl.Log.WithName("IsPodExist").V(1).Info("DEBUG TEST", "opts", opts)
 	if err := r.List(ctx, podList, opts...); err != nil {
 		return false, err
 	}
+	ctrl.Log.V(1).Info("DEBUG TEST", "content", fmt.Sprintf("%+v",
+		GetObjectContain(podList)))
 	if len(podList.Items) > 0 {
 		return true, nil
 	}

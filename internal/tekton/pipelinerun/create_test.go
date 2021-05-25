@@ -18,12 +18,11 @@ package pipelinerun_test
 
 import (
 	"context"
-	"github.com/w6d-io/ci-operator/internal/config"
-
-	"github.com/w6d-io/ci-operator/internal"
-	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
-
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	"github.com/w6d-io/ci-operator/internal"
+	"github.com/w6d-io/ci-operator/internal/config"
+	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
+	"github.com/w6d-io/ci-operator/internal/util"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -164,53 +163,100 @@ var _ = Describe("Create", func() {
 			Expect(err.Error()).To(ContainSubstring(`namespaces "p6e-cx-30" not found`))
 		})
 		It("create", func() {
+			By("create namespace")
 			ns := &corev1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "p6e-cx-1",
+					Name: "p6e-cx-14",
 				},
 			}
-			err := k8sClient.Create(context.TODO(), ns)
-			Expect(err).To(Succeed())
-			p := pipelinerun.PipelineRun{
-				WorkFlowStruct: internal.WorkFlowStruct{
-					Scheme: scheme,
-					Play: &ci.Play{
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      "test-create-1",
-							Namespace: "p6e-cx-1",
-							UID:       "uuid-uuid-uuid-uuid",
-						},
-						Spec: ci.PlaySpec{
-							Name:       "test",
-							ProjectID:  1,
-							PipelineID: 1,
-							Stack: ci.Stack{
-								Language: "test",
-							},
-							Commit: ci.Commit{
-								SHA: "test_test_test",
-								Ref: "test",
-							},
-							Tasks: []map[ci.TaskType]ci.Task{
-								{
-									ci.Build: ci.Task{
-										Variables: map[string]string{
-											"TEST": "Test",
-										},
-										Image: "test/test:test",
-										Script: []string{
-											"echo",
-											"test",
-										},
-									},
+			Expect(k8sClient.Create(context.TODO(), ns)).To(Succeed())
+
+			By("create play resource")
+			play := &ci.Play{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-create-1",
+					Namespace: "p6e-cx-14",
+					UID:       "uuid-uuid-uuid-uuid",
+				},
+				Spec: ci.PlaySpec{
+					Name:       "test",
+					ProjectID:  14,
+					PipelineID: 1,
+					Stack: ci.Stack{
+						Language: "test",
+					},
+					Commit: ci.Commit{
+						SHA: "test_test_test",
+						Ref: "test",
+					},
+					Tasks: []map[ci.TaskType]ci.Task{
+						{
+							ci.Build: ci.Task{
+								Variables: map[string]string{
+									"TEST": "Test",
+								},
+								Image: "test/test:test",
+								Script: []string{
+									"echo",
+									"test",
 								},
 							},
 						},
 					},
 				},
 			}
-			err = p.Create(context.TODO(), k8sClient, ctrl.Log)
-			Expect(err).To(Succeed())
+			By("create pipelinerun")
+			p := pipelinerun.PipelineRun{
+				WorkFlowStruct: internal.WorkFlowStruct{
+					Scheme: scheme,
+					Play:   play,
+				},
+			}
+			Expect(p.Create(context.TODO(), k8sClient, ctrl.Log)).To(Succeed())
+
+			By("create namespace #15")
+			play.Namespace = "p6e-cx-15"
+			play.Spec.ProjectID = 15
+			ns = &corev1.Namespace{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "p6e-cx-15",
+				},
+			}
+			Expect(k8sClient.Create(context.TODO(), ns)).To(Succeed())
+
+			By("create fake pod")
+			po := &corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "pod-fake-15",
+					Namespace: "p6e-cx-15",
+					Labels:    util.GetCILabels(play),
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  "web",
+							Image: "nginx",
+							Ports: []corev1.ContainerPort{
+								{
+									Name:          "web",
+									ContainerPort: 80,
+									Protocol:      "TCP",
+								},
+							},
+						},
+					},
+				},
+			}
+			Expect(k8sClient.Create(ctx, po)).To(Succeed())
+
+			//Expect(k8sClient.Get(ctx, types.NamespacedName{Name: "pod-fake-15", Namespace: "p6e-cx-15"}, po)).To(Succeed())
+			//ctrl.Log.V(1).Info("DEBUG TEST", "POD content", fmt.Sprintf("%+v",
+			//	util.GetObjectContain(po)))
+			//ctrl.Log.V(1).Info("DEBUG TEST", "T PR content", fmt.Sprintf("%+v",
+			//	p))
+
+			By("throw delaying")
+			Expect(p.Create(context.TODO(), k8sClient, ctrl.Log)).To(Succeed())
 		})
 
 		It("does", func() {
@@ -241,6 +287,7 @@ var _ = Describe("Create", func() {
 											"test",
 										},
 									},
+									"git-leaks": ci.Task{},
 								},
 							},
 						},
