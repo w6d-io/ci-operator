@@ -50,12 +50,12 @@ type ParamSpec struct {
 
 // Step is the Schema for the steps API
 type Step struct {
-	metav1.TypeMeta       `json:",inline"`
-	metav1.ObjectMeta     `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	// Params declares parameters passed to this task.
 	// +optional
-	Params []ParamSpec    `json:"params,omitempty"`
+	Params []ParamSpec `json:"params,omitempty"`
 
 	// Sidecar container
 	Sidecar []tkn.Sidecar `json:"sidecar,omitempty"`

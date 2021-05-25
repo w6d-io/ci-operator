@@ -238,7 +238,7 @@ var _ = Describe("Task", func() {
 			By("Set namespace")
 			config.SetNamespace("p6e-cx-21")
 
-			_, _, err = s.GetSteps(ctx, ctrl.Log)
+			_, _, _, err = s.GetSteps(ctx, ctrl.Log)
 			Expect(err).To(Succeed())
 
 		})
