@@ -26,10 +26,13 @@ import (
 )
 
 // New return a MinIO instance
-func New(logger logr.Logger) *Minio {
+func New(logger logr.Logger) Interface {
 	log := logger.WithName("New").WithValues("package", "minio")
 	log.V(1).Info(" instantiate minio client")
 
+	if Instance != nil {
+		return Instance
+	}
 	m := &Minio{
 		Config: config.GetMinio(),
 	}
@@ -54,7 +57,8 @@ func New(logger logr.Logger) *Minio {
 	}
 	m.Client = minioClient
 	log.V(1).Info("return minio client")
-	return m
+	Instance = m
+	return Instance
 }
 
 // PutFile creates the object target in a bucket, with contents from file at source

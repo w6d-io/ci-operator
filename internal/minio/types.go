@@ -18,12 +18,20 @@ Created on 08/01/2021
 package minio
 
 import (
+	"github.com/go-logr/logr"
 	"github.com/minio/minio-go/v6"
 	"github.com/w6d-io/ci-operator/internal/config"
 )
+
+type Interface interface {
+	PutFile(logr.Logger, string, string) error
+	PutString(logr.Logger, string, string) error
+}
 
 // Minio contains the instance and the configuration
 type Minio struct {
 	Client *minio.Client
 	Config *config.Minio
 }
+
+var Instance Interface

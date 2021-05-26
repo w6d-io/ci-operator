@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/w6d-io/ci-operator/controllers"
 	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
@@ -29,7 +30,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 
+	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	civ1alpha1 "github.com/w6d-io/ci-operator/api/v1alpha1"
 	zapraw "go.uber.org/zap"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -50,6 +53,7 @@ func Test(t *testing.T) {
 
 var cfg *rest.Config
 var k8sClient client.Client
+var k8sManager manager.Manager
 var testEnv *envtest.Environment
 var ctx context.Context
 var scheme = runtime.NewScheme()
@@ -77,8 +81,11 @@ var _ = BeforeSuite(func(done Done) {
 	ctrl.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseFlagOptions(&opts), zap.RawZapOpts(zapraw.AddCaller(), zapraw.AddCallerSkip(-1))))
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
-		CRDDirectoryPaths:     []string{filepath.Join("..", "config", "crd", "bases")},
-		ErrorIfCRDPathMissing: false,
+		CRDDirectoryPaths: []string{
+			filepath.Join("..", "config", "crd", "bases"),
+			filepath.Join("..", "third_party", "tektoncd", "pipeline", "config"),
+		},
+		ErrorIfCRDPathMissing: true,
 	}
 
 	var err error
@@ -87,6 +94,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(cfg).ToNot(BeNil())
 	utilruntime.Must(civ1alpha1.AddToScheme(scheme))
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+	utilruntime.Must(tkn.AddToScheme(scheme))
 	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme})
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
@@ -94,6 +102,24 @@ var _ = BeforeSuite(func(done Done) {
 	correlationID := uuid.New().String()
 	ctx = context.Background()
 	ctx = context.WithValue(ctx, "correlation_id", correlationID)
+
+	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
+		Scheme:         scheme,
+		LeaderElection: false,
+	})
+	Expect(err).ToNot(HaveOccurred())
+
+	err = (&controllers.PlayReconciler{
+		Client: k8sManager.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("Play"),
+		Scheme: k8sManager.GetScheme(),
+	}).SetupWithManager(k8sManager)
+	Expect(err).ToNot(HaveOccurred())
+	go func() {
+		defer GinkgoRecover()
+		err = k8sManager.Start(ctrl.SetupSignalHandler())
+		Expect(err).ToNot(HaveOccurred())
+	}()
 
 	close(done)
 }, 60)

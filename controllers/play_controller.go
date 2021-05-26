@@ -18,6 +18,8 @@ package controllers
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
 	"time"
 
@@ -198,6 +200,13 @@ func (r *PlayReconciler) UpdateStatus(ctx context.Context, p *ci.Play, state ci.
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		p.Status.State = state
 		p.Status.Message = message
+
+		meta.SetStatusCondition(&p.Status.Conditions, metav1.Condition{
+			Type:    string(state),
+			Status:  r.GetStatus(state),
+			Reason:  string(state),
+			Message: message,
+		})
 		if err := r.Status().Update(ctx, p); err != nil {
 			log.Error(err, "unable to update play status (retry)")
 			return err
@@ -209,6 +218,17 @@ func (r *PlayReconciler) UpdateStatus(ctx context.Context, p *ci.Play, state ci.
 		return err
 	}
 	return nil
+}
+
+func (r *PlayReconciler) GetStatus(state ci.State) metav1.ConditionStatus {
+	switch state {
+	case ci.Errored, ci.Cancelled, ci.Failed:
+		return metav1.ConditionFalse
+	case ci.Succeeded:
+		return metav1.ConditionTrue
+	default:
+		return metav1.ConditionUnknown
+	}
 }
 
 // UpdateName set the status of tekton resource state
