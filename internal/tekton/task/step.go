@@ -43,7 +43,7 @@ type Step struct {
 }
 
 // GetSteps return the list of step according the task
-func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) (steps []tkn.Step, params []ci.ParamSpec, err error) {
+func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) (steps []tkn.Step, params []ci.ParamSpec, sidecars []tkn.Sidecar, err error) {
 	logger = logger.WithValues("task", s.TaskType)
 	log := logger.WithName("GetSteps")
 	// get Step by annotation
@@ -74,7 +74,7 @@ func (s *Step) GetSteps(ctx context.Context, logger logr.Logger) (steps []tkn.St
 			Timeout:   step.Step.Timeout,
 		}
 		params = append(params, step.Params...)
-
+		sidecars = append(sidecars, step.Sidecar...)
 		if config.GetMinio().Host != "" {
 			vol := corev1.VolumeMount{
 				MountPath: path.Join(pipeline.HomeDir, secrets.MinIOSecretKey),

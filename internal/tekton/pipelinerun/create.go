@@ -19,7 +19,9 @@ package pipelinerun
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/avast/retry-go"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -117,6 +119,10 @@ func (p *PipelineRun) Create(ctx context.Context, r client.Client, log logr.Logg
 	}
 	log.V(1).Info(resource.Kind, "content", fmt.Sprintf("%v",
 		util.GetObjectContain(resource)))
+	err := p.delay(ctx, r, log)
+	if err != nil {
+		log.Error(err, "delay")
+	}
 	if err := r.Create(ctx, resource); err != nil {
 		return err
 	}
@@ -148,4 +154,19 @@ func (p *PipelineRun) getPipelineResourceBinding(play *ci.Play) []tkn.PipelineRe
 		})
 	}
 	return res
+}
+
+func (p *PipelineRun) delay(ctx context.Context, r client.Client, logger logr.Logger) error {
+	return retry.Do(func() error {
+		logger.V(1).Info("delaying", "projectid", p.Play.Spec.ProjectID, "pipelineid", p.Play.Spec.PipelineID)
+		ok, err := util.IsPodExist(ctx, r, p.Play)
+		if client.IgnoreNotFound(err) != nil {
+			return err
+		}
+		if ok {
+			logger.V(1).Info("delay pod still exists")
+			return errors.New("still exists")
+		}
+		return nil
+	}, retry.Attempts(5), retry.Delay(200*time.Millisecond))
 }

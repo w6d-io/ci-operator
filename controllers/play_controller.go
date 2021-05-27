@@ -18,6 +18,8 @@ package controllers
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
 	"time"
 
@@ -68,16 +70,10 @@ type PlayReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Play object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.7.2/pkg/reconcile
 func (r *PlayReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	correlationID := uuid.New().String()
 	ctx = context.WithValue(context.Background(), "correlation_id", correlationID)
+	ctx = context.WithValue(ctx, "play", req.NamespacedName.String())
 	logger := r.Log.WithValues("play", req.NamespacedName, "correlation_id", correlationID)
 	log := logger.WithName("Reconcile")
 	// get the play resource
@@ -103,35 +99,12 @@ func (r *PlayReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	if !apierrors.IsNotFound(err) {
 		if childPr.Name != "" && p.Status.PipelineRunName != childPr.Name {
-			err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-				if err := r.Get(ctx, req.NamespacedName, p); err != nil {
-					return client.IgnoreNotFound(err)
-				}
-				p.Status.PipelineRunName = childPr.Name
-				log.V(1).Info("updating play status")
-				if err := r.Status().Update(ctx, p); err != nil {
-					log.Error(err, "update")
-					return err
-				}
-				return nil
-			})
-			if err != nil {
+			if err := r.UpdateName(ctx, p, childPr.Name); err != nil {
 				return ctrl.Result{Requeue: true}, client.IgnoreNotFound(err)
 			}
 		}
-		err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			//p.Status.State = util.Condition(childPr.Status.Conditions)
-			log.V(1).Info("update status", "status",
-				util.Condition(childPr.Status.Conditions),
-				"step", "1")
-			p.Status.State = util.Condition(childPr.Status.Conditions)
-			p.Status.Message = util.Message(childPr.Status.Conditions)
-			if err := r.Status().Update(ctx, p); err != nil {
-				return err
-			}
-			return nil
-		})
-		if err != nil {
+		if err := r.UpdateStatus(ctx, p, util.Condition(childPr.Status.Conditions),
+			util.Message(childPr.Status.Conditions)); err != nil {
 			log.Error(err, "unable to update Play status")
 			return ctrl.Result{Requeue: true}, err
 		}
@@ -142,11 +115,10 @@ func (r *PlayReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	var prs tkn.PipelineRunList
 	if err := r.List(ctx, &prs, util.InNamespace(p)); util.IgnoreNotExists(err) != nil {
 		log.Error(err, "Unable to list PipelineRuns in ", util.InNamespace(p))
-		p.Status.State = ci.Errored
-		log.V(1).Info("update status", "status", p.Status.State,
+		log.V(1).Info("update status", "status", ci.Errored,
 			"step", "2")
-		if err := r.Status().Update(ctx, p); err != nil {
-			return ctrl.Result{}, err
+		if err := r.UpdateStatus(ctx, p, ci.Errored, err.Error()); err != nil {
+			return ctrl.Result{Requeue: true}, err
 		}
 		return ctrl.Result{}, nil
 	}
@@ -164,21 +136,19 @@ func (r *PlayReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	var limits ci.LimitCiList
 	if err := r.List(ctx, &limits, util.InNamespace(p)); client.IgnoreNotFound(err) != nil {
 		log.Error(err, "unable to list LimitCi")
-		p.Status.State = ci.Errored
-		log.V(1).Info("update status", "status", p.Status.State,
+		log.V(1).Info("update status", "status", ci.Errored,
 			"step", "3")
-		if err := r.Status().Update(ctx, p); err != nil {
-			return ctrl.Result{}, err
+		if err := r.UpdateStatus(ctx, p, ci.Errored, err.Error()); err != nil {
+			return ctrl.Result{Requeue: true}, err
 		}
-		return ctrl.Result{}, err
+		return ctrl.Result{Requeue: true}, err
 	}
 
 	if len(limits.Items) > 0 && (limits.Items[0].Spec.Concurrent <= int64(len(runningPipeline))) {
 		log.V(1).Info("limit ci", "action", "queued")
-		p.Status.State = ci.Queued
-		log.V(1).Info("update status", "status", p.Status.State,
+		log.V(1).Info("update status", "status", ci.Queued,
 			"step", "4")
-		if err := r.Status().Update(ctx, p); err != nil {
+		if err := r.UpdateStatus(ctx, p, ci.Queued, ""); err != nil {
 			return ctrl.Result{}, err
 		}
 		lp := webhook.GetLimitPayload(p, limits.Items[0], "concurrent")
@@ -191,20 +161,17 @@ func (r *PlayReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	err = play.CreateCI(ctx, p, logger, r.Client, r.Scheme)
 	if err != nil {
 		log.Error(err, "Failed to create CI")
-		p.Status.State = ci.Errored
-		p.Status.Message = err.Error()
-		log.V(1).Info("update status", "status", p.Status.State,
+		log.V(1).Info("update status", "status", ci.Errored,
 			"step", "5")
-		if err := r.Status().Update(ctx, p); err != nil {
-			return ctrl.Result{}, err
+		if err := r.UpdateStatus(ctx, p, ci.Errored, err.Error()); err != nil {
+			return ctrl.Result{Requeue: true}, err
 		}
-		return ctrl.Result{}, err
+		return ctrl.Result{Requeue: true}, err
 	}
-	p.Status.State = "---"
-	log.V(1).Info("update status", "status", p.Status.State,
+	log.V(1).Info("update status", "status", "---",
 		"step", "6")
-	if err := r.Status().Update(ctx, p); err != nil {
-		return ctrl.Result{}, err
+	if err := r.UpdateStatus(ctx, p, "---", ""); err != nil {
+		return ctrl.Result{Requeue: true}, err
 	}
 
 	payload := webhook.GetPayLoad(p)
@@ -213,6 +180,70 @@ func (r *PlayReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	return ctrl.Result{Requeue: false}, nil
+}
+
+// UpdateStatus set the status of tekton resource state
+func (r *PlayReconciler) UpdateStatus(ctx context.Context, p *ci.Play, state ci.State, message string) error {
+	correlationID := ctx.Value("correlation_id")
+	nn := ctx.Value("play")
+	log := ctrl.Log.WithName("Reconcile").WithName("UpdateStatus").WithValues("correlation_id", correlationID, "play", nn)
+	var err error
+	log.V(1).Info("update status")
+
+	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		p.Status.State = state
+		p.Status.Message = message
+
+		meta.SetStatusCondition(&p.Status.Conditions, metav1.Condition{
+			Type:    string(state),
+			Status:  r.GetStatus(state),
+			Reason:  string(state),
+			Message: message,
+		})
+		if err := r.Status().Update(ctx, p); err != nil {
+			log.Error(err, "unable to update play status (retry)")
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		log.Error(err, "unable to update play status")
+		return err
+	}
+	return nil
+}
+
+func (r *PlayReconciler) GetStatus(state ci.State) metav1.ConditionStatus {
+	switch state {
+	case ci.Errored, ci.Cancelled, ci.Failed:
+		return metav1.ConditionFalse
+	case ci.Succeeded:
+		return metav1.ConditionTrue
+	default:
+		return metav1.ConditionUnknown
+	}
+}
+
+// UpdateName set the status of tekton resource state
+func (r *PlayReconciler) UpdateName(ctx context.Context, p *ci.Play, name string) error {
+	correlationID := ctx.Value("correlation_id")
+	nn := ctx.Value("play")
+	log := ctrl.Log.WithName("Reconcile").WithName("UpdateName").WithValues("correlation_id", correlationID, "play", nn)
+	var err error
+	log.V(1).Info("update name")
+	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		p.Status.PipelineRunName = name
+		if err := r.Status().Update(ctx, p); err != nil {
+			log.Error(err, "unable to update play name (retry)")
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		log.Error(err, "unable to update play name")
+		return err
+	}
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

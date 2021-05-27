@@ -48,7 +48,7 @@ func (t *Task) Clean(ctx context.Context, logger logr.Logger) error {
 		Client:   t.Client,
 		TaskType: ci.Clean,
 	}
-	steps, _, err := s.GetSteps(ctx, logger)
+	steps, _, _, err := s.GetSteps(ctx, logger)
 	if err != nil {
 		log.Error(err, "get steps failed")
 		return err
