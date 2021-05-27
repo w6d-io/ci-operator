@@ -214,7 +214,8 @@ type PlayStatus struct {
 	Message string `json:"message,omitempty"`
 
 	// Conditions represents the latest available observations of play
-	Conditions []metav1.Condition `json:"conditions"`
+	// +optional
+	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
 //+kubebuilder:object:root=true
