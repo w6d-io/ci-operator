@@ -97,12 +97,13 @@ func (in *Play) ValidateUpdate(old runtime.Object) error {
 				in.Spec.ProjectID,
 				"pipelineID cannot be changed"))
 	}
-	if old.(*Play).Spec.Environment != in.Spec.Environment {
-		allErrs = append(allErrs,
-			field.Invalid(field.NewPath("spec").Child("environment"),
-				in.Spec.Environment,
-				"environment cannot be changed"))
-	}
+	//
+	//if old.(*Play).Spec.Environment != in.Spec.Environment {
+	//	allErrs = append(allErrs,
+	//		field.Invalid(field.NewPath("spec").Child("environment"),
+	//			in.Spec.Environment,
+	//			"environment cannot be changed"))
+	//}
 	if len(allErrs) == 0 {
 		return nil
 	}
@@ -152,6 +153,7 @@ func (in Play) validateTaskType() field.ErrorList {
 func (in *Play) commonValidation() field.ErrorList {
 	playlog.Info("validate common", "name", in.Name)
 	var allErrs field.ErrorList
+	allErrs = append(allErrs, in.validateEnvironment()...)
 	if in.Spec.ProjectID == 0 {
 		allErrs = append(allErrs,
 			field.Invalid(field.NewPath("spec").Child("project_id"),
@@ -164,12 +166,7 @@ func (in *Play) commonValidation() field.ErrorList {
 				in.Spec.PipelineID,
 				"cannot be 0"))
 	}
-	if in.Spec.Environment == "" && !in.Spec.External {
-		allErrs = append(allErrs,
-			field.Invalid(field.NewPath("spec").Child("environment"),
-				in.Spec.Environment,
-				"environment cannot be empty"))
-	}
+
 	_, okSecret := in.Spec.Secret[KubeConfig]
 	okVault := false
 	if in.Spec.Vault != nil {
@@ -225,6 +222,26 @@ func (in *Play) commonValidation() field.ErrorList {
 	return allErrs
 }
 
+func (in *Play) validateEnvironment() field.ErrorList {
+	var allErrs field.ErrorList
+	isDeploy := false
+	if !in.Spec.External {
+		for i := range in.Spec.Tasks {
+			for t := range in.Spec.Tasks[i] {
+				if strings.Contains(t.String(), "deploy") {
+					isDeploy = true
+				}
+			}
+		}
+		if isDeploy && in.Spec.Environment == "" {
+			allErrs = append(allErrs,
+				field.Invalid(field.NewPath("spec").Child("environment"),
+					in.Spec.Environment,
+					"environment cannot be empty"))
+		}
+	}
+	return allErrs
+}
 func validateDomain(domain string) bool {
 	pattern := `^([a-z0-9]{1}[a-z0-9\-]{0,62}){1}(\.[a-z0-9]{1}[a-z0-9\-]{0,62})*[\._]?$`
 	re := regexp.MustCompile(pattern)
