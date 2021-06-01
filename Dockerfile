@@ -47,5 +47,4 @@ WORKDIR /
 COPY --from=builder /workspace/ci-operator .
 USER 1001:1001
 
-
 ENTRYPOINT ["/ci-operator"]
