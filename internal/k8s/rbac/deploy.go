@@ -42,10 +42,11 @@ type Deploy struct {
 }
 
 func (in *Deploy) Create(ctx context.Context, r client.Client, logger logr.Logger) error {
-	log := logger.WithName("Deploy").WithName("Create").WithValues("action", Prefix)
+	log := logger.WithName("Deploy").WithName("Create").WithValues("action", Prefix, "is_internal",
+		in.Play.IsDoDeploy(), "external", in.Play.Spec.External)
 	log.V(1).Info("creating")
 
-	if in.Play.IsInternal() {
+	if !in.Play.IsDoDeploy() || in.Play.Spec.External {
 		log.V(1).Info("skip")
 		return nil
 	}

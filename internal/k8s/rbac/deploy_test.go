@@ -91,6 +91,12 @@ var _ = Describe("RBAC", func() {
 		})
 		Context("we try", func() {
 			It("succeed creation", func() {
+				_ = d.Create(context.TODO(), k8sClient, ctrl.Log)
+				d.Play.Spec.Tasks = []map[ci.TaskType]ci.Task{
+					{
+						"deploy": ci.Task{},
+					},
+				}
 				err := d.Create(context.TODO(), k8sClient, ctrl.Log)
 				Expect(err).To(Succeed())
 				r := rbacv1.RoleBinding{}
@@ -101,10 +107,20 @@ var _ = Describe("RBAC", func() {
 				Expect(len(r.Subjects)).To(Equal(2))
 			})
 			It("with subject already exist", func() {
+				d.Play.Spec.Tasks = []map[ci.TaskType]ci.Task{
+					{
+						ci.Deploy: ci.Task{},
+					},
+				}
 				err := d.Create(context.TODO(), k8sClient, ctrl.Log)
 				Expect(err).To(Succeed())
 			})
 			It("succeed update", func() {
+				d.Play.Spec.Tasks = []map[ci.TaskType]ci.Task{
+					{
+						ci.Deploy: ci.Task{},
+					},
+				}
 				play.Spec.PipelineID = 2
 				err := d.Create(context.TODO(), k8sClient, ctrl.Log)
 				Expect(err).To(Succeed())
