@@ -168,15 +168,17 @@ func (r *PlayReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		}
 		return ctrl.Result{Requeue: true}, err
 	}
+
+	payload := webhook.GetPayLoad(p)
+	log.V(1).Info("hook process")
+	if err := hook.Send(payload, ctrl.Log, "end"); err != nil {
+		return ctrl.Result{Requeue: false}, err
+	}
+
 	log.V(1).Info("update status", "status", "---",
 		"step", "6")
 	if err := r.UpdateStatus(ctx, p, "---", ""); err != nil {
 		return ctrl.Result{Requeue: true}, err
-	}
-
-	payload := webhook.GetPayLoad(p)
-	if err := hook.Send(payload, ctrl.Log, "end"); err != nil {
-		return ctrl.Result{Requeue: false}, err
 	}
 
 	return ctrl.Result{Requeue: false}, nil

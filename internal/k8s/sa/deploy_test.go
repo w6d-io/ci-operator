@@ -51,6 +51,11 @@ var _ = Describe("Service Account", func() {
 							Environment: "develop",
 							ProjectID:   7,
 							PipelineID:  1,
+							Tasks: []map[ci.TaskType]ci.Task{
+								{
+									ci.Deploy: ci.Task{},
+								},
+							},
 						},
 					},
 					Scheme: scheme,
