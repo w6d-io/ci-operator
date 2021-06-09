@@ -45,7 +45,7 @@ func (in *Deploy) Create(ctx context.Context, r client.Client, logger logr.Logge
 	log := logger.WithName("Deploy").WithName("Create").WithValues("action", Prefix)
 	log.V(1).Info("creating")
 
-	if in.Play.Spec.External {
+	if in.Play.IsInternal() {
 		log.V(1).Info("skip")
 		return nil
 	}
