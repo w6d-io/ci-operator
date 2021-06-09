@@ -225,7 +225,7 @@ func (in *Play) commonValidation() field.ErrorList {
 func (in *Play) validateEnvironment() field.ErrorList {
 	var allErrs field.ErrorList
 	if !in.Spec.External {
-		if in.IsInternal() && in.Spec.Environment == "" {
+		if in.IsDoDeploy() && in.Spec.Environment == "" {
 			allErrs = append(allErrs,
 				field.Invalid(field.NewPath("spec").Child("environment"),
 					in.Spec.Environment,
@@ -235,7 +235,7 @@ func (in *Play) validateEnvironment() field.ErrorList {
 	return allErrs
 }
 
-func (in *Play) IsInternal() bool {
+func (in *Play) IsDoDeploy() bool {
 	if !in.Spec.External {
 		for i := range in.Spec.Tasks {
 			for t := range in.Spec.Tasks[i] {
