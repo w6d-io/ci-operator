@@ -17,6 +17,7 @@ package secrets_test
 
 import (
 	"context"
+	"github.com/w6d-io/ci-operator/internal/util"
 	"testing"
 
 	"github.com/google/uuid"
@@ -86,7 +87,7 @@ var _ = BeforeSuite(func(done Done) {
 
 	correlationID := uuid.New().String()
 	ctx = context.Background()
-	ctx = context.WithValue(ctx, "correlation_id", correlationID)
+	ctx = util.NewCorrelationIDContext(ctx, correlationID)
 
 	close(done)
 }, 60)

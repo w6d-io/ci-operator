@@ -23,6 +23,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/k8s/configmap"
+	"github.com/w6d-io/ci-operator/internal/util"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -160,8 +161,8 @@ dockerSecret:
 
 // GetValues builds the values from the template from Play resource
 func (in *Templates) GetValues(ctx context.Context, out *bytes.Buffer, logger logr.Logger) error {
-	correlationID := ctx.Value("correlation_id")
-	if correlationID != nil {
+	correlationID, ok := util.GetCorrelationIDFromContext(ctx)
+	if ok {
 		logger = logger.WithValues("correlation_id", correlationID)
 	}
 	tpl := LookupOrDefaultValues(ctx, in.Client, "deploy", HelmValuesTemplate)

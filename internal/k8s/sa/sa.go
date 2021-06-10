@@ -30,7 +30,7 @@ import (
 
 // Update adds the secret reference in the service account
 func Update(ctx context.Context, name string, nn types.NamespacedName, r client.Client) error {
-	correlationID := ctx.Value("correlation_id")
+	correlationID, _ := util.GetCorrelationIDFromContext(ctx)
 	log := ctrl.Log.WithValues("correlation_id", correlationID, "action", "service-account").
 		WithName("controllers").
 		WithName("Play").

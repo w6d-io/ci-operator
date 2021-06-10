@@ -19,6 +19,7 @@ import (
 	"context"
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	"github.com/w6d-io/ci-operator/internal/util"
 	"path/filepath"
 	"testing"
 
@@ -93,7 +94,7 @@ var _ = BeforeSuite(func(done Done) {
 
 	correlationID := uuid.New().String()
 	ctx = context.Background()
-	ctx = context.WithValue(ctx, "correlation_id", correlationID)
+	ctx = util.NewCorrelationIDContext(ctx, correlationID)
 
 	close(done)
 }, 60)
