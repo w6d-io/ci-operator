@@ -8,7 +8,7 @@
 [![GitHub](https://img.shields.io/github/license/w6d-io/ci-operator?style=flat)](https://github.com/w6d-io/ci-operator/blob/v0.11.1/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/w6d-io/ci-operator.svg)](https://github.com/w6d-io/ci-operator/issues)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/w6d-io/ci-operator.svg)](https://github.com/w6d-io/ci-operator/pulls)
-
+ 
 CI Operator is a kubernetes CRD base on [Tekton Pipeline](https://github.com/tektoncd/pipeline).
 
 CI Operator targets is to easily create pipeline CI/CD by using [Tekton Pipeline](https://github.com/tektoncd/pipeline).
