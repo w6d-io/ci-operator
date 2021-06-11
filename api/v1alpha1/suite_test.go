@@ -17,6 +17,7 @@ package v1alpha1_test
 
 import (
 	"context"
+	"github.com/w6d-io/ci-operator/internal/util"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"testing"
 
@@ -86,7 +87,7 @@ var _ = BeforeSuite(func(done Done) {
 
 	correlationID := uuid.New().String()
 	ctx = context.Background()
-	ctx = context.WithValue(ctx, "correlation_id", correlationID)
+	ctx = util.NewCorrelationIDContext(ctx, correlationID)
 
 	close(done)
 }, 60)

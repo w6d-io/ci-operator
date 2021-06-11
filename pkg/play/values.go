@@ -25,12 +25,13 @@ import (
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/minio"
+	"github.com/w6d-io/ci-operator/internal/util"
 	"github.com/w6d-io/ci-operator/internal/values"
 )
 
 func (wf *WFType) CreateValues(ctx context.Context, p *ci.Play, logger logr.Logger) error {
-	correlationID := ctx.Value("correlation_id")
-	if correlationID != nil {
+	correlationID, ok := util.GetCorrelationIDFromContext(ctx)
+	if ok {
 		logger = logger.WithValues("correlation_id", correlationID)
 	}
 	log := logger.WithName("CreateValues")

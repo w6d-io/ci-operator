@@ -72,8 +72,8 @@ type PlayReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *PlayReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	correlationID := uuid.New().String()
-	ctx = context.WithValue(context.Background(), "correlation_id", correlationID)
-	ctx = context.WithValue(ctx, "play", req.NamespacedName.String())
+	ctx = util.NewCorrelationIDContext(ctx, correlationID)
+	ctx = util.NewPlayContext(ctx, req.NamespacedName.String())
 	logger := r.Log.WithValues("play", req.NamespacedName, "correlation_id", correlationID)
 	log := logger.WithName("Reconcile")
 	// get the play resource
@@ -186,8 +186,8 @@ func (r *PlayReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 // UpdateStatus set the status of tekton resource state
 func (r *PlayReconciler) UpdateStatus(ctx context.Context, p *ci.Play, state ci.State, message string) error {
-	correlationID := ctx.Value("correlation_id")
-	nn := ctx.Value("play")
+	correlationID, _ := util.GetCorrelationIDFromContext(ctx)
+	nn, _ := util.GetPlayFromContext(ctx)
 	log := ctrl.Log.WithName("Reconcile").WithName("UpdateStatus").WithValues("correlation_id", correlationID, "play", nn)
 	var err error
 	log.V(1).Info("update status")
@@ -228,8 +228,8 @@ func (r *PlayReconciler) GetStatus(state ci.State) metav1.ConditionStatus {
 
 // UpdateName set the status of tekton resource state
 func (r *PlayReconciler) UpdateName(ctx context.Context, p *ci.Play, name string) error {
-	correlationID := ctx.Value("correlation_id")
-	nn := ctx.Value("play")
+	correlationID, _ := util.GetCorrelationIDFromContext(ctx)
+	nn, _ := util.GetPlayFromContext(ctx)
 	log := ctrl.Log.WithName("Reconcile").WithName("UpdateName").WithValues("correlation_id", correlationID, "play", nn)
 	var err error
 	log.V(1).Info("update name")

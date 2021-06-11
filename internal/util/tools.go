@@ -259,3 +259,32 @@ func ParseHostURL(host string) (*url.URL, error) {
 		Path:   basePath,
 	}, nil
 }
+
+type contextKey int
+
+const (
+	contextKeyCorrelationID contextKey = iota
+	contextKeyPlay
+)
+
+// NewCorrelationIDContext returns a context with correlation id
+func NewCorrelationIDContext(ctx context.Context, correlationID string) context.Context {
+	return context.WithValue(ctx, contextKeyCorrelationID, correlationID)
+}
+
+// GetCorrelationIDFromContext gets the value from the context.
+func GetCorrelationIDFromContext(ctx context.Context) (string, bool) {
+	caller, ok := ctx.Value(contextKeyCorrelationID).(string)
+	return caller, ok
+}
+
+// NewPlayContext returns a context with correlation id
+func NewPlayContext(ctx context.Context, value string) context.Context {
+	return context.WithValue(ctx, contextKeyPlay, value)
+}
+
+// GetPlayFromContext gets the value from the context.
+func GetPlayFromContext(ctx context.Context) (string, bool) {
+	caller, ok := ctx.Value(contextKeyPlay).(string)
+	return caller, ok
+}

@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	"github.com/w6d-io/ci-operator/internal/util"
 	"strings"
 	"text/template"
 
@@ -41,8 +42,8 @@ var (
 
 func (in *Templates) PrintTemplate(ctx context.Context, out *bytes.Buffer, name string, templ string) error {
 	log := ValueLog.WithName("PrintTemplate")
-	correlationID := ctx.Value("correlation_id")
-	if correlationID != nil {
+	correlationID, ok := util.GetCorrelationIDFromContext(ctx)
+	if ok {
 		log = log.WithValues("correlation_id", correlationID)
 	}
 	log.V(1).Info("templating")
