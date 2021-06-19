@@ -56,16 +56,9 @@ func Update(ctx context.Context, name string, nn types.NamespacedName, r client.
 				corev1.ObjectReference{Name: name})
 			log.V(1).Info("update sa", "content", fmt.Sprintf("%v",
 				util.GetObjectContain(resource)))
-			if err := r.Update(ctx, resource); err != nil {
-				log.Error(err, "fail to update service account (retry)")
-				return err
-			}
-			return nil
+			return r.Update(ctx, resource)
 		})
-		if err != nil {
-			log.Error(err, "fail to update service account")
-			return err
-		}
+		return err
 	}
 	return nil
 }

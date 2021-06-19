@@ -18,9 +18,12 @@ Created on 16/12/2020
 package pipelinerun
 
 import (
+	"context"
+	"github.com/go-logr/logr"
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type PipelineRun struct {
@@ -41,3 +44,19 @@ type PipelineRun struct {
 const (
 	Prefix string = "pipeline-run"
 )
+
+type Interface interface {
+	SetBuild(int, logr.Logger) error
+	SetClean(int, logr.Logger) error
+	SetDeploy(int, logr.Logger) error
+	SetE2ETest(int, logr.Logger) error
+	SetGeneric(int, ci.TaskType, logr.Logger) error
+	SetIntTest(int, logr.Logger) error
+	SetUnitTest(int, logr.Logger) error
+
+	Parse(logr.Logger) error
+	GetNamespace(ci.Task) string
+	Create(context.Context, client.Client, logr.Logger) error
+}
+
+var _ Interface = &PipelineRun{}

@@ -18,16 +18,17 @@ package task_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/k8s/secrets"
-	corev1 "k8s.io/api/core/v1"
+	"github.com/w6d-io/ci-operator/internal/tekton/task"
 
+	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
-
-	"github.com/w6d-io/ci-operator/internal/tekton/task"
 )
 
 var _ = Describe("Task", func() {
@@ -241,6 +242,27 @@ var _ = Describe("Task", func() {
 			_, _, _, err = s.GetSteps(ctx, ctrl.Log)
 			Expect(err).To(Succeed())
 
+			By("set fake client")
+			s.Client = fake.NewClientBuilder().Build()
+
+			_, _, _, err = s.GetSteps(ctx, ctrl.Log)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("no kind is registered for the type v1alpha1.StepList"))
+
+			By("test get params")
+			params := []ci.ParamSpec{
+				{
+					ParamSpec: tkn.ParamSpec{
+						Name:        "test1",
+						Type:        "string",
+						Description: "unit test get params",
+						Default: &tkn.ArrayOrString{
+							StringVal: "no default",
+						},
+					},
+				},
+			}
+			Expect(len(s.GetParams(params))).To(Equal(1))
 		})
 	})
 })

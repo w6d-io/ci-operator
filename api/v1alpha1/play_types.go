@@ -55,6 +55,11 @@ type PlaySpec struct {
 	// Commit contains all git information
 	Commit Commit `json:"commit,omitempty"`
 
+	// PipelineNamespace is the namespace where the pipeline will run
+	// default : <pipeline_prefix>-<project_id>
+	// +optional
+	PipelineNamespace string `json:"pipeline_namespace"`
+
 	// Domain contains the url for exposition
 	// +optional
 	Domain string `json:"domain,omitempty"`
@@ -264,17 +269,11 @@ const (
 
 	// TaskTypes
 
-	// GitLeaks is the task type for git leaks jobs"
-	GitLeaks TaskType = "git-leaks"
-
 	// E2ETests is the task type for unit tests"
 	E2ETests TaskType = "e2e-tests"
 
 	// UnitTests is the task type for unit tests"
 	UnitTests TaskType = "unit-tests"
-
-	// Sonar is the task type for Sonar scan"
-	Sonar TaskType = "sonar"
 
 	// Build is the task type for build"
 	Build TaskType = "build"
@@ -310,9 +309,6 @@ const (
 
 	// Errored means that at least one tekton resource couldn't be created
 	Errored State = "Errored"
-
-	// Unknown means that the controller just begun to run
-	//Unknown State = "Unknown"
 
 	// Annotations
 

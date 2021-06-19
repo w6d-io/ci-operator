@@ -77,9 +77,5 @@ func (in *CI) Create(ctx context.Context, r client.Client, logger logr.Logger) e
 	log.V(1).Info(resource.Kind, "content", fmt.Sprintf("%v",
 		util.GetObjectContain(resource)))
 
-	if err := r.Create(ctx, resource); err != nil {
-		log.Error(err, "create")
-		return err
-	}
-	return nil
+	return r.Create(ctx, resource)
 }

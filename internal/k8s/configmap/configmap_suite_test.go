@@ -17,17 +17,23 @@ Created on 31/03/2021
 package configmap_test
 
 import (
-	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
-	"k8s.io/client-go/kubernetes/scheme"
+	"context"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"testing"
+
+	"github.com/google/uuid"
+	"github.com/w6d-io/ci-operator/internal/util"
+	"go.uber.org/zap/zapcore"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"testing"
-
-	"go.uber.org/zap/zapcore"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	zapraw "go.uber.org/zap"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	. "github.com/onsi/ginkgo"
@@ -41,7 +47,10 @@ func Test(t *testing.T) {
 
 var cfg *rest.Config
 var k8sClient client.Client
+var k8sFakeClient client.Client
 var testEnv *envtest.Environment
+var ctx context.Context
+var scheme = runtime.NewScheme()
 
 var _ = BeforeSuite(func(done Done) {
 	encoder := zapcore.EncoderConfig{
@@ -63,7 +72,7 @@ var _ = BeforeSuite(func(done Done) {
 		Development:     true,
 		StacktraceLevel: zapcore.PanicLevel,
 	}
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts), zap.RawZapOpts(zapraw.AddCaller())))
+	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts), zap.RawZapOpts(zapraw.AddCaller(), zapraw.AddCallerSkip(-1))))
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
 		ErrorIfCRDPathMissing: false,
@@ -74,12 +83,18 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(cfg).ToNot(BeNil())
 
-	err = tkn.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+	utilruntime.Must(tkn.AddToScheme(scheme))
 
-	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
+	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme})
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
+
+	k8sFakeClient = fake.NewClientBuilder().WithScheme(scheme).Build()
+
+	correlationID := uuid.New().String()
+	ctx = context.Background()
+	ctx = util.NewCorrelationIDContext(ctx, correlationID)
 
 	close(done)
 }, 60)

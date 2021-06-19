@@ -4,3 +4,5 @@ ingress:
   class: nginx
   issuer: letsencrypt-prod
 deploy_prefix: "test"
+envPrefix: "W6D"
+pipeline_prefix: "p6e-cx"

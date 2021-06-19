@@ -30,12 +30,17 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/ghodss/yaml"
-	"github.com/w6d-io/ci-operator/pkg/webhook"
 	"github.com/w6d-io/hook"
 )
 
 var (
 	configLog = ctrl.Log.WithName("config")
+)
+
+const (
+	PipelinePrefixDefault = "p6e-cx"
+	DeployPrefixDefault   = "cx"
+	EnvPrefixDefault      = "W6D"
 )
 
 // New get the filename and fill Config struct
@@ -60,9 +65,6 @@ func New(filename string) error {
 			EmptyDir: &corev1.EmptyDirVolumeSource{},
 		}
 	}
-	if config.DeployPrefix == "" {
-		config.DeployPrefix = "cx"
-	}
 	for _, wh := range config.Webhooks {
 		if wh.URLRaw != "" {
 			if err := hook.Subscribe(wh.URLRaw, wh.Scope); err != nil {
@@ -70,9 +72,6 @@ func New(filename string) error {
 				return err
 			}
 		}
-	}
-	if config.EnvPrefix == "" {
-		config.EnvPrefix = "W6D"
 	}
 	return nil
 }
@@ -145,9 +144,30 @@ func GetClusterRole() string {
 	return config.ClusterRole
 }
 
+// GetPipelinePrefix returns the prefix to use for deploy namespace name
+func GetPipelinePrefix() string {
+	if config.PipelinePrefix == "" {
+		return PipelinePrefixDefault
+	}
+	return config.PipelinePrefix
+}
+
+// SetPipelinePrefix record the pipeline prefix
+func SetPipelinePrefix(prefix string) {
+	config.PipelinePrefix = prefix
+}
+
 // GetDeployPrefix returns the prefix to use for deploy namespace name
 func GetDeployPrefix() string {
+	if config.DeployPrefix == "" {
+		return DeployPrefixDefault
+	}
 	return config.DeployPrefix
+}
+
+// SetDeployPrefix record the prefix to use for deploy namespace name
+func SetDeployPrefix(prefix string) {
+	config.DeployPrefix = prefix
 }
 
 // GetMinio return the Minio structure
@@ -212,7 +232,7 @@ func SetNamespace(namespace string) {
 }
 
 // GetWebhooks returns the list of url where to send the event
-func GetWebhooks() []webhook.Webhook {
+func GetWebhooks() []Webhook {
 	return config.Webhooks
 }
 
@@ -261,6 +281,10 @@ func SetEnvPrefix(prefix string) {
 
 // GetEnvPrefix return the prefix for variable environment
 func GetEnvPrefix(elements ...string) string {
+	prefix := EnvPrefixDefault
+	if config.EnvPrefix != "" {
+		prefix = config.EnvPrefix
+	}
 	toAdd := strings.Join(elements, "_")
 	if toAdd != "" {
 		//if toAdd[0] != '_' {
@@ -270,7 +294,7 @@ func GetEnvPrefix(elements ...string) string {
 			toAdd += "_"
 		}
 	}
-	return ToSnakeUpperCase(config.EnvPrefix + "_" + toAdd)
+	return ToSnakeUpperCase(prefix + "_" + toAdd)
 }
 
 //var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")

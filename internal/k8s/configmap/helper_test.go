@@ -17,29 +17,26 @@ Created on 31/03/2021
 package configmap_test
 
 import (
-	"context"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/k8s/configmap"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var _ = Describe("Configmap", func() {
 	Context("call get content", func() {
-		BeforeEach(func() {
-		})
-		AfterEach(func() {
-		})
 		It("get empty string with nil parameter", func() {
+			By("All params is nil")
 			str := configmap.GetContentFromKeySelector(nil, nil, nil)
 			Expect(str).To(Equal(""))
+
 		})
 		It("", func() {
 			var err error
 			config.SetNamespace("default")
-			ctx := context.WithValue(context.Background(), "correlation_id", "unit-test")
 			cm := &corev1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "unit-test",
@@ -57,8 +54,20 @@ var _ = Describe("Configmap", func() {
 				},
 				Key: "nonexistent",
 			}
-			str := configmap.GetContentFromKeySelector(context.Background(), k8sClient, c)
+
+			By("use fake client")
+			str := configmap.GetContentFromKeySelector(ctx, k8sFakeClient, c)
 			Expect(str).To(Equal(""))
+
+			By("with nonexistent key")
+			str = configmap.GetContentFromKeySelector(ctx, k8sClient, c)
+			Expect(str).To(Equal(""))
+
+			By("with existent key")
+			c.Key = "values.yaml"
+			str = configmap.GetContentFromKeySelector(ctx, k8sClient, c)
+			Expect(str).To(Equal("Test"))
+
 			err = k8sClient.Delete(ctx, cm)
 			Expect(err).To(Succeed())
 		})

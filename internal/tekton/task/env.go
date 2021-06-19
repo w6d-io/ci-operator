@@ -67,6 +67,10 @@ func BuildCommonPredefinedEnv(play *ci.Play) (envVars []corev1.EnvVar) {
 		Name:  config.GetEnvPrefix("commit") + "SHA",
 		Value: play.Spec.Commit.SHA,
 	})
+	envVars = append(envVars, corev1.EnvVar{
+		Name:  config.GetEnvPrefix("commit") + "BEFORE_SHA",
+		Value: play.Spec.Commit.BeforeSHA,
+	})
 	if len(play.Spec.Commit.SHA) >= 8 {
 		envVars = append(envVars, corev1.EnvVar{
 			Name:  config.GetEnvPrefix("commit") + "SHORT_SHA",

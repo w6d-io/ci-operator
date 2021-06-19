@@ -17,7 +17,10 @@ package v1alpha1_test
 
 import (
 	"context"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal/util"
+	"path/filepath"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"testing"
 
@@ -40,7 +43,10 @@ import (
 
 func Test(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, " Suite")
+
+	RunSpecsWithDefaultAndCustomReporters(t,
+		"Controller Suite",
+		[]Reporter{printer.NewlineReporter{}})
 }
 
 var cfg *rest.Config
@@ -70,9 +76,13 @@ var _ = BeforeSuite(func(done Done) {
 		Development:     true,
 		StacktraceLevel: zapcore.PanicLevel,
 	}
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts), zap.RawZapOpts(zapraw.AddCaller(), zapraw.AddCallerSkip(-1))))
+	ctrl.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseFlagOptions(&opts), zap.RawZapOpts(zapraw.AddCaller(), zapraw.AddCallerSkip(-1))))
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
+		CRDDirectoryPaths: []string{
+			filepath.Join("..", "..", "config", "crd", "bases"),
+			filepath.Join("..", "..", "third_party", "tektoncd", "pipeline", "config"),
+		},
 		ErrorIfCRDPathMissing: false,
 	}
 
@@ -80,14 +90,28 @@ var _ = BeforeSuite(func(done Done) {
 	cfg, err = testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
 	Expect(cfg).ToNot(BeNil())
+	utilruntime.Must(ci.AddToScheme(scheme))
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme})
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
 
+	k8sManager, err = ctrl.NewManager(cfg, ctrl.Options{
+		Scheme:         scheme,
+		LeaderElection: false,
+	})
+	Expect(err).ToNot(HaveOccurred())
+
 	correlationID := uuid.New().String()
 	ctx = context.Background()
 	ctx = util.NewCorrelationIDContext(ctx, correlationID)
+	err = (&ci.Play{}).SetupWebhookWithManager(k8sManager)
+	Expect(err).ToNot(HaveOccurred())
+	go func() {
+		defer GinkgoRecover()
+		err = k8sManager.Start(ctrl.SetupSignalHandler())
+		Expect(err).To(HaveOccurred())
+	}()
 
 	close(done)
 }, 60)

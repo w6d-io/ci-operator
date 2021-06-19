@@ -20,6 +20,7 @@ package webhook
 import (
 	"fmt"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	"github.com/w6d-io/ci-operator/internal/config"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -56,8 +57,12 @@ func GetPayLoad(play *ci.Play) *PlayPayload {
 }
 
 func getCINamespacedName(prefix string, play *ci.Play) types.NamespacedName {
+	namespace := fmt.Sprintf("%s-%v", config.GetPipelinePrefix(), play.Spec.ProjectID)
+	if play.Spec.PipelineNamespace != "" {
+		namespace = play.Spec.PipelineNamespace
+	}
 	return types.NamespacedName{
 		Name:      fmt.Sprintf("%s-%v-%v", prefix, play.Spec.ProjectID, play.Spec.PipelineID),
-		Namespace: fmt.Sprintf("p6e-cx-%v", play.Spec.ProjectID),
+		Namespace: namespace,
 	}
 }

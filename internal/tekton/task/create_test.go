@@ -99,52 +99,6 @@ var _ = Describe("Task", func() {
 			err = t.Parse(ctx, ctrl.Log)
 			Expect(err).To(Succeed())
 
-			// SONAR
-			t.Play.Spec.Tasks = []map[ci.TaskType]ci.Task{
-				{
-					ci.Sonar: ci.Task{
-						Script: ci.Script{
-							"echo", "toto",
-						},
-					},
-				},
-			}
-			t.Play.Spec.ProjectID = 41
-			t.Play.Namespace = "p6e-cx-41"
-			err = t.Parse(ctx, ctrl.Log)
-			Expect(err).ToNot(Succeed())
-			By("Set namespace")
-			config.SetNamespace("p6e-cx-41")
-			Expect(err.Error()).To(Equal("no step found for sonar"))
-			By("Create namespace")
-			ns = &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "p6e-cx-41",
-				},
-			}
-			Expect(k8sClient.Create(ctx, ns)).To(Succeed())
-			By("Create sonar step")
-			step = &ci.Step{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "step-sonar-1",
-					Namespace: "p6e-cx-41",
-					Annotations: map[string]string{
-						ci.AnnotationPackage:  "custom",
-						ci.AnnotationLanguage: "bash",
-						ci.AnnotationTask:     ci.Sonar.String(),
-						ci.AnnotationOrder:    "0",
-					},
-				},
-				Step: ci.StepSpec{
-					Step: tkn.Step{
-						Script: "echo test",
-					},
-				},
-			}
-			Expect(k8sClient.Create(ctx, step)).To(Succeed())
-			err = t.Parse(ctx, ctrl.Log)
-			Expect(err).To(Succeed())
-
 			// UnitTest
 			By("Create namespace")
 			ns = &corev1.Namespace{
@@ -368,6 +322,70 @@ var _ = Describe("Task", func() {
 				Step: ci.StepSpec{
 					Step: tkn.Step{
 						Script: "echo test",
+					},
+				},
+			}
+			Expect(k8sClient.Create(ctx, step)).To(Succeed())
+			err = t.Parse(ctx, ctrl.Log)
+			Expect(err).To(Succeed())
+
+			// Generic
+			By("Create namespace")
+			ns = &corev1.Namespace{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "p6e-cx-47",
+				},
+			}
+			Expect(k8sClient.Create(ctx, ns)).To(Succeed())
+			t.Play.Spec.Tasks = []map[ci.TaskType]ci.Task{
+				{
+					"git-leaks": ci.Task{
+						Script: ci.Script{
+							"echo", "toto",
+						},
+					},
+				},
+			}
+			t.Play.Spec.ProjectID = 47
+			t.Play.Namespace = "p6e-cx-47"
+			t.Params = map[string][]ci.ParamSpec{
+				"test": {
+					ci.ParamSpec{
+						ParamSpec: tkn.ParamSpec{
+							Name: "unit-test",
+						},
+					},
+				},
+			}
+			err = t.Parse(ctx, ctrl.Log)
+			Expect(err).ToNot(Succeed())
+
+			By("Set namespace")
+			config.SetNamespace("p6e-cx-47")
+			Expect(err.Error()).To(Equal("no step found for git-leaks"))
+			By("Create git-leaks test step")
+			step = &ci.Step{
+				ObjectMeta: metav1.ObjectMeta{
+					GenerateName: "step-git-leaks",
+					Namespace:    "p6e-cx-47",
+					Annotations: map[string]string{
+						ci.AnnotationKind:  "generic",
+						ci.AnnotationOrder: "0",
+						ci.AnnotationTask:  "git-leaks",
+					},
+				},
+				Params: []ci.ParamSpec{
+					{
+						ParamSpec: tkn.ParamSpec{},
+					},
+				},
+				Step: ci.StepSpec{
+					Step: tkn.Step{
+						Container: corev1.Container{
+							Name:  "git-leaks",
+							Image: "w6dio/docker-gitleaks:v0.0.6",
+						},
+						Script: "echo git-leaks",
 					},
 				},
 			}

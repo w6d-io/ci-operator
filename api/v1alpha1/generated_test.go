@@ -287,6 +287,9 @@ var _ = Describe("DeepCopy", func() {
 			Params: []v1alpha1.ParamSpec{
 				{},
 			},
+			Sidecar: []tkn.Sidecar{
+				{},
+			},
 		}
 		out := &v1alpha1.Step{}
 

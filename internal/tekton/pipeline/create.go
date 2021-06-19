@@ -47,8 +47,6 @@ func (p *Pipeline) Parse(logger logr.Logger) error {
 			case ci.Build:
 				p.Pos = pos
 				_ = p.SetPipelineBuild(logger)
-			case ci.Sonar:
-				_ = p.SetPipelineSonar(logger)
 			case ci.Deploy:
 				_ = p.SetPipelineDeploy(logger)
 			case ci.IntegrationTests:

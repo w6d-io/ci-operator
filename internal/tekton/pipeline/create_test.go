@@ -56,9 +56,6 @@ var _ = Describe("Create", func() {
 								},
 							},
 							{
-								ci.Sonar: ci.Task{},
-							},
-							{
 								ci.Deploy: ci.Task{},
 							},
 							{
@@ -103,9 +100,6 @@ var _ = Describe("Create", func() {
 									},
 									Docker: ci.Docker{},
 								},
-							},
-							{
-								ci.Sonar: ci.Task{},
 							},
 							{
 								ci.Deploy: ci.Task{},

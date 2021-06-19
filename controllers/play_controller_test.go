@@ -16,24 +16,26 @@ Created on 20/04/2021
 package controllers_test
 
 import (
+	"time"
+
 	"github.com/go-logr/logr"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	"github.com/w6d-io/ci-operator/controllers"
 	"github.com/w6d-io/ci-operator/internal/minio"
 	"github.com/w6d-io/ci-operator/internal/util"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/types"
 	"knative.dev/pkg/apis"
 	"knative.dev/pkg/apis/duck/v1beta1"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"time"
 
+	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Play controller", func() {
@@ -209,6 +211,10 @@ var _ = Describe("Play controller", func() {
 			_, err = r.Reconcile(ctx, req)
 			Expect(err).To(HaveOccurred())
 			//Expect(err.Error()).To(Equal("xyz"))
+		})
+		It("", func() {
+			r := &controllers.PlayReconciler{}
+			Expect(r.GetStatus(ci.Succeeded)).To(Equal(metav1.ConditionTrue))
 		})
 	})
 })

@@ -53,12 +53,13 @@ var _ = Describe("Config", func() {
 						Name:     "ws",
 						EmptyDir: &corev1.EmptyDirVolumeSource{},
 					},
-					DeployPrefix: "test",
-					EnvPrefix:    "W6D",
+					DeployPrefix:   "test",
+					PipelinePrefix: "p6e-cx",
+					EnvPrefix:      "W6D",
 				}))
 			})
 			It("GetConfigRaw function", func() {
-				Expect(len(config.GetConfigRaw())).Should(Equal(12))
+				Expect(len(config.GetConfigRaw())).Should(Equal(13))
 			})
 			It("GetClusterRole function", func() {
 				Expect(config.GetClusterRole()).Should(Equal(""))
@@ -176,6 +177,16 @@ var _ = Describe("Config", func() {
 
 				By("get prefix with arguments")
 				Expect(config.GetEnvPrefix("git-leaks", "build")).To(Equal("TEST_GIT_LEAKS_BUILD_"))
+			})
+			It("pipeline prefix", func() {
+				By("set pipeline prefix")
+				config.SetPipelinePrefix("test-prefix")
+				Expect(config.GetPipelinePrefix()).To(Equal("test-prefix"))
+			})
+			It("deploy prefix", func() {
+				By("set pipeline prefix")
+				config.SetDeployPrefix("deploy-prefix")
+				Expect(config.GetDeployPrefix()).To(Equal("deploy-prefix"))
 			})
 		})
 	})

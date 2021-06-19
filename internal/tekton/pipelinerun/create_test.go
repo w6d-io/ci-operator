@@ -70,7 +70,6 @@ var _ = Describe("Create", func() {
 											"test",
 										},
 									},
-									ci.Sonar: ci.Task{},
 									ci.Deploy: ci.Task{
 										Variables: map[string]string{
 											"TEST": "Test",
