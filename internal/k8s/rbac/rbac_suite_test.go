@@ -48,7 +48,7 @@ var testEnv *envtest.Environment
 var ctx context.Context
 var scheme = runtime.NewScheme()
 
-var _ = BeforeSuite(func(done Done) {
+var _ = BeforeSuite(func() {
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
 		ErrorIfCRDPathMissing: false,
@@ -75,7 +75,7 @@ var _ = BeforeSuite(func(done Done) {
 	ctx = context.Background()
 	ctx = util.NewCorrelationIDContext(ctx, correlationID)
 
-	close(done)
+	
 }, 60)
 
 var _ = AfterSuite(func() {

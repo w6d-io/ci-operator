@@ -32,10 +32,6 @@ import (
 
 var _ = Describe("Task", func() {
 	Context("Generic", func() {
-		BeforeEach(func() {
-		})
-		AfterEach(func() {
-		})
 		It("Create a generic task", func() {
 			var err error
 			By("Build a task")

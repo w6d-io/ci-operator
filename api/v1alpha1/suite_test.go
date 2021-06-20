@@ -20,7 +20,6 @@ import (
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal/util"
 	"path/filepath"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"testing"
 
@@ -43,10 +42,7 @@ import (
 
 func Test(t *testing.T) {
 	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Controller Suite",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "Controller Suite")
 }
 
 var cfg *rest.Config
@@ -56,7 +52,7 @@ var testEnv *envtest.Environment
 var ctx context.Context
 var scheme = runtime.NewScheme()
 
-var _ = BeforeSuite(func(done Done) {
+var _ = BeforeSuite(func() {
 	encoder := zapcore.EncoderConfig{
 		// Keys can be anything except the empty string.
 		TimeKey:        "T",
@@ -113,7 +109,7 @@ var _ = BeforeSuite(func(done Done) {
 		Expect(err).To(HaveOccurred())
 	}()
 
-	close(done)
+	//close(done)
 }, 60)
 
 var _ = AfterSuite(func() {

@@ -43,7 +43,7 @@ var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
 
-var _ = BeforeSuite(func(done Done) {
+var _ = BeforeSuite(func() {
 
 	encoder := zapcore.EncoderConfig{
 		// Keys can be anything except the empty string.
@@ -86,7 +86,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
 
-	close(done)
+	
 }, 60)
 
 var _ = AfterSuite(func() {
