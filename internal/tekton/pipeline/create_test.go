@@ -18,6 +18,7 @@ package pipeline_test
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/tekton/pipeline"
@@ -116,10 +117,11 @@ var _ = Describe("Create", func() {
 						},
 					},
 				},
+				Scheme: runtime.NewScheme(),
 			}
 			err := p.Create(context.TODO(), k8sClient, ctrl.Log)
 			Expect(err).ToNot(Succeed())
-			Expect(err.Error()).To(ContainSubstring("cross-namespace"))
+			Expect(err.Error()).To(ContainSubstring("no kind is registered for the type v1alpha1.Play"))
 
 			By("set a nonexistent namespace")
 			config.SetNamespace("p6e-cx-1")

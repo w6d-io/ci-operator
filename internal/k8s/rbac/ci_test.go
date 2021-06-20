@@ -17,13 +17,11 @@ Created on 03/03/2021
 package rbac_test
 
 import (
-	"context"
 	"github.com/w6d-io/ci-operator/internal"
 	"github.com/w6d-io/ci-operator/internal/config"
 	"github.com/w6d-io/ci-operator/internal/k8s/rbac"
 	"github.com/w6d-io/ci-operator/internal/util"
-	"k8s.io/client-go/kubernetes/scheme"
-	ctrl "sigs.k8s.io/controller-runtime"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -31,6 +29,7 @@ import (
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var _ = Describe("CI", func() {
@@ -55,28 +54,37 @@ var _ = Describe("CI", func() {
 					Name: util.GetCINamespacedName(rbac.Prefix, play).Namespace,
 				},
 			}
-			_ = k8sClient.Create(context.TODO(), ns)
+			_ = k8sClient.Create(ctx, ns)
 			err := config.New("testdata/config.yaml")
 			Expect(err).To(Succeed())
 			c = rbac.CI{
 				WorkFlowStruct: internal.WorkFlowStruct{
-					Play: play,
+					Play:   play,
+					Scheme: scheme,
 				},
 			}
 		})
 		AfterEach(func() {
 		})
 		Context("we try", func() {
-			It("fails due to crossed namespace creation", func() {
+			It("fails due to kind missing", func() {
 				play.Namespace = "default"
-				err := c.Create(context.TODO(), k8sClient, ctrl.Log)
+				c.Scheme = runtime.NewScheme()
+				err := c.Create(ctx, k8sClient, ctrl.Log)
 				Expect(err).ToNot(Succeed())
-				Expect(err.Error()).To(ContainSubstring("cross-namespace"))
+				Expect(err.Error()).To(ContainSubstring("no kind is registered for the type v1alpha1.Play"))
 			})
 			It("succeed creation", func() {
-				play.Namespace = "p6e-cx-1"
-				c.Scheme = scheme.Scheme
-				err := c.Create(context.TODO(), k8sClient, ctrl.Log)
+				By("create namespace")
+				ns := &corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{
+						GenerateName: "p6e-cx",
+					},
+				}
+				Expect(k8sClient.Create(ctx, ns)).To(Succeed())
+
+				play.Namespace = ns.GetName()
+				err := c.Create(ctx, k8sClient, ctrl.Log)
 				Expect(err).To(Succeed())
 			})
 		})

@@ -25,6 +25,7 @@ import (
 	"github.com/w6d-io/ci-operator/internal/util"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	. "github.com/onsi/ginkgo"
@@ -112,9 +113,10 @@ var _ = Describe("Create", func() {
 			Expect(err).To(Succeed())
 		})
 		It("failed creation", func() {
+			var err error
 			p := pipelinerun.PipelineRun{
 				WorkFlowStruct: internal.WorkFlowStruct{
-					Scheme: scheme,
+					Scheme: runtime.NewScheme(),
 					Play: &ci.Play{
 						ObjectMeta: metav1.ObjectMeta{
 							Name:      "test-create-1",
@@ -150,11 +152,13 @@ var _ = Describe("Create", func() {
 					},
 				},
 			}
-			err := p.Create(context.TODO(), k8sClient, ctrl.Log)
+			err = p.Create(context.TODO(), k8sClient, ctrl.Log)
 			Expect(err).ToNot(Succeed())
-			Expect(err.Error()).To(ContainSubstring("cross-namespace owner references"))
+			Expect(err.Error()).To(ContainSubstring("no kind is registered for the type v1alpha1.Play"))
 
-			By("Create in nonexist namespace")
+			By("Set scheme")
+			p.Scheme = scheme
+			By("Do creation in non-exist namespace")
 			p.Play.Namespace = "p6e-cx-30"
 			p.Play.Spec.ProjectID = 30
 			err = p.Create(context.TODO(), k8sClient, ctrl.Log)

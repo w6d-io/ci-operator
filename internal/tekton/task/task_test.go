@@ -25,6 +25,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
@@ -156,14 +157,23 @@ var _ = Describe("Task", func() {
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(Equal(`namespaces "p6e-cx-80" not found`))
 
-			t.Play.Namespace = "default"
-			f = t.Creates[0]
+			//t.Play.Namespace = "default"
+			t.Play.Namespace = ns.GetName()
+			g := &task.GenericTask{
+				Meta: task.Meta{
+					Steps:  []tkn.Step{},
+					Play:   t.Play,
+					Scheme: runtime.NewScheme(),
+				},
+				TaskType: "",
+				Params:   nil,
+			}
+			f = g.Create
 			err = f(ctx, k8sClient, ctrl.Log)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal(`cross-namespace owner references are disallowed, owner's namespace default, obj's namespace p6e-cx-80`))
+			Expect(err.Error()).To(ContainSubstring(`no kind is registered for the type v1alpha1.Play`))
 
-			t.Play.Namespace = ns.GetName()
-			t.Play.Spec.PipelineNamespace = ns.GetName()
+			t.Scheme = scheme
 			f = t.Creates[0]
 			Expect(f(ctx, k8sClient, ctrl.Log)).To(Succeed())
 

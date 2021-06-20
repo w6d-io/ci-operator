@@ -17,16 +17,21 @@ Created on 02/03/2021
 package rbac_test
 
 import (
+	"context"
+	"github.com/google/uuid"
 	"path/filepath"
 	"testing"
 
-	"k8s.io/client-go/kubernetes/scheme"
+	"github.com/w6d-io/ci-operator/internal/util"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
 	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -40,6 +45,8 @@ func TestRBAC(t *testing.T) {
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
+var ctx context.Context
+var scheme = runtime.NewScheme()
 
 var _ = BeforeSuite(func(done Done) {
 	By("bootstrapping test environment")
@@ -56,15 +63,17 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(cfg).ToNot(BeNil())
 
-	err = tkn.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
+	utilruntime.Must(ci.AddToScheme(scheme))
+	utilruntime.Must(tkn.AddToScheme(scheme))
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme})
 
-	err = ci.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
+
+	correlationID := uuid.New().String()
+	ctx = context.Background()
+	ctx = util.NewCorrelationIDContext(ctx, correlationID)
 
 	close(done)
 }, 60)

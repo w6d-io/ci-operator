@@ -38,8 +38,8 @@ var (
 )
 
 const (
-	DeployPrefixDefault   = "cx"
-	EnvPrefixDefault      = "W6D"
+	DeployPrefixDefault = "cx"
+	EnvPrefixDefault    = "W6D"
 )
 
 // New get the filename and fill Config struct
@@ -142,7 +142,6 @@ func GetConfigRaw() map[string]interface{} {
 func GetClusterRole() string {
 	return config.ClusterRole
 }
-
 
 // GetDeployPrefix returns the prefix to use for deploy namespace name
 func GetDeployPrefix() string {

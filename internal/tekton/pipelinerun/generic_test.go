@@ -17,6 +17,7 @@ Created on 02/03/2021
 package pipelinerun_test
 
 import (
+	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	"github.com/w6d-io/ci-operator/internal"
 	"github.com/w6d-io/ci-operator/internal/tekton/pipelinerun"
 
@@ -58,6 +59,16 @@ var _ = Describe("generic in pipeline run", func() {
 									},
 								},
 							},
+						},
+					},
+				},
+				GenericParams: map[string][]ci.ParamSpec{
+					"test": {
+						ci.ParamSpec{
+							ParamSpec: tkn.ParamSpec{
+								Name: "test",
+							},
+							Value: "value",
 						},
 					},
 				},

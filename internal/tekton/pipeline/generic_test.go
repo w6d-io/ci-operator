@@ -17,6 +17,7 @@ Created on 02/03/2021
 package pipeline_test
 
 import (
+	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	"github.com/w6d-io/ci-operator/internal/tekton/pipeline"
 
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
@@ -47,6 +48,16 @@ var _ = Describe("Set Generic", func() {
 									Docker: ci.Docker{},
 								},
 							},
+						},
+					},
+				},
+				GenericParams: map[string][]ci.ParamSpec{
+					"test": {
+						ci.ParamSpec{
+							ParamSpec: tkn.ParamSpec{
+								Name: "test",
+							},
+							Value: "value",
 						},
 					},
 				},
