@@ -58,6 +58,6 @@ func GetPayLoad(play *ci.Play) *PlayPayload {
 func getCINamespacedName(prefix string, play *ci.Play) types.NamespacedName {
 	return types.NamespacedName{
 		Name:      fmt.Sprintf("%s-%v-%v", prefix, play.Spec.ProjectID, play.Spec.PipelineID),
-		Namespace: fmt.Sprintf("p6e-cx-%v", play.Spec.ProjectID),
+		Namespace: play.GetNamespace(),
 	}
 }

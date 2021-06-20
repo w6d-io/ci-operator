@@ -40,13 +40,6 @@ func (t *Task) Parse(ctx context.Context, logger logr.Logger) error {
 				if err := t.Build(ctx, logger); err != nil {
 					return err
 				}
-			case ci.Sonar:
-				// TODO call methods for unitTest
-				log.WithValues("task", ci.Sonar).V(1).Info("launch")
-				t.Index = pos
-				if err := t.Sonar(ctx, logger); err != nil {
-					return err
-				}
 			case ci.UnitTests:
 				// TODO call methods for unitTest
 				log.WithValues("task", ci.UnitTests).V(1).Info("launch")

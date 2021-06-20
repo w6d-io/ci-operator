@@ -39,7 +39,7 @@ type GenericTask struct {
 	Params   []ci.ParamSpec
 }
 
-// Generic create git leaks tekton Task resource
+// Generic create a tekton Task resource
 func (t *Task) Generic(ctx context.Context, taskType ci.TaskType, logger logr.Logger) error {
 	log := logger.WithName("Generic").WithValues("task", taskType)
 	// get the steps

@@ -113,7 +113,6 @@ var _ CIInterface = &task.CleanTask{}
 var _ CIInterface = &task.DeployTask{}
 var _ CIInterface = &task.IntTestTask{}
 var _ CIInterface = &task.UnitTestTask{}
-var _ CIInterface = &task.SonarTask{}
 var _ CIInterface = &pipeline.Pipeline{}
 var _ CIInterface = &pipelinerun.PipelineRun{}
 

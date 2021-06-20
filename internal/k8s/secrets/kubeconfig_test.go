@@ -40,6 +40,10 @@ var _ = Describe("Kube config secret", func() {
 			s := &secrets.Secret{
 				WorkFlowStruct: internal.WorkFlowStruct{
 					Play: &ci.Play{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "play-kubeconfig-1",
+							Namespace: "p6e-cx-12",
+						},
 						Spec: ci.PlaySpec{
 							ProjectID:  12,
 							PipelineID: 1,

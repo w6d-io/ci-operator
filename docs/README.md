@@ -53,6 +53,7 @@ Volume: # volume will be added in the pipeline resource. This is what will be us
       resources:
         requests:
           storage: 2Gi
+pipeline_prefix: p6e-cx
 values:
   deploy: # template to use for deployment instead of the on include in the code
     name: ci-operator-template

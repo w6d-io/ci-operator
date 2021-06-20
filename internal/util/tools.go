@@ -84,7 +84,7 @@ func IsPipelineRunning(pr tkn.PipelineRun) bool {
 
 // InNamespace return a client.InNamespace with pipeline namespace
 func InNamespace(play *ci.Play) client.InNamespace {
-	return client.InNamespace(fmt.Sprintf("p6e-cx-%v", play.Spec.ProjectID))
+	return client.InNamespace(play.GetNamespace())
 }
 
 // MatchingLabels return a client.MatchingLabels with pipeline labels
@@ -118,15 +118,16 @@ func IsPodExist(ctx context.Context, r client.Client, play *ci.Play) (bool, erro
 func GetCINamespacedName(prefix string, play *ci.Play) types.NamespacedName {
 	return types.NamespacedName{
 		Name:      fmt.Sprintf("%s-%v-%v", prefix, play.Spec.ProjectID, play.Spec.PipelineID),
-		Namespace: fmt.Sprintf("p6e-cx-%v", play.Spec.ProjectID),
+		Namespace: play.GetNamespace(),
 	}
 }
 
 // GetCINamespacedName2 return CI namespacedName
 func GetCINamespacedName2(prefix string, play *ci.Play) types.NamespacedName {
+
 	return types.NamespacedName{
 		Name:      fmt.Sprintf("%s-%v", prefix, play.Spec.ProjectID),
-		Namespace: fmt.Sprintf("p6e-cx-%v", play.Spec.ProjectID),
+		Namespace: play.GetNamespace(),
 	}
 }
 

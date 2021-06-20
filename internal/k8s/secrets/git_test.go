@@ -38,6 +38,10 @@ var _ = Describe("Git secret", func() {
 			s := &secrets.Secret{
 				WorkFlowStruct: internal.WorkFlowStruct{
 					Play: &ci.Play{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "play-git-1",
+							Namespace: "p6e-cx-11",
+						},
 						Spec: ci.PlaySpec{
 							ProjectID:  11,
 							PipelineID: 1,

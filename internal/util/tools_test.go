@@ -25,6 +25,7 @@ import (
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	"github.com/w6d-io/ci-operator/internal/util"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/pkg/apis/duck/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strconv"
@@ -106,6 +107,10 @@ var _ = Describe("Util", func() {
 		It("InNamespace", func() {
 			By("build play")
 			play := &ci.Play{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "play-tool-1",
+					Namespace: "p6e-cx-1",
+				},
 				Spec: ci.PlaySpec{
 					ProjectID: 1,
 				},
@@ -115,6 +120,10 @@ var _ = Describe("Util", func() {
 		It("GetCINamespacedName", func() {
 			By("build play")
 			play := &ci.Play{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "play-tool-1",
+					Namespace: "p6e-cx-1",
+				},
 				Spec: ci.PlaySpec{
 					ProjectID:  1,
 					PipelineID: 1,
@@ -125,6 +134,10 @@ var _ = Describe("Util", func() {
 		It("GetCINamespacedName2", func() {
 			By("build play")
 			play := &ci.Play{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "play-tool-1",
+					Namespace: "p6e-cx-1",
+				},
 				Spec: ci.PlaySpec{
 					ProjectID: 1,
 				},

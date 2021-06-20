@@ -18,6 +18,7 @@ package sa_test
 import (
 	"github.com/w6d-io/ci-operator/internal"
 	"github.com/w6d-io/ci-operator/internal/k8s/sa"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -34,7 +35,7 @@ var _ = Describe("Service Account", func() {
 		})
 		AfterEach(func() {
 		})
-		It("failed because crossed namespace forbidden", func() {
+		It("failed because no kind", func() {
 			var err error
 
 			s := &sa.CI{
@@ -49,12 +50,12 @@ var _ = Describe("Service Account", func() {
 							PipelineID: 1,
 						},
 					},
-					Scheme: scheme,
+					Scheme: runtime.NewScheme(),
 				},
 			}
 			err = s.Create(ctx, k8sClient, ctrl.Log)
 			Expect(err).ToNot(Succeed())
-			Expect(err.Error()).To(Equal("cross-namespace owner references are disallowed, owner's namespace default, obj's namespace p6e-cx-6"))
+			Expect(err.Error()).To(ContainSubstring("no kind is registered for the type v1alpha1.Play"))
 		})
 		It("failed because namespace does not exist", func() {
 			var err error

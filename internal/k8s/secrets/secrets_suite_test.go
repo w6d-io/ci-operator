@@ -49,7 +49,7 @@ var testEnv *envtest.Environment
 var ctx context.Context
 var scheme = runtime.NewScheme()
 
-var _ = BeforeSuite(func(done Done) {
+var _ = BeforeSuite(func() {
 	encoder := zapcore.EncoderConfig{
 		// Keys can be anything except the empty string.
 		TimeKey:        "T",
@@ -89,7 +89,7 @@ var _ = BeforeSuite(func(done Done) {
 	ctx = context.Background()
 	ctx = util.NewCorrelationIDContext(ctx, correlationID)
 
-	close(done)
+	
 }, 60)
 
 var _ = AfterSuite(func() {

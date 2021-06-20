@@ -118,7 +118,9 @@ spec:
   commit:
     sha: 3010508ce47519b9b7444dcd2d2961796c874cff
     ref: main
+  pipeline_namespace: p6e-cx-1
   domain: nodejs-sample.example.ci
+  external: false
   expose: true
   tasks:
     - unit-tests:
@@ -136,13 +138,18 @@ spec:
     - deploy:
         variables:
           BUILDENV: build
-  dependencies:
-    mongodb:
-      variables:
-        HOST: "$DB_HOST"
-        PASSWORD: "$DB_PASSWORD"
-        USERNAME: "$DB_USERNAME"
   secret:
     git_token: abcdef1234567890abcdef1234567890abcdef
     .dockerconfigjson: '{"auths":{"https://index.docker.io/v1/":{"auth":"personaldockertoken"}}}'
 ```
+
+## explanation
+
+
+
+| field                    | Description                                                                                                                                                                               |
+|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`spec.name`               | it is used for service name in deployment and in the value of the label application                                                                                                       |
+|`spec.environment`        | it is use to build the namespace string where the application will be deploy by deploy task. This field is mandatory if you have enable deploy task and the flag `spec.external` is false |
+|`spec.pipeline_namespace` | this optional field is the namespace where all resource for the pipeline will be created. If empty the default one `<pipeline_prefix>-<project_id>` will be used.                         |
+

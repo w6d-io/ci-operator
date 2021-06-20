@@ -46,8 +46,8 @@ type Interface interface {
 	SetPipelineDeploy(logr.Logger) error
 	SetPipelineIntTest(logr.Logger) error
 	SetPipelineClean(logr.Logger) error
-	SetPipelineSonar(logr.Logger) error
 	SetPipelineE2ETest(logr.Logger) error
+	SetPipelineGeneric(ci.TaskType, logr.Logger) error
 }
 
 var _ Interface = &Pipeline{}

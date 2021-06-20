@@ -19,20 +19,21 @@ package task_test
 
 import (
 	"context"
-	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
-	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
-	"github.com/w6d-io/ci-operator/internal/util"
 	"path/filepath"
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/w6d-io/ci-operator/internal/util"
 	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	tkn "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	ci "github.com/w6d-io/ci-operator/api/v1alpha1"
 	zapraw "go.uber.org/zap"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -49,11 +50,13 @@ func Test(t *testing.T) {
 
 var cfg *rest.Config
 var k8sClient client.Client
+var k8sFakeClient client.Client
+var clientBuilder *fake.ClientBuilder
 var testEnv *envtest.Environment
 var ctx context.Context
 var scheme = runtime.NewScheme()
 
-var _ = BeforeSuite(func(done Done) {
+var _ = BeforeSuite(func() {
 	encoder := zapcore.EncoderConfig{
 		// Keys can be anything except the empty string.
 		TimeKey:        "T",
@@ -87,18 +90,23 @@ var _ = BeforeSuite(func(done Done) {
 	cfg, err = testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
 	Expect(cfg).ToNot(BeNil())
+
 	utilruntime.Must(ci.AddToScheme(scheme))
 	utilruntime.Must(tkn.AddToScheme(scheme))
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+
 	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme})
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
+
+	clientBuilder = fake.NewClientBuilder().WithScheme(scheme)
+	k8sFakeClient = clientBuilder.Build()
 
 	correlationID := uuid.New().String()
 	ctx = context.Background()
 	ctx = util.NewCorrelationIDContext(ctx, correlationID)
 
-	close(done)
+	
 }, 60)
 
 var _ = AfterSuite(func() {

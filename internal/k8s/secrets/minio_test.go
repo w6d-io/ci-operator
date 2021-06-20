@@ -34,6 +34,10 @@ var _ = Describe("", func() {
 			s := &secrets.Secret{
 				WorkFlowStruct: internal.WorkFlowStruct{
 					Play: &ci.Play{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "play-secret-1",
+							Namespace: "p6e-cx-13",
+						},
 						Spec: ci.PlaySpec{
 							ProjectID:  13,
 							PipelineID: 1,

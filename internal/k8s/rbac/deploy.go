@@ -76,16 +76,9 @@ func (in *Deploy) Create(ctx context.Context, r client.Client, logger logr.Logge
 			return err
 		}
 		resource.Subjects = append(resource.Subjects, GetSubject(in.Play))
-		if err := r.Update(ctx, resource); err != nil {
-			log.Error(err, "update")
-			return err
-		}
-		return nil
+		return r.Update(ctx, resource)
 	})
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // GetRoleBinding return the a new role binding resource

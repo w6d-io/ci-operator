@@ -40,6 +40,10 @@ var _ = Describe("Docker secret", func() {
 			s := &secrets.Secret{
 				WorkFlowStruct: internal.WorkFlowStruct{
 					Play: &ci.Play{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "play-docker-1",
+							Namespace: "p6e-cx-10",
+						},
 						Spec: ci.PlaySpec{
 							ProjectID:  10,
 							PipelineID: 1,

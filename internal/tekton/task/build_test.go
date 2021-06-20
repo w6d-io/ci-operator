@@ -25,6 +25,7 @@ import (
 	"github.com/w6d-io/ci-operator/internal/tekton/task"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -151,12 +152,14 @@ var _ = Describe("Task", func() {
 			By("Set config")
 			Expect(config.New("testdata/config.yaml")).To(Succeed())
 
-			By("Failed due to cross namespace")
+			By("Failed due to kind missing")
+			b.Scheme = runtime.NewScheme()
 			err = b.Create(ctx, k8sClient, ctrl.Log)
 			Expect(err).ToNot(Succeed())
-			Expect(err.Error()).To(ContainSubstring("cross-namespace owner references are disallowed"))
+			Expect(err.Error()).To(ContainSubstring("no kind is registered for the type v1alpha1.Play"))
 
 			By("set the right namespace")
+			b.Scheme = scheme
 			b.Play.Spec.PipelineID = 1
 			b.Play.Spec.ProjectID = 23
 			err = b.Create(ctx, k8sClient, ctrl.Log)

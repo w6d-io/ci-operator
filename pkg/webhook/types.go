@@ -39,9 +39,3 @@ package webhook
 //}
 //
 //var payload Payload
-
-type Webhook struct {
-	Name   string `json:"name" yaml:"name"`
-	URLRaw string `json:"url" yaml:"url"`
-	Scope  string `json:"scope" yaml:"scope"`
-}
