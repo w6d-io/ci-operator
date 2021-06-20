@@ -370,9 +370,9 @@ var _ = Describe("Task", func() {
 					Namespace:    "p6e-cx-47",
 					Annotations: map[string]string{
 						ci.AnnotationLanguage: "bash",
-						ci.AnnotationPackage: "custom",
-						ci.AnnotationOrder: "0",
-						ci.AnnotationTask:  "git-leaks",
+						ci.AnnotationPackage:  "custom",
+						ci.AnnotationOrder:    "0",
+						ci.AnnotationTask:     "git-leaks",
 					},
 				},
 				Params: []ci.ParamSpec{

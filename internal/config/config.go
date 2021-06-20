@@ -38,7 +38,6 @@ var (
 )
 
 const (
-	PipelinePrefixDefault = "p6e-cx"
 	DeployPrefixDefault   = "cx"
 	EnvPrefixDefault      = "W6D"
 )
@@ -144,18 +143,6 @@ func GetClusterRole() string {
 	return config.ClusterRole
 }
 
-// GetPipelinePrefix returns the prefix to use for deploy namespace name
-func GetPipelinePrefix() string {
-	if config.PipelinePrefix == "" {
-		return PipelinePrefixDefault
-	}
-	return config.PipelinePrefix
-}
-
-// SetPipelinePrefix record the pipeline prefix
-func SetPipelinePrefix(prefix string) {
-	config.PipelinePrefix = prefix
-}
 
 // GetDeployPrefix returns the prefix to use for deploy namespace name
 func GetDeployPrefix() string {

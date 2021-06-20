@@ -178,11 +178,6 @@ var _ = Describe("Config", func() {
 				By("get prefix with arguments")
 				Expect(config.GetEnvPrefix("git-leaks", "build")).To(Equal("TEST_GIT_LEAKS_BUILD_"))
 			})
-			It("pipeline prefix", func() {
-				By("set pipeline prefix")
-				config.SetPipelinePrefix("test-prefix")
-				Expect(config.GetPipelinePrefix()).To(Equal("test-prefix"))
-			})
 			It("deploy prefix", func() {
 				By("set pipeline prefix")
 				config.SetDeployPrefix("deploy-prefix")

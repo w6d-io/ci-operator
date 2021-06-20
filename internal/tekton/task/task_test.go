@@ -125,9 +125,9 @@ var _ = Describe("Task", func() {
 					Namespace:    ns.GetName(),
 					Annotations: map[string]string{
 						ci.AnnotationLanguage: "python",
-						ci.AnnotationPackage: "pip",
-						ci.AnnotationOrder: "0",
-						ci.AnnotationTask:  "git-leaks",
+						ci.AnnotationPackage:  "pip",
+						ci.AnnotationOrder:    "0",
+						ci.AnnotationTask:     "git-leaks",
 					},
 				},
 				Params: []ci.ParamSpec{

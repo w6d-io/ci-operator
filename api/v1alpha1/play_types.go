@@ -55,11 +55,6 @@ type PlaySpec struct {
 	// Commit contains all git information
 	Commit Commit `json:"commit,omitempty"`
 
-	// PipelineNamespace is the namespace where the pipeline will run
-	// default : <pipeline_prefix>-<project_id>
-	// +optional
-	PipelineNamespace string `json:"pipeline_namespace"`
-
 	// Domain contains the url for exposition
 	// +optional
 	Domain string `json:"domain,omitempty"`

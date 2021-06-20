@@ -21,7 +21,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/w6d-io/ci-operator/internal/config"
 	"net/url"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"strconv"
@@ -85,11 +84,7 @@ func IsPipelineRunning(pr tkn.PipelineRun) bool {
 
 // InNamespace return a client.InNamespace with pipeline namespace
 func InNamespace(play *ci.Play) client.InNamespace {
-	namespace := fmt.Sprintf("%s-%v", config.GetPipelinePrefix(), play.Spec.ProjectID)
-	if play.Spec.PipelineNamespace != "" {
-		namespace = play.Spec.PipelineNamespace
-	}
-	return client.InNamespace(namespace)
+	return client.InNamespace(play.GetNamespace())
 }
 
 // MatchingLabels return a client.MatchingLabels with pipeline labels
@@ -121,25 +116,18 @@ func IsPodExist(ctx context.Context, r client.Client, play *ci.Play) (bool, erro
 
 // GetCINamespacedName return CI namespacedName
 func GetCINamespacedName(prefix string, play *ci.Play) types.NamespacedName {
-	namespace := fmt.Sprintf("%s-%v", config.GetPipelinePrefix(), play.Spec.ProjectID)
-	if play.Spec.PipelineNamespace != "" {
-		namespace = play.Spec.PipelineNamespace
-	}
 	return types.NamespacedName{
 		Name:      fmt.Sprintf("%s-%v-%v", prefix, play.Spec.ProjectID, play.Spec.PipelineID),
-		Namespace: namespace,
+		Namespace: play.GetNamespace(),
 	}
 }
 
 // GetCINamespacedName2 return CI namespacedName
 func GetCINamespacedName2(prefix string, play *ci.Play) types.NamespacedName {
-	namespace := fmt.Sprintf("%s-%v", config.GetPipelinePrefix(), play.Spec.ProjectID)
-	if play.Spec.PipelineNamespace != "" {
-		namespace = play.Spec.PipelineNamespace
-	}
+
 	return types.NamespacedName{
 		Name:      fmt.Sprintf("%s-%v", prefix, play.Spec.ProjectID),
-		Namespace: namespace,
+		Namespace: play.GetNamespace(),
 	}
 }
 
