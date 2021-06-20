@@ -124,7 +124,8 @@ var _ = Describe("Task", func() {
 					GenerateName: "step-git-leaks",
 					Namespace:    ns.GetName(),
 					Annotations: map[string]string{
-						ci.AnnotationKind:  "generic",
+						ci.AnnotationLanguage: "python",
+						ci.AnnotationPackage: "pip",
 						ci.AnnotationOrder: "0",
 						ci.AnnotationTask:  "git-leaks",
 					},

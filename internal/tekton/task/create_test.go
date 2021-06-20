@@ -339,7 +339,7 @@ var _ = Describe("Task", func() {
 			Expect(k8sClient.Create(ctx, ns)).To(Succeed())
 			t.Play.Spec.Tasks = []map[ci.TaskType]ci.Task{
 				{
-					"git-leaks": ci.Task{
+					"gitleaks": ci.Task{
 						Script: ci.Script{
 							"echo", "toto",
 						},
@@ -369,7 +369,8 @@ var _ = Describe("Task", func() {
 					GenerateName: "step-git-leaks",
 					Namespace:    "p6e-cx-47",
 					Annotations: map[string]string{
-						ci.AnnotationKind:  "generic",
+						ci.AnnotationLanguage: "bash",
+						ci.AnnotationPackage: "custom",
 						ci.AnnotationOrder: "0",
 						ci.AnnotationTask:  "git-leaks",
 					},
