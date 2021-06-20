@@ -339,7 +339,7 @@ var _ = Describe("Task", func() {
 			Expect(k8sClient.Create(ctx, ns)).To(Succeed())
 			t.Play.Spec.Tasks = []map[ci.TaskType]ci.Task{
 				{
-					"gitleaks": ci.Task{
+					"git-leaks": ci.Task{
 						Script: ci.Script{
 							"echo", "toto",
 						},
