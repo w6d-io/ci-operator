@@ -14,5 +14,4 @@ CI Operator is a kubernetes CRD base on [Tekton Pipeline](https://github.com/tek
 CI Operator targets is to easily create pipeline CI/CD by using [Tekton Pipeline](https://github.com/tektoncd/pipeline).
 
 By creates one `Play` resource CI Operator builds all tekton resources for the pipeline.
-
 [docs](/docs)
