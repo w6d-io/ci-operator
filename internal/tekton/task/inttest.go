@@ -59,15 +59,14 @@ func (t *Task) IntTest(ctx context.Context, logger logr.Logger) error {
 		return fmt.Errorf("no step found for %s", s.TaskType)
 	}
 	task := t.Play.Spec.Tasks[t.Index][s.TaskType]
-	if len(task.Variables) != 0 {
-		for i := range steps {
-			for key, val := range task.Variables {
-				steps[i].Env = append(steps[i].Env, corev1.EnvVar{
-					Name:  key,
-					Value: val,
-				})
-			}
+	for i := range steps {
+		for key, val := range task.Variables {
+			steps[i].Env = append(steps[i].Env, corev1.EnvVar{
+				Name:  key,
+				Value: val,
+			})
 		}
+		steps[i].Env = append(steps[i].Env, BuildAndGetPredefinedEnv(t.Play)...)
 	}
 	inttest := &IntTestTask{
 		Meta: Meta{

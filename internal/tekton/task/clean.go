@@ -56,6 +56,9 @@ func (t *Task) Clean(ctx context.Context, logger logr.Logger) error {
 	if len(steps) == 0 {
 		return fmt.Errorf("no step found for %s", ci.Clean)
 	}
+	for i := range steps {
+		steps[i].Env = append(steps[i].Env, BuildAndGetPredefinedEnv(t.Play)...)
+	}
 	clean := &CleanTask{
 		Meta: Meta{
 			Steps:  steps,
