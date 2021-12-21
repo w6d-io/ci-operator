@@ -106,7 +106,6 @@ var _ = BeforeSuite(func() {
 	ctx = context.Background()
 	ctx = util.NewCorrelationIDContext(ctx, correlationID)
 
-	
 }, 60)
 
 var _ = AfterSuite(func() {
