@@ -15,13 +15,14 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Get kubebuilder
-      uses: RyanSiu1995/kubebuilder-action@v1.1
+      uses: RyanSiu1995/kubebuilder-action@v1.2
       with:
-        version: 2.3.1
+        version: 3.0.0
+
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: 1.16
+        go-version: 1.17
 
     - name: Build
       run: go build -v ./...

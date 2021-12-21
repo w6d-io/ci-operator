@@ -1,4 +1,4 @@
-# Copyright 2020 Tekton Authors LLC
+# Copyright 2021 The Tekton Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,13 +15,15 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: config-leader-election
+  name: pipelines-info
   namespace: tekton-pipelines
   labels:
     app.kubernetes.io/instance: default
     app.kubernetes.io/part-of: tekton-pipelines
 data:
-  # An inactive but valid configuration follows; see example.
-  leaseDuration: "15s"
-  renewDeadline: "10s"
-  retryPeriod: "2s"
+  # Contains pipelines version which can be queried by external
+  # tools such as CLI. Elevated permissions are already given to
+  # this ConfigMap such that even if we don't have access to
+  # other resources in the namespace we still can have access to
+  # this ConfigMap.
+  version: "devel"

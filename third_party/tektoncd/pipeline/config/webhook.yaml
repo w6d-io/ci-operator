@@ -40,8 +40,6 @@ spec:
       app.kubernetes.io/part-of: tekton-pipelines
   template:
     metadata:
-      annotations:
-        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
       labels:
         app.kubernetes.io/name: webhook
         app.kubernetes.io/component: webhook
@@ -55,6 +53,14 @@ spec:
         version: "devel"
     spec:
       affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: kubernetes.io/os
+                  operator: NotIn
+                  values:
+                  - windows
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
           - podAffinityTerm:
@@ -94,6 +100,8 @@ spec:
           value: config-observability
         - name: CONFIG_LEADERELECTION_NAME
           value: config-leader-election
+        - name: CONFIG_FEATURE_FLAGS_NAME
+          value: feature-flags
         - name: WEBHOOK_SERVICE_NAME
           value: tekton-pipelines-webhook
         - name: WEBHOOK_SECRET_NAME
@@ -102,8 +110,12 @@ spec:
           value: tekton.dev/pipeline
         securityContext:
           allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - all
           # User 65532 is the distroless nonroot user ID
           runAsUser: 65532
+          runAsGroup: 65532
         ports:
         - name: metrics
           containerPort: 9090

@@ -14,7 +14,6 @@ WORKDIR /workspace
 # Copy the Go Modules manifests
 COPY go.mod go.mod
 COPY go.sum go.sum
-COPY vendor/ vendor
 # Copy the go source
 COPY main.go main.go
 COPY api/ api/
@@ -22,10 +21,12 @@ COPY controllers/ controllers/
 COPY internal/ internal/
 COPY pkg/ pkg/
 
+# get dependancy
+RUN go mod download && go mod tidy
+
 # Build
 RUN  go build \
      -ldflags="-X 'main.Version=${VERSION}' -X 'main.Revision=${VCS_REF}' -X 'main.GoVersion=go${GOVERSION}' -X 'main.Built=${BUILD_DATE}' -X 'main.OsArch=${GOOS}/${GOARCH}'" \
-     -mod=vendor \
      -a -o ci-operator main.go
 RUN chown 1001:1001 ci-operator
 
