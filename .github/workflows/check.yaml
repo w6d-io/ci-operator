@@ -16,6 +16,8 @@ jobs:
 
     - name: Get kubebuilder
       uses: RyanSiu1995/kubebuilder-action@v1.2
+      with:
+        version: 3.0.0
 
     - name: Set up Go
       uses: actions/setup-go@v2
