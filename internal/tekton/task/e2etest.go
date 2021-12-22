@@ -56,6 +56,9 @@ func (t *Task) E2ETest(ctx context.Context, logger logr.Logger) error {
 	if len(steps) == 0 {
 		return fmt.Errorf("no step found for %s", ci.E2ETests)
 	}
+	for i := range steps {
+		steps[i].Env = append(steps[i].Env, BuildAndGetPredefinedEnv(t.Play)...)
+	}
 	task := &E2ETestTask{
 		Meta: Meta{
 			Steps:  steps,
