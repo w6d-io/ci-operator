@@ -18,6 +18,7 @@ package task
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/w6d-io/ci-operator/internal/config"
 
@@ -35,6 +36,10 @@ func BuildAndGetPredefinedEnv(play *ci.Play) (envVars []corev1.EnvVar) {
 
 // BuildCommonPredefinedEnv return the basics commons environment variable
 func BuildCommonPredefinedEnv(play *ci.Play) (envVars []corev1.EnvVar) {
+	envVars = append(envVars, corev1.EnvVar{
+		Name:  "W6D_PIPELINE_DATE",
+		Value: fmt.Sprintf("%v", time.Now().Format("2006-01-02T15:04:05.000Z")),
+	})
 	envVars = append(envVars, corev1.EnvVar{
 		Name:  config.GetEnvPrefix("project") + "NAME",
 		Value: play.Spec.Name,
