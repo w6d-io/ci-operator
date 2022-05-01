@@ -289,7 +289,6 @@ func (in *Play) validateVault() field.ErrorList {
 func inArray(val interface{}, array interface{}) (exists bool, index int) {
 	exists = false
 	index = -1
-
 	switch reflect.TypeOf(array).Kind() {
 	case reflect.Slice:
 		s := reflect.ValueOf(array)
@@ -302,7 +301,6 @@ func inArray(val interface{}, array interface{}) (exists bool, index int) {
 			}
 		}
 	}
-
 	return
 }
 
