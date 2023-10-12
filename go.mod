@@ -17,7 +17,7 @@ require (
 	github.com/tidwall/gjson v1.9.3
 	github.com/w6d-io/hook v0.1.2
 	go.uber.org/zap v1.17.0
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+	gopkg.in/yaml.v3 v3.0.0
 	k8s.io/api v0.21.1
 	k8s.io/apimachinery v0.21.1
 	k8s.io/client-go v0.21.1
